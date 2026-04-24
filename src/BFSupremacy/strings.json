@@ -17,5 +17,20 @@
         "debug": {
             "name": "Debug"
         }
+    },
+    "objective": {
+        "A": "A",
+        "B": "B",
+        "C": "C",
+        "D": "D",
+        "E": "E",
+        "F": "F",
+        "G": "G"
+    },
+    "captureProgress": {
+        "contested": "CONTESTED",
+        "capturing": "CAPTURING",
+        "captured": "SECURED",
+        "losing": "LOSING"
     }
 }

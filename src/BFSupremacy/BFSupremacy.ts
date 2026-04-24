@@ -1,4 +1,5 @@
 import { Events } from 'bf6-portal-utils/events';
+import { BFSupremacyUI } from './BFSUpremacyUI';
 
 export class BFSupremacy {
     private static subscribed = false;
@@ -9,10 +10,10 @@ export class BFSupremacy {
         }
 
         Events.OngoingGlobal.subscribe(() => {
-
         });
 
         Events.OnGameModeStarted.subscribe(() => {
+            BFSupremacyUI.UI_Setup();
         });
 
         Events.OnPlayerEnterCapturePoint.subscribe((eventPlayer: mod.Player, eventCapturePoint: mod.CapturePoint) => {

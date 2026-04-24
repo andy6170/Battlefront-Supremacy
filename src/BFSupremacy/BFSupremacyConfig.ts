@@ -29,6 +29,7 @@ export class UIConfig {
 }
 
 export interface GameConfig {
+    readonly gameStarted: boolean;
     readonly stage: number;
     readonly ticketSpeed: number;
     readonly attacker: mod.Team;
@@ -43,10 +44,21 @@ export interface GameConfig {
     readonly team1HQHealth: number;
     readonly team2HQHealth: number;
     readonly elapsedTime: number;
+    readonly flags: mod.CapturePoint[];
+    readonly capturePointProgress: number[];
+    readonly captureProgressSize: number[];
+    readonly captureProgressPosition: mod.Vector[];
+    readonly capturingUITextColour1: mod.Vector[];
+    readonly capturingUITextColour2: mod.Vector[];
+    readonly capturingUIBackgroundColour1: mod.Vector[];
+    readonly capturingUIBackgroundColour2: mod.Vector[];
+    readonly capturingMessage1: string[];
+    readonly capturingMessage2: string[];
 }
 
 export class GameConfig {
     public static readonly gameConfig: GameConfig = {
+        gameStarted: false,
         stage: 0,
         ticketSpeed: 5,
         baseAttackTime: 450,
@@ -61,5 +73,37 @@ export class GameConfig {
         team1HQHealth: 100000,
         team2HQHealth: 100000,
         elapsedTime: 0,
+        flags: [],
+        capturePointProgress: [],
+        captureProgressSize: [],
+        captureProgressPosition: [],
+        capturingUITextColour1: [],
+        capturingUITextColour2: [],
+        capturingUIBackgroundColour1: [],
+        capturingUIBackgroundColour2: [],
+        capturingMessage1: [],
+        capturingMessage2: [],
     };
+}
+
+export interface SupremacyPlayerData {
+    kills: number;
+    deaths: number;
+    status: number;
+}
+
+export class PlayerVariables {
+    public static readonly playerData: Map<number, SupremacyPlayerData> = new Map<number, SupremacyPlayerData>();
+
+    public static getPlayerData(player: mod.Player | number): SupremacyPlayerData {
+        const playerId = typeof player === 'number' ? player : mod.GetObjId(player);
+        if (!PlayerVariables.playerData.has(playerId)) {
+            PlayerVariables.playerData.set(playerId, {
+                kills: 0,
+                deaths: 0,
+                status: 0
+            });
+        }
+        return PlayerVariables.playerData.get(playerId)!;
+    }
 }
