@@ -1,0 +1,21 @@
+{
+    "supremacy": {
+        "conquest": {
+            "name": "Conquest",
+            "description": "CAPTURE AND HOLD THE OBJECTIVES"
+        },
+        "regroup": {
+            "name": "Regroup",
+            "description1": "GET TO THE REGROUP POINT",
+            "description2": "STOP THEM REGROUPING"
+        },
+        "finalassault": {
+            "name": "Final Assault",
+            "description1": "ASSAULT THE FINAL OBJECTIVE",
+            "description2": "DEFEND THE OBJECTIVE"
+        },
+        "debug": {
+            "name": "Debug"
+        }
+    }
+}
