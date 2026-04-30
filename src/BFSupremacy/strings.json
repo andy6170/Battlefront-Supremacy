@@ -2,7 +2,8 @@
     "supremacy": {
         "conquest": {
             "name": "Conquest",
-            "description": "CAPTURE AND HOLD THE OBJECTIVES"
+            "description": "CAPTURE AND HOLD THE OBJECTIVES",
+            "percentage": "{}%"
         },
         "regroup": {
             "name": "Regroup",
@@ -32,5 +33,6 @@
         "capturing": "CAPTURING",
         "captured": "SECURED",
         "losing": "LOSING"
-    }
+    },
+    "value": "{}"
 }

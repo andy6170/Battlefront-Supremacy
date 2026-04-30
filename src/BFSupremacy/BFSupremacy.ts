@@ -1,5 +1,7 @@
 import { Events } from 'bf6-portal-utils/events';
-import { BFSupremacyUI } from './BFSUpremacyUI';
+import { BFSupremacyUI } from './BFSupremacyUI';
+import { BFSupremacyConquest } from './BFSupremacyConquest';
+import { GameConfig } from './BFSupremacyVariables';
 
 export class BFSupremacy {
     private static subscribed = false;
@@ -10,10 +12,18 @@ export class BFSupremacy {
         }
 
         Events.OngoingGlobal.subscribe(() => {
+            if (GameConfig.gameConfig.gameStarted) {
+                if (GameConfig.gameConfig.stage == 0) {
+                    BFSupremacyConquest.ongoingSecondsCheck();
+                }
+            }
         });
 
         Events.OnGameModeStarted.subscribe(() => {
             BFSupremacyUI.UI_Setup();
+            BFSupremacyConquest.init();
+            GameConfig.gameConfig.roundOngoing = true;
+            GameConfig.gameConfig.gameStarted = true;
         });
 
         Events.OnPlayerEnterCapturePoint.subscribe((eventPlayer: mod.Player, eventCapturePoint: mod.CapturePoint) => {
