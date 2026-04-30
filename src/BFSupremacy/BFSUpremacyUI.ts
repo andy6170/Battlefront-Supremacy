@@ -28,6 +28,22 @@ export class BFSupremacyUI {
 
     }
 
+    public static UI_AlphaUpdate() {
+        if (UIconfig.uiConfig.uiAlphaUp) {
+            UIconfig.uiConfig.uiAlpha += 0.033;
+        } else {
+            UIconfig.uiConfig.uiAlpha -= 0.033;
+        }
+        if (UIconfig.uiConfig.uiAlpha > 1) {
+            UIconfig.uiConfig.uiAlpha = 1;
+            UIconfig.uiConfig.uiAlphaUp = false;
+        }
+        if (UIconfig.uiConfig.uiAlpha < 0) {
+            UIconfig.uiConfig.uiAlpha = 0.01; // 0 has a bug deleting the UI
+            UIconfig.uiConfig.uiAlphaUp = true;
+        }
+    }
+
     //-------------------------------------------------------------------------
     //Conquest UI
     //-------------------------------------------------------------------------

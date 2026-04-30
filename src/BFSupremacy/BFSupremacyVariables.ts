@@ -57,6 +57,8 @@ export interface UIconfig {
     conquestUI: mod.UIWidget;
     regroupUI: mod.UIWidget;
     finalAssaultUI: mod.UIWidget;
+    uiAlpha: number;
+    uiAlphaUp: boolean;
 }
 
 export class UIconfig {
@@ -73,6 +75,8 @@ export class UIconfig {
         conquestUI: mod.GetUIRoot(),
         regroupUI: mod.GetUIRoot(),
         finalAssaultUI: mod.GetUIRoot(),
+        uiAlpha: 1,
+        uiAlphaUp: false,
     };
 }
 
