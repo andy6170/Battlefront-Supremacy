@@ -12,7 +12,7 @@ export class BFSupremacy {
         }
 
         Events.OngoingGlobal.subscribe(() => {
-            if (GameConfig.gameConfig.gameStarted) {
+            if (GameConfig.gameConfig.gameStarted && GameConfig.gameConfig.roundOngoing) {
                 BFSupremacyUI.UI_AlphaUpdate();
                 if (GameConfig.gameConfig.stage == 0) {
                     BFSupremacyConquest.ongoingSecondsCheck();
@@ -25,6 +25,10 @@ export class BFSupremacy {
             BFSupremacyConquest.init();
             GameConfig.gameConfig.roundOngoing = true;
             GameConfig.gameConfig.gameStarted = true;
+            mod.SetCameraTypeForAll(mod.Cameras.ThirdPerson);
+            if (GameConfig.gameConfig.debug) {
+                GameConfig.gameConfig.ticketSpeed = 2;
+            }
         });
 
         Events.OnPlayerEnterCapturePoint.subscribe((eventPlayer: mod.Player, eventCapturePoint: mod.CapturePoint) => {

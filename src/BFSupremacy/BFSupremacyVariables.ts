@@ -1,5 +1,6 @@
 export interface GameConfig {
     gameStarted: boolean;
+    debug: boolean;
     stage: number;
     capturePointNeutralizationTime: number;
     capturePointCapturingTime: number;
@@ -8,6 +9,7 @@ export interface GameConfig {
     defender: mod.Team;
     baseAttackTime: number;
     bonusTimeAddition: number;
+    bonusTime: number;
     remainingTime: number;
     elapsedTime: number;
     flags: mod.CapturePoint[];
@@ -23,12 +25,14 @@ export interface GameConfig {
 export class GameConfig {
     public static gameConfig: GameConfig = {
         gameStarted: false,
+        debug: true,
         capturePointNeutralizationTime: 5,
         capturePointCapturingTime: 5,
         stage: 0,
-        ticketSpeed: 5,
+        ticketSpeed: 6,
         baseAttackTime: 450,
         bonusTimeAddition: 10,
+        bonusTime: 0,
         remainingTime: 0,
         attacker: mod.GetTeam(1),
         defender: mod.GetTeam(2),

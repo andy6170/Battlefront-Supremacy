@@ -19,8 +19,10 @@ export class BFSupremacyCore {
 
         } else if (GameConfig.gameConfig.stage == 2) {
             GameConfig.gameConfig.stage = 0;
+            BFSupremacyConquest.resetConquest();
         }
         BFSupremacyUI.UI_Change();
+        BFSupremacyUI.UI_Update();
         GameConfig.gameConfig.roundOngoing = true;
     }
 }

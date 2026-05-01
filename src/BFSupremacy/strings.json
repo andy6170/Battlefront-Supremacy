@@ -8,7 +8,8 @@
         "regroup": {
             "name": "Regroup",
             "description1": "GET TO THE REGROUP POINT",
-            "description2": "STOP THEM REGROUPING"
+            "description2": "STOP THEM REGROUPING",
+            "bonustime": "0{}:{}{}"
         },
         "finalassault": {
             "name": "Final Assault",
@@ -34,5 +35,7 @@
         "captured": "SECURED",
         "losing": "LOSING"
     },
-    "value": "{}"
+    "value": "{}",
+    "debug1": "T1Score:{}",
+    "debug2": "T2Score:{}"
 }
