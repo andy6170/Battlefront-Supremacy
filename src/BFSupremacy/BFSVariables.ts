@@ -11,6 +11,8 @@ export interface GameConfig {
     bonusTimeAddition: number;
     bonusTime: number;
     remainingTime: number;
+    extractionTime: number;
+    extractionRemainingTime: number;
     elapsedTime: number;
     flags: mod.CapturePoint[];
     capturePointProgress: number[];
@@ -22,16 +24,27 @@ export interface GameConfig {
     ticketDrained: boolean;
     conquestCapturePoints: number;
     finalAssaultCapturePoints: number;
+    flagStart: number;
+    flagEnd: number;
+    oldFlagStart: number;
+    oldFlagEnd: number;
+    regroupBot: mod.Player | undefined;
+    regroupVehicle: mod.Vehicle | undefined;
+    regroupVehicleSelected: boolean;
+    extractReady: boolean;
+    heliTakeOff: boolean;
 }
 
 export class GameConfig {
     public static gameConfig: GameConfig = {
         gameStarted: false,
-        debug: false,
+        debug: true,
         capturePointNeutralizationTime: 5,
         capturePointCapturingTime: 5,
         stage: 0,
         ticketSpeed: 6,
+        extractionTime: 60,
+        extractionRemainingTime: 60,
         baseAttackTime: 360,
         bonusTimeAddition: 10,
         bonusTime: 0,
@@ -49,6 +62,15 @@ export class GameConfig {
         ticketDrained: false,
         conquestCapturePoints: 0,
         finalAssaultCapturePoints: 0,
+        flagStart: 200,
+        flagEnd: 220,
+        oldFlagStart: 0,
+        oldFlagEnd: 1,
+        regroupBot: undefined,
+        regroupVehicle: undefined,
+        regroupVehicleSelected: false,
+        extractReady: false,
+        heliTakeOff: false,
     };
 }
 
@@ -117,6 +139,7 @@ export interface SupremacyPlayerData {
     uniqueUI: string;
     containerWidget: mod.UIWidget
     firstDeploy: boolean;
+    currentObjective: mod.CapturePoint;
 }
 
 export class PlayerVariables {
@@ -133,6 +156,7 @@ export class PlayerVariables {
                 uniqueUI: "",
                 containerWidget: mod.GetUIRoot(),
                 firstDeploy: true,
+                currentObjective: mod.GetCapturePoint(0)
             });
         }
         return PlayerVariables.playerData.get(playerId)!;

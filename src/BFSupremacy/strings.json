@@ -9,7 +9,8 @@
             "name": "Regroup",
             "description1": "GET TO THE REGROUP POINT",
             "description2": "STOP THEM REGROUPING",
-            "bonustime": "0{}:{}{}"
+            "bonustime": "0{}:{}{}",
+            "extract": "EXTRACT"
         },
         "finalassault": {
             "name": "Final Assault",
@@ -47,5 +48,8 @@
     "ui_inProgress": "UI In Progress",
     "ui_built": "UI Built",
     "game_started": "Game Started",
-    "init_complete": "Init Complete"
+    "init_complete": "Init Complete",
+    "vehicle_occupied": "Bot In heli",
+    "vehicle_else": "Different Vehicle",
+    "vehicleCheck": "Starting Check..."
 }

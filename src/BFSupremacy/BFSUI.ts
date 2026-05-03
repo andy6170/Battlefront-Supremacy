@@ -18,7 +18,7 @@ export class BFSupremacyUI {
         if (GameConfig.gameConfig.stage == 0) {
             BFSupremacyUI.conquest_UI_Update();
         } else if (GameConfig.gameConfig.stage == 1) {
-            BFSupremacyUI.regroup_UI_Update();
+            BFSupremacyUI.regroup_UI_Text_Update();
         } else if (GameConfig.gameConfig.stage == 2) {
             BFSupremacyUI.finalassault_UI_Update();
         }
@@ -211,16 +211,29 @@ export class BFSupremacyUI {
     public static regroup_UI_Setup() {
         mod.AddUIContainer("regroup_container", mod.CreateVector(0, 20, 0), mod.CreateVector(250, 50, 0), mod.UIAnchor.TopCenter, mod.FindUIWidgetWithName("MainUI"), false, 0, mod.CreateVector(0.5, 0.5, 0.5), 0.5, mod.UIBgFill.None, mod.UIDepth.AboveGameUI);
         UIconfig.uiConfig.regroupUI = mod.FindUIWidgetWithName("regroup_container");
-        mod.AddUIText("bonustime_regroup_T1", mod.CreateVector(0, 0, 0), mod.CreateVector(180, 40, 0), mod.UIAnchor.BottomCenter, UIconfig.uiConfig.regroupUI, true, 0, UIconfig.uiConfig.friendlyColour, 1, mod.UIBgFill.Blur, mod.Message(mod.stringkeys.supremacy.regroup.bonustime, 0, 0, 0), 36, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(1));
-        mod.AddUIText("bonustime_regroup_T2", mod.CreateVector(0, 0, 0), mod.CreateVector(180, 40, 0), mod.UIAnchor.BottomCenter, UIconfig.uiConfig.regroupUI, true, 0, UIconfig.uiConfig.enemyColour, 1, mod.UIBgFill.Blur, mod.Message(mod.stringkeys.supremacy.regroup.bonustime, 0, 0, 0), 36, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(2));
+        mod.AddUIContainer("bonustime_background1", mod.CreateVector(0, 0, 0), mod.CreateVector(180, 40, 0), mod.UIAnchor.BottomCenter, UIconfig.uiConfig.regroupUI, true, 0, UIconfig.uiConfig.friendlyBGColour, 1, mod.UIBgFill.Blur, mod.GetTeam(1));
+        mod.AddUIContainer("bonustime_background2", mod.CreateVector(0, 0, 0), mod.CreateVector(180, 40, 0), mod.UIAnchor.BottomCenter, UIconfig.uiConfig.regroupUI, true, 0, UIconfig.uiConfig.enemyBGColour, 1, mod.UIBgFill.Blur, mod.GetTeam(2));
+        mod.AddUIContainer("bonustime_bar1", mod.CreateVector(0, 0, 0), mod.CreateVector(180, 40, 0), mod.UIAnchor.BottomCenter, UIconfig.uiConfig.regroupUI, true, 0, UIconfig.uiConfig.friendlyColour, 1, mod.UIBgFill.Solid, mod.GetTeam(1));
+        mod.AddUIContainer("bonustime_bar2", mod.CreateVector(0, 0, 0), mod.CreateVector(180, 40, 0), mod.UIAnchor.BottomCenter, UIconfig.uiConfig.regroupUI, true, 0, UIconfig.uiConfig.enemyColour, 1, mod.UIBgFill.Solid, mod.GetTeam(2));
+        mod.AddUIText("bonustime_regroup_Text", mod.CreateVector(0, 0, 0), mod.CreateVector(180, 40, 0), mod.UIAnchor.BottomCenter, UIconfig.uiConfig.regroupUI, true, 0, UIconfig.uiConfig.friendlyColour, 1, mod.UIBgFill.None, mod.Message(mod.stringkeys.supremacy.regroup.bonustime, 0, 0, 0), 36, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center);
     }
 
-    public static regroup_UI_Update() {
-        let seconds = GameConfig.gameConfig.bonusTime;
-        let tenseconds = Math.floor(seconds / 10);
-        let minutes = Math.floor(seconds / 60);
-        mod.SetUITextLabel(mod.FindUIWidgetWithName("bonustime_regroup_T1"), mod.Message(mod.stringkeys.supremacy.regroup.bonustime, minutes, tenseconds, seconds));
-        mod.SetUITextLabel(mod.FindUIWidgetWithName("bonustime_regroup_T2"), mod.Message(mod.stringkeys.supremacy.regroup.bonustime, minutes, tenseconds, seconds));
+    public static regroup_UI_Text_Update() {
+        let totalSeconds = GameConfig.gameConfig.bonusTime;
+        let seconds = totalSeconds % 10;
+        let tenseconds = Math.floor((totalSeconds % 60) / 10);
+        let minutes = Math.floor(totalSeconds / 60);
+        mod.SetUITextLabel(mod.FindUIWidgetWithName("bonustime_regroup_Text"), mod.Message(mod.stringkeys.supremacy.regroup.bonustime, minutes, tenseconds, seconds));
+    }
+
+    public static regroup_UI_Progress_Update() {
+        let progressSize = GameConfig.gameConfig.extractionRemainingTime / GameConfig.gameConfig.extractionTime * 180;
+        let position = -90 + (progressSize / 2);
+        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("bonustime_bar1"), mod.CreateVector(progressSize, 40, 0));
+        mod.SetUIWidgetPosition(mod.FindUIWidgetWithName("bonustime_bar1"), mod.CreateVector(position, 0, 0));
+        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("bonustime_bar2"), mod.CreateVector(progressSize, 40, 0));
+        mod.SetUIWidgetPosition(mod.FindUIWidgetWithName("bonustime_bar2"), mod.CreateVector(position, 0, 0));
+
     }
 
     public static regroup_UI_Change(enable: boolean) {

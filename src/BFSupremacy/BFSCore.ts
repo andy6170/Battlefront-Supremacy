@@ -1,6 +1,7 @@
 import { GameConfig, ObjectiveVariables, UIconfig } from "./BFSVariables.ts";
 import { BFSupremacyUI } from "./BFSUI.ts";
 import { BFSupremacyConquest } from "./BFSConquest.ts";
+import { BFSupremacyRegroup } from "./BFSRegroup.ts";
 
 
 export class BFSupremacyCore {
@@ -13,14 +14,28 @@ export class BFSupremacyCore {
         await mod.Wait(3);
         if (GameConfig.gameConfig.stage == 0) {
             GameConfig.gameConfig.stage = 1;
+            GameConfig.gameConfig.extractionRemainingTime = GameConfig.gameConfig.extractionTime;
+            if (GameConfig.gameConfig.debug) {
+                GameConfig.gameConfig.extractionRemainingTime = 20;
+            }
+            GameConfig.gameConfig.extractReady = false;
             BFSupremacyConquest.endConquest();
-
+            GameConfig.gameConfig.flagStart = 0;
+            GameConfig.gameConfig.flagEnd = 0;
+            BFSupremacyRegroup.spawnHeli();
         } else if (GameConfig.gameConfig.stage == 1) {
             GameConfig.gameConfig.stage = 2;
-
+            GameConfig.gameConfig.flagStart = 250;
+            GameConfig.gameConfig.flagEnd = 260;
         } else if (GameConfig.gameConfig.stage == 2) {
+            GameConfig.gameConfig.stage = 3;
+            GameConfig.gameConfig.flagStart = 0;
+            GameConfig.gameConfig.flagEnd = 0;
+        } else if (GameConfig.gameConfig.stage == 3) {
             GameConfig.gameConfig.stage = 0;
             BFSupremacyConquest.resetConquest();
+            GameConfig.gameConfig.flagStart = 200;
+            GameConfig.gameConfig.flagEnd = 220;
         }
         BFSupremacyUI.UI_Change();
         BFSupremacyUI.UI_Update();

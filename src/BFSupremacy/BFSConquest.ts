@@ -23,7 +23,7 @@ export class BFSupremacyConquest {
             }
         }
         GameConfig.gameConfig.conquestCapturePoints = count;
-        for (let i = 220; i < 230; i++) {
+        for (let i = 250; i < 260; i++) {
             let capturePoint = mod.GetCapturePoint(i);
             mod.EnableGameModeObjective(capturePoint, false);
         }
@@ -31,7 +31,6 @@ export class BFSupremacyConquest {
             let capturePoint = mod.GetCapturePoint(i);
             mod.EnableGameModeObjective(capturePoint, false);
         }
-
     }
 
     public static ongoingConquest(): void {
