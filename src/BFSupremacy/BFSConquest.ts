@@ -1,7 +1,8 @@
-import { GameConfig } from "./BFSupremacyVariables.ts";
-import { BFSupremacyUI } from "./BFSupremacyUI.ts";
-import { TeamVariables } from "./BFSupremacyVariables.ts";
-import { BFSupremacyCore } from "./BFSupremacyCore.ts";
+import { GameConfig } from "./BFSVariables.ts";
+import { BFSupremacyUI } from "./BFSUI.ts";
+import { TeamVariables } from "./BFSVariables.ts";
+import { BFSupremacyCore } from "./BFSCore.ts";
+import { UIconfig } from "./BFSVariables.ts";
 
 export class BFSupremacyConquest {
     public static init(): void {
@@ -12,15 +13,36 @@ export class BFSupremacyConquest {
             mod.SetCapturePointNeutralizationTime(capturePoint, GameConfig.gameConfig.capturePointNeutralizationTime);
             mod.SetCapturePointCapturingTime(capturePoint, GameConfig.gameConfig.capturePointCapturingTime);
         }
+        let count = 0;
+        let allPoints = mod.AllCapturePoints();
+        for (let i = 0; i < mod.CountOf(allPoints); i++) {
+            let p = mod.ValueInArray(allPoints, i) as mod.Object;
+            let id = mod.GetObjId(p);
+            if (id >= 200 && id < 220) {
+                count++;
+            }
+        }
+        GameConfig.gameConfig.conquestCapturePoints = count;
+        for (let i = 220; i < 230; i++) {
+            let capturePoint = mod.GetCapturePoint(i);
+            mod.EnableGameModeObjective(capturePoint, false);
+        }
+        for (let i = 300; i < 310; i++) {
+            let capturePoint = mod.GetCapturePoint(i);
+            mod.EnableGameModeObjective(capturePoint, false);
+        }
+
     }
 
-    public static ongoingSecondsCheck(): void {
+    public static ongoingConquest(): void {
+        BFSupremacyUI.conquest_UI_Flash();
         if (mod.RoundToInteger(mod.GetMatchTimeElapsed()) % 2 == 0) {
             if (GameConfig.gameConfig.timeEven) {
                 return;
             }
             GameConfig.gameConfig.timeEven = true;
             GameConfig.gameConfig.timeOdd = false;
+            UIconfig.uiConfig.flashStart = true;
         }
         else if (mod.RoundToInteger(mod.GetMatchTimeElapsed()) % 2 != 0) {
             if (GameConfig.gameConfig.timeOdd) {
@@ -28,6 +50,7 @@ export class BFSupremacyConquest {
             }
             GameConfig.gameConfig.timeEven = false;
             GameConfig.gameConfig.timeOdd = true;
+            UIconfig.uiConfig.flashStart = true;
         }
 
         if (mod.RoundToInteger(mod.GetMatchTimeElapsed()) % GameConfig.gameConfig.ticketSpeed == 0 && !GameConfig.gameConfig.ticketDrained) {
@@ -59,11 +82,16 @@ export class BFSupremacyConquest {
         }
         if (t1Control > t2Control) {
             TeamVariables.getTeamData(1).score += (t1Control - t2Control) * multiplier;
+            UIconfig.uiConfig.ProgressFlashT1 = true;
+            UIconfig.uiConfig.ProgressFlashT2 = false;
         } else if (t2Control > t1Control) {
             TeamVariables.getTeamData(2).score += (t2Control - t1Control) * multiplier;
+            UIconfig.uiConfig.ProgressFlashT2 = true;
+            UIconfig.uiConfig.ProgressFlashT1 = false;
+        } else {
+            UIconfig.uiConfig.ProgressFlashT1 = false;
+            UIconfig.uiConfig.ProgressFlashT2 = false;
         }
-        mod.SendErrorReport(mod.Message(mod.stringkeys.debug1, TeamVariables.getTeamData(1).score));
-        mod.SendErrorReport(mod.Message(mod.stringkeys.debug2, TeamVariables.getTeamData(2).score));
         BFSupremacyUI.conquest_UI_Update();
 
         if (TeamVariables.getTeamData(1).score >= 100) {

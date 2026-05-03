@@ -21,21 +21,31 @@
         }
     },
     "objective": {
-        "A": "A",
-        "B": "B",
-        "C": "C",
-        "D": "D",
-        "E": "E",
-        "F": "F",
-        "G": "G"
+        "a": "A",
+        "b": "B",
+        "c": "C",
+        "d": "D",
+        "e": "E",
+        "f": "F",
+        "g": "G",
+        "h": "H",
+        "i": "I",
+        "j": "J"
     },
     "captureProgress": {
+        "none": "",
         "contested": "CONTESTED",
         "capturing": "CAPTURING",
-        "captured": "SECURED",
-        "losing": "LOSING"
+        "secured": "SECURED",
+        "losing": "LOSING",
+        "counter": "{} - {}"
     },
     "value": "{}",
     "debug1": "T1Score:{}",
-    "debug2": "T2Score:{}"
+    "debug2": "T2Score:{}",
+    "ui_setup": "UI Setup",
+    "ui_inProgress": "UI In Progress",
+    "ui_built": "UI Built",
+    "game_started": "Game Started",
+    "init_complete": "Init Complete"
 }

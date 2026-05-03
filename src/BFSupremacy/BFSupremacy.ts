@@ -1,7 +1,9 @@
 import { Events } from 'bf6-portal-utils/events';
-import { BFSupremacyConquest } from './BFSupremacyConquest';
-import { GameConfig } from './BFSupremacyVariables';
-import { BFSupremacyUI } from './BFSupremacyUI';
+import { BFSupremacyConquest } from './BFSConquest';
+import { GameConfig, ObjectiveVariables, PlayerVariables } from './BFSVariables';
+import { BFSupremacyUI } from './BFSUI';
+import { BFSupremacyCore } from './BFSCore';
+import { BFSupremacyPlayer } from './BFSPlayer';
 
 export class BFSupremacy {
     private static subscribed = false;
@@ -12,41 +14,107 @@ export class BFSupremacy {
         }
 
         Events.OngoingGlobal.subscribe(() => {
+            BFSupremacyUI.UI_AlphaUpdate();
             if (GameConfig.gameConfig.gameStarted && GameConfig.gameConfig.roundOngoing) {
-                BFSupremacyUI.UI_AlphaUpdate();
                 if (GameConfig.gameConfig.stage == 0) {
-                    BFSupremacyConquest.ongoingSecondsCheck();
+                    BFSupremacyConquest.ongoingConquest();
                 }
             }
         });
 
         Events.OnGameModeStarted.subscribe(() => {
-            BFSupremacyUI.UI_Setup();
             BFSupremacyConquest.init();
-            GameConfig.gameConfig.roundOngoing = true;
-            GameConfig.gameConfig.gameStarted = true;
+            BFSupremacyUI.UI_Setup();
             mod.SetCameraTypeForAll(mod.Cameras.ThirdPerson);
             if (GameConfig.gameConfig.debug) {
                 GameConfig.gameConfig.ticketSpeed = 2;
             }
+            GameConfig.gameConfig.roundOngoing = true;
+            GameConfig.gameConfig.gameStarted = true;
         });
 
-        Events.OnPlayerEnterCapturePoint.subscribe((eventPlayer: mod.Player, eventCapturePoint: mod.CapturePoint) => {
+        Events.OnPlayerEnterCapturePoint.subscribe(async (eventPlayer: mod.Player, eventCapturePoint: mod.CapturePoint) => {
+            if (PlayerVariables.getPlayerData(eventPlayer).onPoint) {
+                return;
+            }
+            await mod.Wait(0.05);
+            PlayerVariables.getPlayerData(eventPlayer).onPoint = true;
+
+            let allPlayers = mod.GetPlayersOnPoint(eventCapturePoint);
+            let team1Count = 0;
+            let team2Count = 0;
+            for (let i = 0; i < mod.CountOf(allPlayers); i++) {
+                let p = mod.ValueInArray(allPlayers, i) as mod.Player;
+                if (mod.Equals(mod.GetTeam(p), mod.GetTeam(1))) {
+                    team1Count++;
+                } else if (mod.Equals(mod.GetTeam(p), mod.GetTeam(2))) {
+                    team2Count++;
+                }
+            }
+            ObjectiveVariables.objectiveVariables.get(mod.GetObjId(eventCapturePoint))!.team1Players = team1Count;
+            ObjectiveVariables.objectiveVariables.get(mod.GetObjId(eventCapturePoint))!.team2Players = team2Count;
+            while (PlayerVariables.getPlayerData(eventPlayer).onPoint) {
+                if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsAlive)) {
+                    BFSupremacyPlayer.enableCaptureUI(eventPlayer, true);
+                    BFSupremacyPlayer.updatePlayerCaptureUI(eventPlayer, eventCapturePoint);
+                } else {
+                    BFSupremacyPlayer.enableCaptureUI(eventPlayer, false);
+                }
+                await mod.Wait(0.1);
+            }
+            BFSupremacyPlayer.enableCaptureUI(eventPlayer, false);
+
+
         });
 
         Events.OnPlayerExitCapturePoint.subscribe((eventPlayer: mod.Player, eventCapturePoint: mod.CapturePoint) => {
+            PlayerVariables.getPlayerData(eventPlayer).onPoint = false;
+
+            let allPlayers = mod.GetPlayersOnPoint(eventCapturePoint);
+            let team1Count = 0;
+            let team2Count = 0;
+            for (let i = 0; i < mod.CountOf(allPlayers); i++) {
+                let p = mod.ValueInArray(allPlayers, i) as mod.Player;
+                if (mod.Equals(mod.GetTeam(p), mod.GetTeam(1))) {
+                    team1Count++;
+                } else if (mod.Equals(mod.GetTeam(p), mod.GetTeam(2))) {
+                    team2Count++;
+                }
+            }
+            ObjectiveVariables.objectiveVariables.get(mod.GetObjId(eventCapturePoint))!.team1Players = team1Count;
+            ObjectiveVariables.objectiveVariables.get(mod.GetObjId(eventCapturePoint))!.team2Players = team2Count;
         });
 
-        Events.OnCapturePointCaptured.subscribe((eventCapturePoint: mod.CapturePoint) => {
+        Events.OnCapturePointCaptured.subscribe(async (eventCapturePoint: mod.CapturePoint) => {
+            await mod.Wait(0.1)
+            if (GameConfig.gameConfig.gameStarted) {
+                BFSupremacyUI.capturePoint_UI_Colour_Update(eventCapturePoint);
+                BFSupremacyCore.updateFlagData(eventCapturePoint);
+            }
         });
 
-        Events.OnCapturePointLost.subscribe((eventCapturePoint: mod.CapturePoint) => {
+        Events.OnCapturePointLost.subscribe(async (eventCapturePoint: mod.CapturePoint) => {
+            await mod.Wait(0.1)
+            BFSupremacyUI.capturePoint_UI_Colour_Update(eventCapturePoint);
+            BFSupremacyCore.updateFlagData(eventCapturePoint);
+        });
+
+        Events.OngoingCapturePoint.subscribe((eventCapturePoint: mod.CapturePoint) => {
+            if (!GameConfig.gameConfig.gameStarted) {
+                return;
+            }
+            BFSupremacyCore.ongoingFlagData(eventCapturePoint);
+            BFSupremacyUI.capturePoint_UI_Alpha_Update(eventCapturePoint);
         });
 
         Events.OnPlayerJoinGame.subscribe((eventPlayer: mod.Player) => {
         });
 
         Events.OnPlayerDeployed.subscribe((eventPlayer: mod.Player) => {
+            if (PlayerVariables.getPlayerData(eventPlayer).firstDeploy) {
+                BFSupremacyPlayer.createPlayerUI(eventPlayer);
+                PlayerVariables.getPlayerData(eventPlayer).firstDeploy = false;
+            }
         });
 
         Events.OnPlayerEarnedKill.subscribe((eventPlayer: mod.Player, eventOtherPlayer: mod.Player, eventDeathType: mod.DeathType, eventWeaponUnlock: mod.WeaponUnlock) => {
