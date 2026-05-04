@@ -94,7 +94,7 @@ export class BFSupremacyRegroup {
         if (!heli) return;
 
         const departureTarget = mod.GetSpatialObject(903);
-        const departurePos = mod.GetObjectPosition(departureTarget);
+        const departurePos = mod.Add(mod.GetObjectPosition(departureTarget), mod.CreateVector(0, 0.3, 0));
         const startPos = mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition);
         if (!startPos) return;
 
@@ -105,22 +105,26 @@ export class BFSupremacyRegroup {
         const cameraObject = mod.GetFixedCamera(51);
         const cameraPos = mod.GetObjectPosition(cameraObject);
 
+        const liftPos = mod.Add(startPos, mod.CreateVector(0, 40, 0));
+        const time1 = (40 / 0.5) * 0.066;
+        const liftRot = this.getLookAtRotation(cameraPos, liftPos);
+        mod.SetObjectTransformOverTime(cameraObject, mod.CreateTransform(cameraPos, liftRot), time1, false, false);
+
         while (true) {
             const currentPos = mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition);
             if (mod.YComponentOf(currentPos) >= liftTargetY) break;
 
-            const liftPos = mod.Add(currentPos, mod.CreateVector(0, 0.5, 0));
-            mod.Teleport(heli, liftPos, 0);
-
-            let cameraTargetRot = this.getLookAtRotation(cameraPos, currentPos);
-
-
-            mod.SetObjectTransform(cameraObject, mod.CreateTransform(cameraPos, cameraTargetRot));
+            const nextPos = mod.Add(currentPos, mod.CreateVector(0, 0.5, 0));
+            mod.Teleport(heli, nextPos, 0);
 
             await mod.Wait(0.033);
         }
 
         // Stage 2: Fly to Target
+        const time2 = (mod.DistanceBetween(liftPos, departurePos) / 1.2) * 0.066;
+        const finalRot = this.getLookAtRotation(cameraPos, departurePos);
+        mod.SetObjectTransformOverTime(cameraObject, mod.CreateTransform(cameraPos, finalRot), time2, false, false);
+
         while (GameConfig.gameConfig.stage == 1) {
             const currentPos = mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition);
             const dist = mod.DistanceBetween(currentPos, departurePos);
@@ -129,10 +133,6 @@ export class BFSupremacyRegroup {
             const direction = mod.DirectionTowards(currentPos, departurePos);
             const movePos = mod.Add(currentPos, mod.Multiply(direction, 1.2));
             mod.Teleport(heli, movePos, 0);
-
-            let cameraTargetRot = this.getLookAtRotation(cameraPos, currentPos);
-
-            mod.SetObjectTransform(cameraObject, mod.CreateTransform(cameraPos, cameraTargetRot));
 
             await mod.Wait(0.033);
         }
