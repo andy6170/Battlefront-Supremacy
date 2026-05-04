@@ -24,16 +24,31 @@ export class BFSupremacyConquest {
         }
         GameConfig.gameConfig.conquestCapturePoints = count;
         for (let i = 250; i < 260; i++) {
-            let capturePoint = mod.GetCapturePoint(i);
-            mod.EnableGameModeObjective(capturePoint, false);
+            mod.EnableGameModeObjective(mod.GetCapturePoint(i), false);
+        }
+        for (let i = 260; i < 270; i++) {
+            mod.EnableGameModeObjective(mod.GetMCOM(i), false);
+        }
+
+        for (let i = 1; i < 10; i++) {
+            mod.EnableHQ(mod.GetHQ(i), true);
         }
         for (let i = 300; i < 310; i++) {
-            let capturePoint = mod.GetCapturePoint(i);
-            mod.EnableGameModeObjective(capturePoint, false);
+            mod.EnableHQ(mod.GetHQ(i), false);
+        }
+        for (let i = 400; i < 410; i++) {
+            mod.EnableHQ(mod.GetHQ(i), false);
+        }
+
+        mod.EnableGameModeObjective(mod.GetSector(150), true);
+        for (let i = 100; i < 110; i++) {
+            mod.EnableGameModeObjective(mod.GetSector(i), false);
         }
     }
 
     public static ongoingConquest(): void {
+        if (!GameConfig.gameConfig.roundOngoing) return;
+
         BFSupremacyUI.conquest_UI_Flash();
         if (mod.RoundToInteger(mod.GetMatchTimeElapsed()) % 2 == 0) {
             if (GameConfig.gameConfig.timeEven) {

@@ -63,7 +63,7 @@ export class BFSupremacyRegroup {
             if (distHorizontal < 5) break;
 
             const direction = mod.DirectionTowards(currentPos, hoverPos);
-            mod.Teleport(heli, mod.Add(currentPos, mod.Multiply(direction, 0.66)), 0);
+            mod.Teleport(heli, mod.Add(currentPos, mod.Multiply(direction, 0.99)), 0);
             await mod.Wait(0.033);
         }
 
@@ -137,6 +137,14 @@ export class BFSupremacyRegroup {
             await mod.Wait(0.033);
         }
         mod.SetCameraTypeForAll(mod.Cameras.FirstPerson, 0);
+        const players = mod.AllPlayers();
+
+        for (let i = 1; i < mod.CountOf(players); i++) {
+            const p = mod.ValueInArray(players, i);
+            if (!p) break;
+            mod.EnableAllInputRestrictions(p, false);
+        }
+        mod.UndeployAllPlayers();
         BFSupremacyCore.changeStage();
     }
 

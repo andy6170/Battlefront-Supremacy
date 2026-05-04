@@ -11,7 +11,7 @@ export class BFSupremacyUI {
         BFSupremacyUI.conquest_UI_Setup();
         BFSupremacyUI.capturePoint_UI_Setup_Conquest();
         BFSupremacyUI.regroup_UI_Setup();
-        BFSupremacyUI.finalassault_UI_Setup();
+        BFSupremacyUI.finalAssault_UI_Setup();
     }
 
     public static UI_Update() {
@@ -20,7 +20,7 @@ export class BFSupremacyUI {
         } else if (GameConfig.gameConfig.stage == 1) {
             BFSupremacyUI.regroup_UI_Text_Update();
         } else if (GameConfig.gameConfig.stage == 2) {
-            BFSupremacyUI.finalassault_UI_Update();
+            BFSupremacyUI.finalAssault_UI_Update();
         }
 
     }
@@ -33,8 +33,8 @@ export class BFSupremacyUI {
             BFSupremacyUI.regroup_UI_Change(true);
         } else if (GameConfig.gameConfig.stage == 2) {
             BFSupremacyUI.regroup_UI_Change(false);
-        } else if (GameConfig.gameConfig.stage == 3) {
-            BFSupremacyUI.conquest_UI_Change(false);
+            BFSupremacyUI.finalAssault_UI_Change(true);
+            BFSupremacyUI.finalAssault_UI_Colours();
         }
 
 
@@ -209,7 +209,7 @@ export class BFSupremacyUI {
     //-------------------------------------------------------------------------
 
     public static regroup_UI_Setup() {
-        mod.AddUIContainer("regroup_container", mod.CreateVector(0, 20, 0), mod.CreateVector(250, 50, 0), mod.UIAnchor.TopCenter, mod.FindUIWidgetWithName("MainUI"), false, 0, mod.CreateVector(0.5, 0.5, 0.5), 0.5, mod.UIBgFill.None, mod.UIDepth.AboveGameUI);
+        mod.AddUIContainer("regroup_container", mod.CreateVector(0, 95, 0), mod.CreateVector(250, 50, 0), mod.UIAnchor.TopCenter, mod.FindUIWidgetWithName("MainUI"), false, 0, mod.CreateVector(0.5, 0.5, 0.5), 0.5, mod.UIBgFill.None, mod.UIDepth.AboveGameUI);
         UIconfig.uiConfig.regroupUI = mod.FindUIWidgetWithName("regroup_container");
         mod.AddUIContainer("bonustime_background1", mod.CreateVector(0, 0, 0), mod.CreateVector(180, 40, 0), mod.UIAnchor.BottomCenter, UIconfig.uiConfig.regroupUI, true, 0, UIconfig.uiConfig.friendlyBGColour, 0.9, mod.UIBgFill.Blur, mod.GetTeam(1));
         mod.AddUIContainer("bonustime_background2", mod.CreateVector(0, 0, 0), mod.CreateVector(180, 40, 0), mod.UIAnchor.BottomCenter, UIconfig.uiConfig.regroupUI, true, 0, UIconfig.uiConfig.enemyBGColour, 0.9, mod.UIBgFill.Blur, mod.GetTeam(2));
@@ -245,15 +245,34 @@ export class BFSupremacyUI {
     //Final Assault UI
     //-------------------------------------------------------------------------
 
-    public static finalassault_UI_Setup() {
-        mod.AddUIContainer("finalassault_container", mod.CreateVector(0, 0, 0), mod.CreateVector(380, 80, 0), mod.UIAnchor.TopCenter, mod.FindUIWidgetWithName("MainUI"), false, 0, mod.CreateVector(0.5, 0.5, 0.5), 0.5, mod.UIBgFill.None, mod.UIDepth.AboveGameUI);
+    public static finalAssault_UI_Setup() {
+        mod.AddUIContainer("finalAssault_container", mod.CreateVector(0, 95, 0), mod.CreateVector(250, 50, 0), mod.UIAnchor.TopCenter, mod.FindUIWidgetWithName("MainUI"), false, 0, mod.CreateVector(0.5, 0.5, 0.5), 0.5, mod.UIBgFill.None, mod.UIDepth.AboveGameUI);
+        UIconfig.uiConfig.finalAssaultUI = mod.FindUIWidgetWithName("finalAssault_container");
+        mod.AddUIText("timer_text1", mod.CreateVector(0, 0, 0), mod.CreateVector(180, 40, 0), mod.UIAnchor.BottomCenter, UIconfig.uiConfig.finalAssaultUI, true, 0, UIconfig.uiConfig.friendlyColour, 1, mod.UIBgFill.Solid, mod.Message(mod.stringkeys.supremacy.regroup.bonustime, 0, 0, 0), 36, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center);
+        mod.AddUIText("timer_text2", mod.CreateVector(0, 0, 0), mod.CreateVector(180, 40, 0), mod.UIAnchor.BottomCenter, UIconfig.uiConfig.finalAssaultUI, true, 0, UIconfig.uiConfig.enemyColour, 1, mod.UIBgFill.Solid, mod.Message(mod.stringkeys.supremacy.regroup.bonustime, 0, 0, 0), 36, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center);
     }
 
-    public static finalassault_UI_Update() {
+    public static finalAssault_UI_Update() {
+        let totalSeconds = GameConfig.gameConfig.remainingTime;
+        let seconds = totalSeconds % 10;
+        let tenseconds = Math.floor((totalSeconds % 60) / 10);
+        let minutes = Math.floor(totalSeconds / 60);
+        mod.SetUITextLabel(mod.FindUIWidgetWithName("timer_text1"), mod.Message(mod.stringkeys.supremacy.regroup.bonustime, minutes, tenseconds, seconds));
+        mod.SetUITextLabel(mod.FindUIWidgetWithName("timer_text2"), mod.Message(mod.stringkeys.supremacy.regroup.bonustime, minutes, tenseconds, seconds));
+    }
+
+    public static finalAssault_UI_Colours() {
+        if (mod.Equals(GameConfig.gameConfig.attacker, mod.GetTeam(1))) {
+            mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName("timer_text1"), UIconfig.uiConfig.enemyColour);
+            mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName("timer_text2"), UIconfig.uiConfig.friendlyColour);
+        } else {
+            mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName("timer_text1"), UIconfig.uiConfig.friendlyColour);
+            mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName("timer_text2"), UIconfig.uiConfig.enemyColour);
+        }
 
     }
 
-    public static finalassault_UI_Change(enable: boolean) {
-        mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("finalassault_container"), enable);
+    public static finalAssault_UI_Change(enable: boolean) {
+        mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("finalAssault_container"), enable);
     }
 }

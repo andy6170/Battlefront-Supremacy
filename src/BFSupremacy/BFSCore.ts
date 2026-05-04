@@ -2,6 +2,7 @@ import { GameConfig, ObjectiveVariables, UIconfig } from "./BFSVariables.ts";
 import { BFSupremacyUI } from "./BFSUI.ts";
 import { BFSupremacyConquest } from "./BFSConquest.ts";
 import { BFSupremacyRegroup } from "./BFSRegroup.ts";
+import { BFSupremacyFinalSector } from "./BFSFinalSector.ts";
 
 
 export class BFSupremacyCore {
@@ -11,9 +12,16 @@ export class BFSupremacyCore {
 
     public static async changeStage(): Promise<void> {
         GameConfig.gameConfig.roundOngoing = false;
+        GameConfig.gameConfig.stage++;
+        let stage = GameConfig.gameConfig.stage;
         await mod.Wait(3);
-        if (GameConfig.gameConfig.stage == 0) {
-            GameConfig.gameConfig.stage = 1;
+
+        if (stage == 0) {
+            BFSupremacyConquest.resetConquest();
+            GameConfig.gameConfig.flagStart = 200;
+            GameConfig.gameConfig.flagEnd = 220;
+
+        } else if (stage == 1) {
             GameConfig.gameConfig.extractionRemainingTime = GameConfig.gameConfig.extractionTime;
             if (GameConfig.gameConfig.debug) {
                 GameConfig.gameConfig.extractionRemainingTime = 20;
@@ -23,19 +31,12 @@ export class BFSupremacyCore {
             GameConfig.gameConfig.flagStart = 0;
             GameConfig.gameConfig.flagEnd = 0;
             BFSupremacyRegroup.spawnHeli();
-        } else if (GameConfig.gameConfig.stage == 1) {
-            GameConfig.gameConfig.stage = 2;
-            GameConfig.gameConfig.flagStart = 250;
-            GameConfig.gameConfig.flagEnd = 260;
-        } else if (GameConfig.gameConfig.stage == 2) {
-            GameConfig.gameConfig.stage = 3;
-            GameConfig.gameConfig.flagStart = 0;
-            GameConfig.gameConfig.flagEnd = 0;
-        } else if (GameConfig.gameConfig.stage == 3) {
-            GameConfig.gameConfig.stage = 0;
-            BFSupremacyConquest.resetConquest();
-            GameConfig.gameConfig.flagStart = 200;
-            GameConfig.gameConfig.flagEnd = 220;
+
+        } else if (stage == 2) {
+            BFSupremacyFinalSector.init();
+
+        } else if (stage == 3) {
+
         }
         BFSupremacyUI.UI_Change();
         BFSupremacyUI.UI_Update();
@@ -137,7 +138,12 @@ export class BFSupremacyCore {
     }
 
     public static waitingArea(player: mod.Player): void {
-        if (mod.Equals(mod.GetTeam(player), mod.GetTeam(1))) mod.Teleport(player, mod.CreateVector(0, 0, 0), 0);
-        else mod.Teleport(player, mod.CreateVector(0, 0, 0), 0);
+        let position = mod.CreateVector(0, 0, 0);
+        if (mod.Equals(mod.GetTeam(player), mod.GetTeam(1))) {
+            position = mod.GetObjectPosition(mod.GetSpatialObject(950));
+        } else if (mod.Equals(mod.GetTeam(player), mod.GetTeam(2))) {
+            position = mod.GetObjectPosition(mod.GetSpatialObject(951));
+        }
+        mod.Teleport(player, position, 0);
     }
 }
