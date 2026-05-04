@@ -85,7 +85,7 @@ export class BFSupremacyRegroup {
             if (GameConfig.gameConfig.regroupBot) {
                 mod.Heal(GameConfig.gameConfig.regroupBot, 500);
             }
-            await mod.Wait(0.2);
+            await mod.Wait(0.1);
         }
     }
 
