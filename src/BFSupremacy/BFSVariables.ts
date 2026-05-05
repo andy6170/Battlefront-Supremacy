@@ -4,6 +4,10 @@ export interface GameConfig {
     stage: number;
     capturePointNeutralizationTime: number;
     capturePointCapturingTime: number;
+    capturePointMultiplier: number;
+    finalCaptureTime: number;
+    finalNeutralizeTime: number;
+    finalCaptureMultiplier: number;
     ticketSpeed: number;
     attacker: mod.Team;
     defender: mod.Team;
@@ -41,6 +45,10 @@ export class GameConfig {
         debug: true,
         capturePointNeutralizationTime: 5,
         capturePointCapturingTime: 5,
+        capturePointMultiplier: 3,
+        finalCaptureTime: 15,
+        finalNeutralizeTime: 25,
+        finalCaptureMultiplier: 1,
         stage: 0,
         ticketSpeed: 6,
         extractionTime: 60,
@@ -88,6 +96,8 @@ export interface UIconfig {
     regroupUI: mod.UIWidget;
     finalAssaultUI: mod.UIWidget;
     capturePointUI: mod.UIWidget;
+    capturepointUIFinalAssault: mod.UIWidget;
+    mcomUI: mod.UIWidget;
     uiAlpha: number;
     uiAlphaUp: boolean;
     flashStart: boolean;
@@ -111,6 +121,8 @@ export class UIconfig {
         regroupUI: mod.GetUIRoot(),
         finalAssaultUI: mod.GetUIRoot(),
         capturePointUI: mod.GetUIRoot(),
+        capturepointUIFinalAssault: mod.GetUIRoot(),
+        mcomUI: mod.GetUIRoot(),
         uiAlpha: 1,
         uiAlphaUp: false,
         flashStart: false,

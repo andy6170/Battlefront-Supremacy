@@ -5,6 +5,7 @@ import { BFSupremacyUI } from './BFSUI';
 import { BFSupremacyCore } from './BFSCore';
 import { BFSupremacyPlayer } from './BFSPlayer';
 import { BFSupremacyRegroup } from './BFSRegroup';
+import { BFSupremacyFinalSector } from './BFSFinalSector';
 
 
 export class BFSupremacy {
@@ -97,6 +98,11 @@ export class BFSupremacy {
                 BFSupremacyUI.capturePoint_UI_Colour_Update(eventCapturePoint);
                 BFSupremacyCore.updateFlagData(eventCapturePoint);
                 BFSupremacyUI.capturePoint_UI_Alpha_Update(eventCapturePoint);
+                if (mod.Equals(GameConfig.gameConfig.stage, 2)) {
+                    if (mod.Equals(mod.GetCurrentOwnerTeam(eventCapturePoint), GameConfig.gameConfig.attacker)) {
+                        BFSupremacyFinalSector.moveToFinalSectorLevel2();
+                    }
+                }
             }
         });
 

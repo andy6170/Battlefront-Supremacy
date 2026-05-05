@@ -7,15 +7,15 @@
         },
         "regroup": {
             "name": "Regroup",
-            "description1": "GET TO THE REGROUP POINT",
-            "description2": "STOP THEM REGROUPING",
+            "attackerMessage": "GET TO THE EXTRACT",
+            "defenderMessage": "STOP THE EXTRACT",
             "bonustime": "0{}:{}{}",
             "extract": "EXTRACT"
         },
         "finalassault": {
             "name": "Final Assault",
-            "description1": "ASSAULT THE FINAL OBJECTIVE",
-            "description2": "DEFEND THE OBJECTIVE"
+            "attackerMessage": "ASSAULT THE FINAL OBJECTIVE",
+            "defenderMessage": "DEFEND THE OBJECTIVE"
         },
         "debug": {
             "name": "Debug"

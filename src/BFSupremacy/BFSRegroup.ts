@@ -137,14 +137,14 @@ export class BFSupremacyRegroup {
             await mod.Wait(0.033);
         }
         mod.SetCameraTypeForAll(mod.Cameras.FirstPerson, 0);
-        const players = mod.AllPlayers();
 
+        const players = mod.AllPlayers();
         for (let i = 1; i < mod.CountOf(players); i++) {
-            const p = mod.ValueInArray(players, i);
-            if (!p) break;
-            mod.EnableAllInputRestrictions(p, false);
+            mod.EnableAllInputRestrictions(mod.ValueInArray(players, i), false);
         }
+
         mod.UndeployAllPlayers();
+        mod.Kill(heli);
         BFSupremacyCore.changeStage();
     }
 
