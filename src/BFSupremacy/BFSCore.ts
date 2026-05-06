@@ -23,6 +23,7 @@ export class BFSupremacyCore {
             BFSupremacyConquest.resetConquest();
             GameConfig.gameConfig.flagStart = 200;
             GameConfig.gameConfig.flagEnd = 220;
+            GameConfig.gameConfig.bonusTime = 0;
 
         } else if (stage == 1) {
             await mod.Wait(3);

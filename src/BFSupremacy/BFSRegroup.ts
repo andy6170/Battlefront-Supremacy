@@ -85,6 +85,7 @@ export class BFSupremacyRegroup {
         GameConfig.gameConfig.roundOngoing = true;
         GameConfig.gameConfig.extractReady = true;
         GameConfig.gameConfig.heliTakeOff = false;
+        mod.EnableGameModeObjective(GameConfig.gameConfig.extractionIcon, true);
         while (GameConfig.gameConfig.stage === 1 && GameConfig.gameConfig.extractionRemainingTime > 0) {
             mod.Teleport(heli, targetPos, 0);
             mod.Heal(heli, 10000);
@@ -101,6 +102,7 @@ export class BFSupremacyRegroup {
 
     public static async animateHeliTakeOff(): Promise<void> {
         //GameConfig.gameConfig.roundOngoing = false;
+        mod.EnableGameModeObjective(GameConfig.gameConfig.extractionIcon, false);
         const heli = GameConfig.gameConfig.regroupVehicle;
         if (!heli) return;
 

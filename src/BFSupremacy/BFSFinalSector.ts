@@ -44,6 +44,7 @@ export class BFSupremacyFinalSector {
     }
 
     public static team1FinalSectorLevel1(enable: boolean): void {
+        mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("capturepoint_container_finalAssault"), enable)
         mod.EnableGameModeObjective(mod.GetCapturePoint(250), enable);
         mod.EnableGameModeObjective(mod.GetCapturePoint(251), enable);
         mod.EnableGameModeObjective(mod.GetSector(100), enable);
@@ -66,6 +67,7 @@ export class BFSupremacyFinalSector {
     }
 
     public static team2FinalSectorLevel1(enable: boolean): void {
+        mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("capturepoint_container_finalAssault"), enable)
         mod.EnableGameModeObjective(mod.GetCapturePoint(252), enable);
         mod.EnableGameModeObjective(mod.GetCapturePoint(253), enable);
         mod.EnableGameModeObjective(mod.GetSector(102), enable);
@@ -86,6 +88,11 @@ export class BFSupremacyFinalSector {
         mod.EnableHQ(mod.GetHQ(303), enable);
         mod.EnableHQ(mod.GetHQ(403), enable);
     }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Ongoing final sector
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static ongoingFinalAssault(): void {
         if (!GameConfig.gameConfig.roundOngoing) return;
@@ -122,6 +129,12 @@ export class BFSupremacyFinalSector {
         BFSupremacyCore.changeStage()
     }
 
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Move to final sector level 2
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     public static moveToFinalSectorLevel2(): void {
         GameConfig.gameConfig.roundOngoing = false;
         mod.EnableGameModeObjective(mod.GetCapturePoint(GameConfig.gameConfig.flagStart), false);
@@ -133,7 +146,16 @@ export class BFSupremacyFinalSector {
             TeamVariables.getTeamData(GameConfig.gameConfig.attacker).finalSectorBreached += 1;
         }
         BFSupremacyFinalSector.manageFinalSector(true);
+        GameConfig.gameConfig.roundOngoing = true;
     }
+
+
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // MCOM destroyed
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static MCOMDestroyed(): void {
         if (mod.Equals(GameConfig.gameConfig.attacker, mod.GetTeam(1))) {
@@ -148,6 +170,12 @@ export class BFSupremacyFinalSector {
             }
         }
     }
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // End game
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static endGame(winningTeam: mod.Team, camera: number): void {
         GameConfig.gameConfig.roundOngoing = false;

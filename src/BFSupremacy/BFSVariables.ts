@@ -37,6 +37,7 @@ export interface GameConfig {
     regroupVehicleSelected: boolean;
     extractReady: boolean;
     heliTakeOff: boolean;
+    extractionIcon: mod.MCOM;
 }
 
 export class GameConfig {
@@ -79,6 +80,7 @@ export class GameConfig {
         regroupVehicleSelected: false,
         extractReady: false,
         heliTakeOff: false,
+        extractionIcon: mod.SpawnObject(mod.RuntimeSpawn_Common.MCOM, mod.Subtract(mod.GetObjectPosition(mod.GetSpatialObject(902)), mod.CreateVector(0, 1.5, 0)), mod.CreateVector(0, 0, 0))
     };
 }
 

@@ -23,6 +23,9 @@ export class BFSupremacy {
                     BFSupremacyConquest.ongoingConquest();
                 } else if (GameConfig.gameConfig.stage == 1) {
                     BFSupremacyRegroup.ongoingRegroup();
+                } else if (GameConfig.gameConfig.stage == 2) {
+                    BFSupremacyUI.UI_AlphaUpdate();
+                    BFSupremacyFinalSector.ongoingFinalAssault();
                 }
             }
         });
@@ -31,6 +34,7 @@ export class BFSupremacy {
             BFSupremacyConquest.init();
             BFSupremacyUI.UI_Setup();
             mod.SetCameraTypeForAll(mod.Cameras.ThirdPerson);
+            mod.EnableGameModeObjective(GameConfig.gameConfig.extractionIcon, false);
             if (GameConfig.gameConfig.debug) {
                 GameConfig.gameConfig.ticketSpeed = 2;
             }
