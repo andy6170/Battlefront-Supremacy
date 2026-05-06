@@ -14,7 +14,7 @@
         },
         "finalassault": {
             "name": "Final Assault",
-            "attackerMessage": "ASSAULT THE FINAL OBJECTIVE",
+            "attackerMessage": "ASSAULT THE OBJECTIVE",
             "defenderMessage": "DEFEND THE OBJECTIVE"
         },
         "debug": {
@@ -51,5 +51,6 @@
     "init_complete": "Init Complete",
     "vehicle_occupied": "Bot In heli",
     "vehicle_else": "Different Vehicle",
-    "vehicleCheck": "Starting Check..."
+    "vehicleCheck": "Starting Check...",
+    "ongoingrunning": "Ongoing Running"
 }

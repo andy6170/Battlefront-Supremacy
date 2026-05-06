@@ -17,9 +17,9 @@ export class BFSupremacy {
         }
 
         Events.OngoingGlobal.subscribe(() => {
-            BFSupremacyUI.UI_AlphaUpdate();
             if (GameConfig.gameConfig.gameStarted && GameConfig.gameConfig.roundOngoing) {
                 if (GameConfig.gameConfig.stage == 0) {
+                    BFSupremacyUI.UI_AlphaUpdate();
                     BFSupremacyConquest.ongoingConquest();
                 } else if (GameConfig.gameConfig.stage == 1) {
                     BFSupremacyRegroup.ongoingRegroup();

@@ -109,10 +109,12 @@ export class BFSupremacyConquest {
         BFSupremacyUI.conquest_UI_Update();
 
         if (TeamVariables.getTeamData(1).score >= 100) {
+            GameConfig.gameConfig.roundOngoing = false;
             GameConfig.gameConfig.attacker = mod.GetTeam(1);
             GameConfig.gameConfig.defender = mod.GetTeam(2);
             BFSupremacyCore.changeStage();
         } else if (TeamVariables.getTeamData(2).score >= 100) {
+            GameConfig.gameConfig.roundOngoing = false;
             GameConfig.gameConfig.attacker = mod.GetTeam(2);
             GameConfig.gameConfig.defender = mod.GetTeam(1);
             BFSupremacyCore.changeStage();

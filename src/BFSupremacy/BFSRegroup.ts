@@ -41,6 +41,10 @@ export class BFSupremacyRegroup {
         }
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Heli Landing
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     public static async animateHeli(): Promise<void> {
         const heli = GameConfig.gameConfig.regroupVehicle;
         if (!heli) return;
@@ -78,7 +82,9 @@ export class BFSupremacyRegroup {
             mod.Teleport(heli, mod.Add(currentPos, mod.Multiply(direction, 0.33)), 0); // Slower descent
             await mod.Wait(0.033);
         }
+        GameConfig.gameConfig.roundOngoing = true;
         GameConfig.gameConfig.extractReady = true;
+        GameConfig.gameConfig.heliTakeOff = false;
         while (GameConfig.gameConfig.stage === 1 && GameConfig.gameConfig.extractionRemainingTime > 0) {
             mod.Teleport(heli, targetPos, 0);
             mod.Heal(heli, 10000);
@@ -89,7 +95,12 @@ export class BFSupremacyRegroup {
         }
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Heli Take Off
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     public static async animateHeliTakeOff(): Promise<void> {
+        //GameConfig.gameConfig.roundOngoing = false;
         const heli = GameConfig.gameConfig.regroupVehicle;
         if (!heli) return;
 
@@ -160,7 +171,9 @@ export class BFSupremacyRegroup {
         return mod.CreateVector(pitch, yaw, 0);
     }
 
-
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Player Boarding Logic
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static playerBoarding(player: mod.Player, vehicle: mod.Vehicle): void {
         GameConfig.gameConfig.bonusTime += GameConfig.gameConfig.bonusTimeAddition;
@@ -171,10 +184,13 @@ export class BFSupremacyRegroup {
         mod.SetCameraTypeForPlayer(player, mod.Cameras.Fixed, 50);
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Ongoing Rule
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public static async ongoingRegroup(): Promise<void> {
-        if (!GameConfig.gameConfig.extractReady || GameConfig.gameConfig.heliTakeOff) {
-            return
+    public static ongoingRegroup(): void {
+        if (!GameConfig.gameConfig.heliTakeOff && GameConfig.gameConfig.extractionRemainingTime <= 0) {
+            return;
         }
         if (mod.RoundToInteger(mod.GetMatchTimeElapsed()) % 2 == 0) {
             if (GameConfig.gameConfig.timeEven) {
@@ -183,6 +199,7 @@ export class BFSupremacyRegroup {
             GameConfig.gameConfig.timeEven = true;
             GameConfig.gameConfig.timeOdd = false;
             GameConfig.gameConfig.extractionRemainingTime -= 1;
+            this.endRegroupCheck();
             this.pilotReset();
         }
         else if (mod.RoundToInteger(mod.GetMatchTimeElapsed()) % 2 != 0) {
@@ -192,14 +209,9 @@ export class BFSupremacyRegroup {
             GameConfig.gameConfig.timeEven = false;
             GameConfig.gameConfig.timeOdd = true;
             GameConfig.gameConfig.extractionRemainingTime -= 1;
+            this.endRegroupCheck();
         }
         BFSupremacyUI.regroup_UI_Progress_Update();
-        if (GameConfig.gameConfig.extractionRemainingTime <= 0) {
-            if (GameConfig.gameConfig.heliTakeOff) return;
-            GameConfig.gameConfig.heliTakeOff = true;
-            mod.SetCameraTypeForAll(mod.Cameras.Fixed, 51);
-            this.animateHeliTakeOff();
-        }
     }
 
     public static async pilotReset(): Promise<void> {
@@ -208,6 +220,14 @@ export class BFSupremacyRegroup {
             mod.ForcePlayerExitVehicle(GameConfig.gameConfig.regroupBot, GameConfig.gameConfig.regroupVehicle);
             await mod.Wait(0.1);
             mod.ForcePlayerToSeat(GameConfig.gameConfig.regroupBot, GameConfig.gameConfig.regroupVehicle, -1);
+        }
+    }
+
+    public static endRegroupCheck(): void {
+        if (GameConfig.gameConfig.extractionRemainingTime <= 0) {
+            GameConfig.gameConfig.roundOngoing = false;
+            mod.SetCameraTypeForAll(mod.Cameras.Fixed, 51);
+            this.animateHeliTakeOff();
         }
     }
 

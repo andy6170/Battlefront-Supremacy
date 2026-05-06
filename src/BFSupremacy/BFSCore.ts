@@ -13,8 +13,11 @@ export class BFSupremacyCore {
     public static async changeStage(): Promise<void> {
         GameConfig.gameConfig.roundOngoing = false;
         GameConfig.gameConfig.stage++;
+        if (GameConfig.gameConfig.stage >= 3) {
+            GameConfig.gameConfig.stage = 0;
+        }
+
         let stage = GameConfig.gameConfig.stage;
-        await mod.Wait(3);
 
         if (stage == 0) {
             BFSupremacyConquest.resetConquest();
@@ -22,6 +25,7 @@ export class BFSupremacyCore {
             GameConfig.gameConfig.flagEnd = 220;
 
         } else if (stage == 1) {
+            await mod.Wait(3);
             GameConfig.gameConfig.extractionRemainingTime = GameConfig.gameConfig.extractionTime;
             if (GameConfig.gameConfig.debug) {
                 GameConfig.gameConfig.extractionRemainingTime = 20;
@@ -33,14 +37,11 @@ export class BFSupremacyCore {
             BFSupremacyRegroup.spawnHeli();
 
         } else if (stage == 2) {
+            GameConfig.gameConfig.remainingTime = GameConfig.gameConfig.baseAttackTime + GameConfig.gameConfig.bonusTime;
             BFSupremacyFinalSector.init();
-
-        } else if (stage == 3) {
-
         }
         BFSupremacyUI.UI_Change();
         BFSupremacyUI.UI_Update();
-        GameConfig.gameConfig.roundOngoing = true;
     }
 
     public static ongoingFlagData(eventCapturePoint: mod.CapturePoint): void {

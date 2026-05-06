@@ -19,8 +19,6 @@ export class BFSupremacyFinalSector {
             mod.SetCapturePointNeutralizationTime(flag, GameConfig.gameConfig.finalNeutralizeTime);
             mod.SetMaxCaptureMultiplier(flag, GameConfig.gameConfig.finalCaptureMultiplier);
         }
-
-        await mod.Wait(5);
         GameConfig.gameConfig.roundOngoing = true;
 
 
