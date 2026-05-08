@@ -5,11 +5,14 @@ import { BFSupremacyCore } from "./BFSCore.ts";
 export class BFSupremacyRegroup {
     public static spawnHeli(): void {
         GameConfig.gameConfig.regroupVehicleSelected = false;
+        GameConfig.gameConfig.regroupBot = undefined;
+        GameConfig.gameConfig.regroupVehicle = undefined;
         mod.SpawnAIFromAISpawner(mod.GetSpawner(900), mod.Message(mod.stringkeys.supremacy.regroup.extract), GameConfig.gameConfig.attacker);
         mod.ForceVehicleSpawnerSpawn(mod.GetVehicleSpawner(901));
     }
 
     public static onBotSpawned(player: mod.Player, spawner: mod.Spawner): void {
+        if (GameConfig.gameConfig.regroupVehicleSelected || GameConfig.gameConfig.stage !== 1) return;
         if (mod.GetObjId(spawner) === 900) {
             GameConfig.gameConfig.regroupBot = player;
             this.checkAndSetup();
@@ -17,9 +20,7 @@ export class BFSupremacyRegroup {
     }
 
     public static onVehicleSpawned(vehicle: mod.Vehicle): void {
-        if (GameConfig.gameConfig.regroupVehicleSelected) {
-            return;
-        }
+        if (GameConfig.gameConfig.regroupVehicleSelected || GameConfig.gameConfig.stage !== 1) return;
         GameConfig.gameConfig.regroupVehicle = vehicle;
         this.checkAndSetup();
     }
@@ -28,7 +29,7 @@ export class BFSupremacyRegroup {
         const bot = GameConfig.gameConfig.regroupBot;
         const heli = GameConfig.gameConfig.regroupVehicle;
 
-        if (bot && heli) {
+        if (bot && heli && !GameConfig.gameConfig.regroupVehicleSelected) {
             GameConfig.gameConfig.regroupVehicleSelected = true;
             await mod.Wait(0.033);
             mod.EnableAllInputRestrictions(bot, true);
@@ -57,8 +58,10 @@ export class BFSupremacyRegroup {
         // Stage 1: Horizontal move to a point above the target
         const hoverPos = mod.CreateVector(mod.XComponentOf(targetPos), mod.YComponentOf(startPos), mod.ZComponentOf(targetPos));
 
-        while (mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition)) {
+        while (mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition) && GameConfig.gameConfig.stage === 1) {
             const currentPos = mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition);
+            if (!currentPos) break;
+            mod.Heal(heli, 10000);
             const distHorizontal = mod.DistanceBetween(
                 mod.CreateVector(mod.XComponentOf(currentPos), 0, mod.ZComponentOf(currentPos)),
                 mod.CreateVector(mod.XComponentOf(targetPos), 0, mod.ZComponentOf(targetPos))
@@ -68,31 +71,40 @@ export class BFSupremacyRegroup {
 
             const direction = mod.DirectionTowards(currentPos, hoverPos);
             mod.Teleport(heli, mod.Add(currentPos, mod.Multiply(direction, 0.99)), 0);
-            await mod.Wait(0.033);
+            await mod.Wait(0.066);
         }
 
         // Stage 2: Landing (Vertical drop)
-        while (mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition)) {
+        while (mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition) && GameConfig.gameConfig.stage === 1) {
             const currentPos = mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition);
+            if (!currentPos) break;
+            mod.Heal(heli, 10000);
             const dist = mod.DistanceBetween(currentPos, targetPos);
 
             if (dist < 1) break;
 
             const direction = mod.DirectionTowards(currentPos, targetPos);
             mod.Teleport(heli, mod.Add(currentPos, mod.Multiply(direction, 0.33)), 0); // Slower descent
-            await mod.Wait(0.033);
+            await mod.Wait(0.066);
         }
+        if (!mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition)) return;
         GameConfig.gameConfig.roundOngoing = true;
         GameConfig.gameConfig.extractReady = true;
         GameConfig.gameConfig.heliTakeOff = false;
-        mod.EnableGameModeObjective(GameConfig.gameConfig.extractionIcon, true);
-        while (GameConfig.gameConfig.stage === 1 && GameConfig.gameConfig.extractionRemainingTime > 0) {
-            mod.Teleport(heli, targetPos, 0);
+        mod.EnableVFX(GameConfig.gameConfig.extractionIcon, true);
+        mod.EnableGameModeObjective(mod.GetCapturePoint(904), true);
+        mod.SetCapturePointOwner(mod.GetCapturePoint(904), GameConfig.gameConfig.attacker);
+        mod.EnableCapturePointDeploying(mod.GetCapturePoint(904), false);
+        while (GameConfig.gameConfig.stage === 1 && GameConfig.gameConfig.extractionRemainingTime > 0 && mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition)) {
+            const currentPos = mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition);
+            if (currentPos && mod.DistanceBetween(currentPos, targetPos) > 0.5) {
+                mod.Teleport(heli, targetPos, 0);
+            }
             mod.Heal(heli, 10000);
             if (GameConfig.gameConfig.regroupBot) {
                 mod.Heal(GameConfig.gameConfig.regroupBot, 500);
             }
-            await mod.Wait(0.1);
+            await mod.Wait(0.2);
         }
     }
 
@@ -101,8 +113,11 @@ export class BFSupremacyRegroup {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static async animateHeliTakeOff(): Promise<void> {
-        //GameConfig.gameConfig.roundOngoing = false;
-        mod.EnableGameModeObjective(GameConfig.gameConfig.extractionIcon, false);
+        if (GameConfig.gameConfig.heliTakeOff) return;
+        GameConfig.gameConfig.heliTakeOff = true;
+        GameConfig.gameConfig.roundOngoing = false;
+        mod.EnableVFX(GameConfig.gameConfig.extractionIcon, false);
+        mod.EnableGameModeObjective(mod.GetCapturePoint(904), false);
         const heli = GameConfig.gameConfig.regroupVehicle;
         if (!heli) return;
 
@@ -118,19 +133,24 @@ export class BFSupremacyRegroup {
         const cameraObject = mod.GetFixedCamera(51);
         const cameraPos = mod.GetObjectPosition(cameraObject);
 
+        const startRot = this.getLookAtRotation(cameraPos, startPos);
+        mod.SetObjectTransform(cameraObject, mod.CreateTransform(cameraPos, startRot));
+
+        await mod.Wait(1);
+
         const liftPos = mod.Add(startPos, mod.CreateVector(0, 40, 0));
         const time1 = (40 / 0.5) * 0.066;
         const liftRot = this.getLookAtRotation(cameraPos, liftPos);
         mod.SetObjectTransformOverTime(cameraObject, mod.CreateTransform(cameraPos, liftRot), time1, false, false);
 
-        while (true) {
+        while (mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition)) {
             const currentPos = mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition);
-            if (mod.YComponentOf(currentPos) >= liftTargetY) break;
+            if (!currentPos || mod.YComponentOf(currentPos) >= liftTargetY) break;
 
             const nextPos = mod.Add(currentPos, mod.CreateVector(0, 0.5, 0));
             mod.Teleport(heli, nextPos, 0);
 
-            await mod.Wait(0.033);
+            await mod.Wait(0.066);
         }
 
         // Stage 2: Fly to Target
@@ -138,8 +158,9 @@ export class BFSupremacyRegroup {
         const finalRot = this.getLookAtRotation(cameraPos, departurePos);
         mod.SetObjectTransformOverTime(cameraObject, mod.CreateTransform(cameraPos, finalRot), time2, false, false);
 
-        while (GameConfig.gameConfig.stage == 1) {
+        while (GameConfig.gameConfig.stage == 1 && mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition)) {
             const currentPos = mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition);
+            if (!currentPos) break;
             const dist = mod.DistanceBetween(currentPos, departurePos);
             if (dist < 5) break;
 
@@ -147,7 +168,7 @@ export class BFSupremacyRegroup {
             const movePos = mod.Add(currentPos, mod.Multiply(direction, 1.2));
             mod.Teleport(heli, movePos, 0);
 
-            await mod.Wait(0.033);
+            await mod.Wait(0.066);
         }
         mod.SetCameraTypeForAll(mod.Cameras.FirstPerson, 0);
 

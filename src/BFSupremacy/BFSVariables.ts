@@ -37,19 +37,19 @@ export interface GameConfig {
     regroupVehicleSelected: boolean;
     extractReady: boolean;
     heliTakeOff: boolean;
-    extractionIcon: mod.MCOM;
+    extractionIcon: mod.VFX;
 }
 
 export class GameConfig {
     public static gameConfig: GameConfig = {
         gameStarted: false,
-        debug: true,
-        capturePointNeutralizationTime: 5,
-        capturePointCapturingTime: 5,
-        capturePointMultiplier: 3,
+        debug: false,
+        capturePointNeutralizationTime: 15,
+        capturePointCapturingTime: 15,
+        capturePointMultiplier: 2,
         finalCaptureTime: 15,
         finalNeutralizeTime: 25,
-        finalCaptureMultiplier: 1,
+        finalCaptureMultiplier: 2,
         stage: 0,
         ticketSpeed: 6,
         extractionTime: 60,
@@ -80,7 +80,7 @@ export class GameConfig {
         regroupVehicleSelected: false,
         extractReady: false,
         heliTakeOff: false,
-        extractionIcon: mod.SpawnObject(mod.RuntimeSpawn_Common.MCOM, mod.Subtract(mod.GetObjectPosition(mod.GetSpatialObject(902)), mod.CreateVector(0, 1.5, 0)), mod.CreateVector(0, 0, 0))
+        extractionIcon: mod.GetVFX(0)
     };
 }
 
@@ -154,6 +154,7 @@ export interface SupremacyPlayerData {
     containerWidget: mod.UIWidget
     firstDeploy: boolean;
     currentObjective: mod.CapturePoint;
+    spawned: boolean;
 }
 
 export class PlayerVariables {
@@ -170,7 +171,8 @@ export class PlayerVariables {
                 uniqueUI: "",
                 containerWidget: mod.GetUIRoot(),
                 firstDeploy: true,
-                currentObjective: mod.GetCapturePoint(0)
+                currentObjective: mod.GetCapturePoint(0),
+                spawned: false
             });
         }
         return PlayerVariables.playerData.get(playerId)!;

@@ -2,7 +2,7 @@ import { GameConfig, ObjectiveVariables, UIconfig } from "./BFSVariables.ts";
 import { BFSupremacyUI } from "./BFSUI.ts";
 import { BFSupremacyConquest } from "./BFSConquest.ts";
 import { BFSupremacyRegroup } from "./BFSRegroup.ts";
-import { BFSupremacyFinalSector } from "./BFSFinalSector.ts";
+import { BFSupremacyFinalAssault } from "./BFSFinalAssault.ts";
 
 
 export class BFSupremacyCore {
@@ -35,12 +35,14 @@ export class BFSupremacyCore {
             BFSupremacyConquest.endConquest();
             GameConfig.gameConfig.flagStart = 0;
             GameConfig.gameConfig.flagEnd = 0;
+            BFSupremacyUI.regroup_UI_Progress_Update();
             BFSupremacyRegroup.spawnHeli();
 
         } else if (stage == 2) {
             GameConfig.gameConfig.remainingTime = GameConfig.gameConfig.baseAttackTime + GameConfig.gameConfig.bonusTime;
-            BFSupremacyFinalSector.init();
+            BFSupremacyFinalAssault.init();
         }
+        await mod.Wait(0.1);
         BFSupremacyUI.UI_Change();
         BFSupremacyUI.UI_Update();
     }
@@ -147,5 +149,21 @@ export class BFSupremacyCore {
             position = mod.GetObjectPosition(mod.GetSpatialObject(951));
         }
         mod.Teleport(player, position, 0);
+    }
+
+    public static capturePointPlayers(eventCapturePoint: mod.CapturePoint): void {
+        let allPlayers = mod.GetPlayersOnPoint(eventCapturePoint);
+        let team1Count = 0;
+        let team2Count = 0;
+        for (let i = 0; i < mod.CountOf(allPlayers); i++) {
+            let p = mod.ValueInArray(allPlayers, i) as mod.Player;
+            if (mod.Equals(mod.GetTeam(p), mod.GetTeam(1)) && mod.GetSoldierState(p, mod.SoldierStateBool.IsAlive)) {
+                team1Count++;
+            } else if (mod.Equals(mod.GetTeam(p), mod.GetTeam(2)) && mod.GetSoldierState(p, mod.SoldierStateBool.IsAlive)) {
+                team2Count++;
+            }
+        }
+        ObjectiveVariables.objectiveVariables.get(mod.GetObjId(eventCapturePoint))!.team1Players = team1Count;
+        ObjectiveVariables.objectiveVariables.get(mod.GetObjId(eventCapturePoint))!.team2Players = team2Count;
     }
 }
