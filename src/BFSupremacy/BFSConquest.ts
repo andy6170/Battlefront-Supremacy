@@ -9,7 +9,6 @@ export class BFSupremacyConquest {
         for (let i = 200; i < 220; i++) {
             let capturePoint = mod.GetCapturePoint(i);
             mod.EnableGameModeObjective(capturePoint, true);
-            //mod.SetCapturePointOwner(capturePoint, mod.GetTeam(0));
             mod.SetCapturePointNeutralizationTime(capturePoint, GameConfig.gameConfig.capturePointNeutralizationTime);
             mod.SetCapturePointCapturingTime(capturePoint, GameConfig.gameConfig.capturePointCapturingTime);
         }
@@ -41,6 +40,7 @@ export class BFSupremacyConquest {
         }
 
         mod.EnableGameModeObjective(mod.GetSector(150), true);
+        mod.EnableGameModeObjective(mod.GetCapturePoint(904), false);
         for (let i = 100; i < 110; i++) {
             mod.EnableGameModeObjective(mod.GetSector(i), false);
         }
@@ -122,13 +122,19 @@ export class BFSupremacyConquest {
     }
 
     public static resetConquest(): void {
+        mod.EnableGameModeObjective(mod.GetSector(150), true);
+        for (let i = 1; i < 10; i++) {
+            mod.EnableHQ(mod.GetHQ(i), true);
+        }
         for (let i = 200; i < 220; i++) {
             let capturePoint = mod.GetCapturePoint(i);
-            mod.SetCapturePointOwner(capturePoint, mod.GetTeam(0));
+            mod.EnableGameModeObjective(capturePoint, true);
+            mod.SetCapturePointOwner(capturePoint, mod.GetTeam(3));
         }
         TeamVariables.getTeamData(1).score = 0;
         TeamVariables.getTeamData(2).score = 0;
         GameConfig.gameConfig.ticketSpeed = 3;
+        GameConfig.gameConfig.roundOngoing = true;
     }
 
     public static endConquest(): void {

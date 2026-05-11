@@ -10,7 +10,8 @@
             "attackerMessage": "GET TO THE EXTRACT",
             "defenderMessage": "STOP THE EXTRACT",
             "bonustime": "0{}:{}{}",
-            "extract": "EXTRACT"
+            "extract": "EXTRACT",
+            "undeploy": "CANNOT SPAWN ON OBJECTIVE"
         },
         "finalassault": {
             "name": "Final Assault",
@@ -52,5 +53,6 @@
     "vehicle_occupied": "Bot In heli",
     "vehicle_else": "Different Vehicle",
     "vehicleCheck": "Starting Check...",
-    "ongoingrunning": "Ongoing Running"
+    "ongoingrunning": "Ongoing Running",
+    "error_generic": "No Team Detected"
 }

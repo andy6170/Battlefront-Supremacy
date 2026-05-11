@@ -12,6 +12,7 @@ export class BFSupremacyUI {
         BFSupremacyUI.capturePoint_UI_Setup_Conquest();
         BFSupremacyUI.regroup_UI_Setup();
         BFSupremacyUI.finalAssault_UI_Setup();
+        BFSupremacyUI.capturePoint_UI_Setup_FinalAssault();
     }
 
     public static UI_Update() {
@@ -28,6 +29,7 @@ export class BFSupremacyUI {
     public static UI_Change() {
         if (GameConfig.gameConfig.stage == 0) {
             BFSupremacyUI.conquest_UI_Change(true);
+            BFSupremacyUI.finalAssault_UI_Change(false);
         } else if (GameConfig.gameConfig.stage == 1) {
             BFSupremacyUI.conquest_UI_Change(false);
             BFSupremacyUI.regroup_UI_Change(true);
@@ -36,6 +38,7 @@ export class BFSupremacyUI {
             BFSupremacyUI.regroup_UI_Change(false);
             BFSupremacyUI.finalAssault_UI_Change(true);
             BFSupremacyUI.finalAssault_UI_Team_Update();
+            BFSupremacyUI.finalAssault_UI_Update();
         }
 
 
@@ -152,7 +155,7 @@ export class BFSupremacyUI {
     }
 
     public static capturePoint_UI_Setup_FinalAssault() {
-        mod.AddUIContainer("capturepoint_container_finalAssault", mod.CreateVector(0, 95, 0), mod.CreateVector(900, 30, 0), mod.UIAnchor.TopCenter, mod.FindUIWidgetWithName("MainUI"), false, 0, mod.CreateVector(0.5, 0.5, 0.5), 0.5, mod.UIBgFill.None, mod.UIDepth.AboveGameUI);
+        mod.AddUIContainer("capturepoint_container_finalAssault", mod.CreateVector(0, 115, 0), mod.CreateVector(900, 30, 0), mod.UIAnchor.TopCenter, mod.FindUIWidgetWithName("MainUI"), false, 0, mod.CreateVector(0.5, 0.5, 0.5), 0.5, mod.UIBgFill.None, mod.UIDepth.AboveGameUI);
         UIconfig.uiConfig.capturepointUIFinalAssault = mod.FindUIWidgetWithName("capturepoint_container_finalAssault");
         for (let i = 0; i < 2; i++) {
             mod.AddUIContainer("finalflag_bg1_" + i, mod.CreateVector(((i - (2 - 1) / 2) * 60), 0, 0), mod.CreateVector(35, 35, 0), mod.UIAnchor.TopCenter, UIconfig.uiConfig.capturepointUIFinalAssault, true, 0, mod.CreateVector(0, 0, 0), 0.8, mod.UIBgFill.Blur, mod.UIDepth.AboveGameUI, mod.GetTeam(1));
@@ -215,7 +218,7 @@ export class BFSupremacyUI {
             prefix = "finalflag_";
         }
 
-        if (GameConfig.gameConfig.stage == 0 && id > 200 || GameConfig.gameConfig.stage == 2 && id < 20)
+        if (id > 20 || id < 0)
             return;
 
         if (mod.LessThan(mod.GetCaptureProgress(eventCapturePoint), 0.9) && mod.GreaterThan(mod.GetCaptureProgress(eventCapturePoint), 0.1)) {
@@ -238,7 +241,7 @@ export class BFSupremacyUI {
     //-------------------------------------------------------------------------
 
     public static regroup_UI_Setup() {
-        mod.AddUIContainer("regroup_container", mod.CreateVector(0, 95, 0), mod.CreateVector(250, 70, 0), mod.UIAnchor.TopCenter, mod.FindUIWidgetWithName("MainUI"), false, 0, mod.CreateVector(0.5, 0.5, 0.5), 0.5, mod.UIBgFill.None, mod.UIDepth.AboveGameUI);
+        mod.AddUIContainer("regroup_container", mod.CreateVector(0, 55, 0), mod.CreateVector(250, 70, 0), mod.UIAnchor.TopCenter, mod.FindUIWidgetWithName("MainUI"), false, 0, mod.CreateVector(0.5, 0.5, 0.5), 0.5, mod.UIBgFill.None, mod.UIDepth.AboveGameUI);
         UIconfig.uiConfig.regroupUI = mod.FindUIWidgetWithName("regroup_container");
         mod.AddUIContainer("bonustime_background1", mod.CreateVector(0, 0, 0), mod.CreateVector(180, 40, 0), mod.UIAnchor.TopCenter, UIconfig.uiConfig.regroupUI, true, 0, UIconfig.uiConfig.friendlyBGColour, 0.9, mod.UIBgFill.Blur, mod.GetTeam(1));
         mod.AddUIContainer("bonustime_background2", mod.CreateVector(0, 0, 0), mod.CreateVector(180, 40, 0), mod.UIAnchor.TopCenter, UIconfig.uiConfig.regroupUI, true, 0, UIconfig.uiConfig.enemyBGColour, 0.9, mod.UIBgFill.Blur, mod.GetTeam(2));
@@ -268,7 +271,6 @@ export class BFSupremacyUI {
     }
 
     public static regroup_UI_Change(enable: boolean) {
-        GameConfig.gameConfig.bonusTime = 0;
         mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("regroup_container"), enable);
     }
 
@@ -295,7 +297,7 @@ export class BFSupremacyUI {
     //-------------------------------------------------------------------------
 
     public static finalAssault_UI_Setup() {
-        mod.AddUIContainer("finalAssault_container", mod.CreateVector(0, 95, 0), mod.CreateVector(250, 70, 0), mod.UIAnchor.TopCenter, mod.FindUIWidgetWithName("MainUI"), false, 0, mod.CreateVector(0.5, 0.5, 0.5), 0.5, mod.UIBgFill.None, mod.UIDepth.AboveGameUI);
+        mod.AddUIContainer("finalAssault_container", mod.CreateVector(0, 55, 0), mod.CreateVector(250, 70, 0), mod.UIAnchor.TopCenter, mod.FindUIWidgetWithName("MainUI"), false, 0, mod.CreateVector(0.5, 0.5, 0.5), 0.5, mod.UIBgFill.None, mod.UIDepth.AboveGameUI);
         UIconfig.uiConfig.finalAssaultUI = mod.FindUIWidgetWithName("finalAssault_container");
         mod.AddUIText("timer_text1", mod.CreateVector(0, 0, 0), mod.CreateVector(180, 40, 0), mod.UIAnchor.TopCenter, UIconfig.uiConfig.finalAssaultUI, true, 0, UIconfig.uiConfig.friendlyColour, 1, mod.UIBgFill.Solid, mod.Message(mod.stringkeys.supremacy.regroup.bonustime, 0, 0, 0), 36, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(1));
         mod.AddUIText("timer_text2", mod.CreateVector(0, 0, 0), mod.CreateVector(180, 40, 0), mod.UIAnchor.TopCenter, UIconfig.uiConfig.finalAssaultUI, true, 0, UIconfig.uiConfig.enemyColour, 1, mod.UIBgFill.Solid, mod.Message(mod.stringkeys.supremacy.regroup.bonustime, 0, 0, 0), 36, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(2));
@@ -324,7 +326,6 @@ export class BFSupremacyUI {
             mod.SetUITextLabel(mod.FindUIWidgetWithName("finalAssault_message1"), mod.Message(mod.stringkeys.supremacy.finalassault.defender));
             mod.SetUITextLabel(mod.FindUIWidgetWithName("finalAssault_message2"), mod.Message(mod.stringkeys.supremacy.finalassault.attacker));
         }
-
     }
 
     public static finalAssault_UI_Change(enable: boolean) {

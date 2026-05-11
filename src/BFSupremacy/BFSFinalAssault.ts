@@ -3,7 +3,7 @@ import { UIconfig } from "./BFSVariables.ts";
 import { BFSupremacyUI } from "./BFSUI.ts";
 import { BFSupremacyCore } from "./BFSCore.ts";
 
-export class BFSupremacyFinalSector {
+export class BFSupremacyFinalAssault {
     public static async init(): Promise<void> {
         mod.EnableGameModeObjective(mod.GetSector(150), false);
         GameConfig.gameConfig.remainingTime = GameConfig.gameConfig.baseAttackTime + GameConfig.gameConfig.bonusTime;
@@ -11,7 +11,9 @@ export class BFSupremacyFinalSector {
             mod.EnableHQ(mod.GetHQ(i), false);
         }
 
-        BFSupremacyFinalSector.manageFinalSector(true);
+        BFSupremacyFinalAssault.manageFinalSector(true);
+        BFSupremacyFinalAssault.flagSetup(GameConfig.gameConfig.flagStart);
+        BFSupremacyFinalAssault.flagSetup(GameConfig.gameConfig.flagEnd);
 
         for (let i = 250; i <= 260; i++) {
             let flag = mod.GetCapturePoint(GameConfig.gameConfig.flagStart + i);
@@ -19,8 +21,25 @@ export class BFSupremacyFinalSector {
             mod.SetCapturePointNeutralizationTime(flag, GameConfig.gameConfig.finalNeutralizeTime);
             mod.SetMaxCaptureMultiplier(flag, GameConfig.gameConfig.finalCaptureMultiplier);
         }
+
+        let vehicles = mod.AllVehicles();
+        for (let i = 0; i < mod.CountOf(vehicles); i++) {
+            mod.Kill(mod.ValueInArray(vehicles, i));
+        }
+
+        await mod.Wait(5);
+
         GameConfig.gameConfig.roundOngoing = true;
 
+
+    }
+
+    public static flagSetup(id: number): void {
+        let flag = mod.GetCapturePoint(id);
+        mod.SetCapturePointCapturingTime(flag, GameConfig.gameConfig.finalCaptureTime);
+        mod.SetCapturePointNeutralizationTime(flag, GameConfig.gameConfig.finalNeutralizeTime);
+        mod.SetMaxCaptureMultiplier(flag, GameConfig.gameConfig.finalCaptureMultiplier);
+        mod.EnableCapturePointDeploying(flag, false);
 
     }
 
@@ -29,21 +48,25 @@ export class BFSupremacyFinalSector {
         const attackerData = TeamVariables.getTeamData(attacker);
         if (mod.Equals(attacker, mod.GetTeam(1))) {
             if (attackerData.finalSectorBreached == 1) {
-                BFSupremacyFinalSector.team1FinalSectorLevel1(enable);
+                BFSupremacyFinalAssault.team1FinalSectorLevel1(enable);
             } else if (attackerData.finalSectorBreached == 2) {
-                BFSupremacyFinalSector.team1FinalSectorLevel2(enable);
+                BFSupremacyFinalAssault.team1FinalSectorLevel2(enable);
             }
         } else if (mod.Equals(attacker, mod.GetTeam(2))) {
             if (attackerData.finalSectorBreached == 1) {
-                BFSupremacyFinalSector.team2FinalSectorLevel1(enable);
+                BFSupremacyFinalAssault.team2FinalSectorLevel1(enable);
             } else if (attackerData.finalSectorBreached == 2) {
-                BFSupremacyFinalSector.team2FinalSectorLevel2(enable);
+                BFSupremacyFinalAssault.team2FinalSectorLevel2(enable);
             }
+        } else {
+            mod.SendErrorReport(mod.Message(mod.stringkeys.error_generic))
         }
+        BFSupremacyUI.finalAssault_UI_Update();
 
     }
 
     public static team1FinalSectorLevel1(enable: boolean): void {
+        mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("capturepoint_container_finalAssault"), enable)
         mod.EnableGameModeObjective(mod.GetCapturePoint(250), enable);
         mod.EnableGameModeObjective(mod.GetCapturePoint(251), enable);
         mod.EnableGameModeObjective(mod.GetSector(100), enable);
@@ -51,6 +74,8 @@ export class BFSupremacyFinalSector {
         GameConfig.gameConfig.flagEnd = 251;
         mod.EnableHQ(mod.GetHQ(300), enable);
         mod.EnableHQ(mod.GetHQ(400), enable);
+        BFSupremacyUI.capturePoint_UI_Colour_Update(mod.GetCapturePoint(250));
+        BFSupremacyUI.capturePoint_UI_Colour_Update(mod.GetCapturePoint(251));
     }
 
     public static team1FinalSectorLevel2(enable: boolean): void {
@@ -66,6 +91,7 @@ export class BFSupremacyFinalSector {
     }
 
     public static team2FinalSectorLevel1(enable: boolean): void {
+        mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("capturepoint_container_finalAssault"), enable)
         mod.EnableGameModeObjective(mod.GetCapturePoint(252), enable);
         mod.EnableGameModeObjective(mod.GetCapturePoint(253), enable);
         mod.EnableGameModeObjective(mod.GetSector(102), enable);
@@ -73,6 +99,8 @@ export class BFSupremacyFinalSector {
         GameConfig.gameConfig.flagEnd = 253;
         mod.EnableHQ(mod.GetHQ(302), enable);
         mod.EnableHQ(mod.GetHQ(402), enable);
+        BFSupremacyUI.capturePoint_UI_Colour_Update(mod.GetCapturePoint(252));
+        BFSupremacyUI.capturePoint_UI_Colour_Update(mod.GetCapturePoint(253));
     }
 
     public static team2FinalSectorLevel2(enable: boolean): void {
@@ -86,6 +114,11 @@ export class BFSupremacyFinalSector {
         mod.EnableHQ(mod.GetHQ(303), enable);
         mod.EnableHQ(mod.GetHQ(403), enable);
     }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Ongoing final sector
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static ongoingFinalAssault(): void {
         if (!GameConfig.gameConfig.roundOngoing) return;
@@ -112,28 +145,45 @@ export class BFSupremacyFinalSector {
         }
 
         if (GameConfig.gameConfig.remainingTime <= 0) {
-            BFSupremacyFinalSector.returnToConquest();
+            BFSupremacyFinalAssault.returnToConquest();
         }
     }
 
     public static returnToConquest(): void {
         GameConfig.gameConfig.roundOngoing = false;
+        BFSupremacyFinalAssault.manageFinalSector(false);
 
-        BFSupremacyCore.changeStage()
+        mod.UndeployAllPlayers();
+        BFSupremacyCore.changeStage();
     }
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Move to final sector level 2
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static moveToFinalSectorLevel2(): void {
         GameConfig.gameConfig.roundOngoing = false;
         mod.EnableGameModeObjective(mod.GetCapturePoint(GameConfig.gameConfig.flagStart), false);
         mod.EnableGameModeObjective(mod.GetCapturePoint(GameConfig.gameConfig.flagEnd), false);
-        BFSupremacyFinalSector.manageFinalSector(false);
+        BFSupremacyFinalAssault.manageFinalSector(false);
         if (mod.Equals(GameConfig.gameConfig.attacker, mod.GetTeam(1))) {
             TeamVariables.getTeamData(GameConfig.gameConfig.attacker).finalSectorBreached += 1;
         } else {
             TeamVariables.getTeamData(GameConfig.gameConfig.attacker).finalSectorBreached += 1;
         }
-        BFSupremacyFinalSector.manageFinalSector(true);
+        BFSupremacyFinalAssault.manageFinalSector(true);
+        GameConfig.gameConfig.roundOngoing = true;
     }
+
+
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // MCOM destroyed
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static MCOMDestroyed(): void {
         if (mod.Equals(GameConfig.gameConfig.attacker, mod.GetTeam(1))) {
@@ -149,9 +199,15 @@ export class BFSupremacyFinalSector {
         }
     }
 
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // End game
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     public static endGame(winningTeam: mod.Team, camera: number): void {
         GameConfig.gameConfig.roundOngoing = false;
-        mod.SetCameraTypeForAll(mod.Cameras.Fixed, camera);
+        //mod.SetCameraTypeForAll(mod.Cameras.Fixed, camera);
         mod.EndGameMode(winningTeam);
     }
 
