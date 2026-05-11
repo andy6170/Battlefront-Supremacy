@@ -4,6 +4,7 @@ import { UIconfig } from "./BFSVariables.ts";
 
 
 export class BFSupremacyUI {
+    private static flashId = 0;
     public static UI_Setup() {
         mod.AddUIContainer("MainUI", mod.CreateVector(0, 0, 0), mod.CreateVector(10000, 10000, 0), mod.UIAnchor.TopCenter);
         mod.SetUIWidgetBgFill(mod.FindUIWidgetWithName("MainUI"), mod.UIBgFill.None);
@@ -258,6 +259,35 @@ export class BFSupremacyUI {
         let tenseconds = Math.floor((totalSeconds % 60) / 10);
         let minutes = Math.floor(totalSeconds / 60);
         mod.SetUITextLabel(mod.FindUIWidgetWithName("bonustime_regroup_Text"), mod.Message(mod.stringkeys.supremacy.regroup.bonustime, minutes, tenseconds, seconds));
+    }
+
+    public static async regroup_UI_Text_Flash() {
+        this.flashId++;
+        const currentId = this.flashId;
+        const textWidget = mod.FindUIWidgetWithName("bonustime_regroup_Text");
+        const white = UIconfig.uiConfig.whiteColour;
+        const black = mod.CreateVector(0, 0, 0);
+        const steps = 10;
+        const waitTime = 0.033;
+
+        for (let i = 0; i < 2; i++) {
+            // Fade to black
+            for (let s = 1; s <= steps; s++) {
+                if (this.flashId !== currentId) return;
+                let t = s / steps;
+                let color = mod.Add(white, mod.Multiply(mod.Subtract(black, white), t));
+                mod.SetUITextColor(textWidget, color);
+                await mod.Wait(waitTime);
+            }
+            // Fade to white
+            for (let s = 1; s <= steps; s++) {
+                if (this.flashId !== currentId) return;
+                let t = s / steps;
+                let color = mod.Add(black, mod.Multiply(mod.Subtract(white, black), t));
+                mod.SetUITextColor(textWidget, color);
+                await mod.Wait(waitTime);
+            }
+        }
     }
 
     public static regroup_UI_Progress_Update() {

@@ -186,7 +186,6 @@ export class PlayerVariables {
 
 export interface TeamData {
     score: number;
-    hqHealth: number;
     mcomCount: number;
     finalSectorBreached: number;
 }
@@ -199,8 +198,7 @@ export class TeamVariables {
         if (!TeamVariables.teamData.has(teamId)) {
             TeamVariables.teamData.set(teamId, {
                 score: 0,
-                hqHealth: 100000,
-                mcomCount: 2,
+                mcomCount: 3,
                 finalSectorBreached: 1
             });
         }

@@ -81,11 +81,13 @@ export class BFSupremacyFinalAssault {
     public static team1FinalSectorLevel2(enable: boolean): void {
         mod.EnableGameModeObjective(mod.GetMCOM(260), enable);
         mod.EnableGameModeObjective(mod.GetMCOM(261), enable);
+        mod.EnableGameModeObjective(mod.GetMCOM(262), enable);
         mod.EnableGameModeObjective(mod.GetSector(101), enable);
         GameConfig.gameConfig.flagStart = 0;
         GameConfig.gameConfig.flagEnd = 0;
         mod.SetMCOMOwner(mod.GetMCOM(260), mod.GetTeam(2));
         mod.SetMCOMOwner(mod.GetMCOM(261), mod.GetTeam(2));
+        mod.SetMCOMOwner(mod.GetMCOM(262), mod.GetTeam(2));
         mod.EnableHQ(mod.GetHQ(301), enable);
         mod.EnableHQ(mod.GetHQ(401), enable);
     }
@@ -104,13 +106,15 @@ export class BFSupremacyFinalAssault {
     }
 
     public static team2FinalSectorLevel2(enable: boolean): void {
-        mod.EnableGameModeObjective(mod.GetMCOM(262), enable);
         mod.EnableGameModeObjective(mod.GetMCOM(263), enable);
+        mod.EnableGameModeObjective(mod.GetMCOM(264), enable);
+        mod.EnableGameModeObjective(mod.GetMCOM(265), enable);
         mod.EnableGameModeObjective(mod.GetSector(103), enable);
         GameConfig.gameConfig.flagStart = 0;
         GameConfig.gameConfig.flagEnd = 0;
-        mod.SetMCOMOwner(mod.GetMCOM(262), mod.GetTeam(1));
         mod.SetMCOMOwner(mod.GetMCOM(263), mod.GetTeam(1));
+        mod.SetMCOMOwner(mod.GetMCOM(264), mod.GetTeam(1));
+        mod.SetMCOMOwner(mod.GetMCOM(265), mod.GetTeam(1));
         mod.EnableHQ(mod.GetHQ(303), enable);
         mod.EnableHQ(mod.GetHQ(403), enable);
     }

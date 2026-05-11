@@ -71,7 +71,7 @@ export class BFSupremacyRegroup {
 
             const direction = mod.DirectionTowards(currentPos, hoverPos);
             mod.Teleport(heli, mod.Add(currentPos, mod.Multiply(direction, 0.99)), 0);
-            await mod.Wait(0.066);
+            await mod.Wait(0.033);
         }
 
         // Stage 2: Landing (Vertical drop)
@@ -85,7 +85,7 @@ export class BFSupremacyRegroup {
 
             const direction = mod.DirectionTowards(currentPos, targetPos);
             mod.Teleport(heli, mod.Add(currentPos, mod.Multiply(direction, 0.33)), 0); // Slower descent
-            await mod.Wait(0.066);
+            await mod.Wait(0.033);
         }
         if (!mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition)) return;
         GameConfig.gameConfig.roundOngoing = true;
@@ -139,7 +139,7 @@ export class BFSupremacyRegroup {
         await mod.Wait(1);
 
         const liftPos = mod.Add(startPos, mod.CreateVector(0, 40, 0));
-        const time1 = (40 / 0.5) * 0.066;
+        const time1 = (40 / 0.5) * 0.033;
         const liftRot = this.getLookAtRotation(cameraPos, liftPos);
         mod.SetObjectTransformOverTime(cameraObject, mod.CreateTransform(cameraPos, liftRot), time1, false, false);
 
@@ -150,11 +150,11 @@ export class BFSupremacyRegroup {
             const nextPos = mod.Add(currentPos, mod.CreateVector(0, 0.5, 0));
             mod.Teleport(heli, nextPos, 0);
 
-            await mod.Wait(0.066);
+            await mod.Wait(0.033);
         }
 
         // Stage 2: Fly to Target
-        const time2 = (mod.DistanceBetween(liftPos, departurePos) / 1.2) * 0.066;
+        const time2 = (mod.DistanceBetween(liftPos, departurePos) / 1.2) * 0.033;
         const finalRot = this.getLookAtRotation(cameraPos, departurePos);
         mod.SetObjectTransformOverTime(cameraObject, mod.CreateTransform(cameraPos, finalRot), time2, false, false);
 
@@ -168,7 +168,7 @@ export class BFSupremacyRegroup {
             const movePos = mod.Add(currentPos, mod.Multiply(direction, 1.2));
             mod.Teleport(heli, movePos, 0);
 
-            await mod.Wait(0.066);
+            await mod.Wait(0.033);
         }
         mod.SetCameraTypeForAll(mod.Cameras.FirstPerson, 0);
 
@@ -201,6 +201,7 @@ export class BFSupremacyRegroup {
     public static playerBoarding(player: mod.Player, vehicle: mod.Vehicle): void {
         GameConfig.gameConfig.bonusTime += GameConfig.gameConfig.bonusTimeAddition;
         BFSupremacyUI.regroup_UI_Text_Update();
+        BFSupremacyUI.regroup_UI_Text_Flash();
         mod.ForcePlayerExitVehicle(player, vehicle);
         BFSupremacyCore.waitingArea(player);
         mod.EnableAllInputRestrictions(player, true);

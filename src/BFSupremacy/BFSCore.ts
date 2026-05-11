@@ -66,6 +66,8 @@ export class BFSupremacyCore {
         let data = ObjectiveVariables.getObjectiveVariables(eventCapturePoint);
         let previousProgress = data.progress;
         let owner = mod.GetCurrentOwnerTeam(eventCapturePoint);
+        let t1 = data.team1Players;
+        let t2 = data.team2Players;
 
         let colour1 = data.uiTextColour1;
         let colour2 = data.uiTextColour2;
@@ -91,28 +93,15 @@ export class BFSupremacyCore {
         }
 
         if (mod.LessThan(progress, 1)) {
-            if (mod.Equals(mod.GetOwnerProgressTeam(eventCapturePoint), mod.GetTeam(1))) {
-                if (mod.GreaterThan(progress, previousProgress)) {
-                    message1 = mod.stringkeys.captureProgress.capturing;
-                    message2 = mod.stringkeys.captureProgress.losing;
-                } else if (mod.LessThan(progress, previousProgress)) {
-                    message1 = mod.stringkeys.captureProgress.losing;
-                    message2 = mod.stringkeys.captureProgress.capturing;
-                } else {
-                    message1 = mod.stringkeys.captureProgress.contested;
-                    message2 = mod.stringkeys.captureProgress.contested;
-                }
+            if (t1 > t2) {
+                message1 = mod.stringkeys.captureProgress.capturing;
+                message2 = mod.stringkeys.captureProgress.losing;
+            } else if (t2 > t1) {
+                message1 = mod.stringkeys.captureProgress.losing;
+                message2 = mod.stringkeys.captureProgress.capturing;
             } else {
-                if (mod.GreaterThan(progress, previousProgress)) {
-                    message1 = mod.stringkeys.captureProgress.losing;
-                    message2 = mod.stringkeys.captureProgress.capturing;
-                } else if (mod.LessThan(progress, previousProgress)) {
-                    message1 = mod.stringkeys.captureProgress.capturing;
-                    message2 = mod.stringkeys.captureProgress.losing;
-                } else {
-                    message1 = mod.stringkeys.captureProgress.contested;
-                    message2 = mod.stringkeys.captureProgress.contested;
-                }
+                message1 = mod.stringkeys.captureProgress.contested;
+                message2 = mod.stringkeys.captureProgress.contested;
             }
         } else {
             if (mod.Equals(owner, mod.GetTeam(1))) {
