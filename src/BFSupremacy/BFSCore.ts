@@ -117,9 +117,9 @@ export class BFSupremacyCore {
         } else {
             if (mod.Equals(owner, mod.GetTeam(1))) {
                 message1 = mod.stringkeys.captureProgress.secured;
-                message2 = mod.stringkeys.captureProgress.losing;
+                message2 = mod.stringkeys.captureProgress.contested;
             } else {
-                message1 = mod.stringkeys.captureProgress.losing;
+                message1 = mod.stringkeys.captureProgress.contested;
                 message2 = mod.stringkeys.captureProgress.secured;
             }
         }
