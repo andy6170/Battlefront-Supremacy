@@ -38,12 +38,17 @@ export interface GameConfig {
     extractReady: boolean;
     heliTakeOff: boolean;
     extractionIcon: mod.VFX;
+    nightMap: boolean;
+    nightFinalArea: boolean;
+    overtime: number;
+    snow: boolean;
+    cutscene: boolean;
 }
 
 export class GameConfig {
     public static gameConfig: GameConfig = {
         gameStarted: false,
-        debug: false,
+        debug: true,
         capturePointNeutralizationTime: 15,
         capturePointCapturingTime: 15,
         capturePointMultiplier: 2,
@@ -80,7 +85,12 @@ export class GameConfig {
         regroupVehicleSelected: false,
         extractReady: false,
         heliTakeOff: false,
-        extractionIcon: mod.GetVFX(0)
+        extractionIcon: mod.GetVFX(0),
+        nightMap: false,
+        nightFinalArea: false,
+        overtime: 0,
+        snow: false,
+        cutscene: false
     };
 }
 
@@ -99,6 +109,7 @@ export interface UIconfig {
     finalAssaultUI: mod.UIWidget;
     capturePointUI: mod.UIWidget;
     capturepointUIFinalAssault: mod.UIWidget;
+    changingSectorUI: mod.UIWidget;
     mcomUI: mod.UIWidget;
     uiAlpha: number;
     uiAlphaUp: boolean;
@@ -124,6 +135,7 @@ export class UIconfig {
         finalAssaultUI: mod.GetUIRoot(),
         capturePointUI: mod.GetUIRoot(),
         capturepointUIFinalAssault: mod.GetUIRoot(),
+        changingSectorUI: mod.GetUIRoot(),
         mcomUI: mod.GetUIRoot(),
         uiAlpha: 1,
         uiAlphaUp: false,
@@ -155,6 +167,8 @@ export interface SupremacyPlayerData {
     firstDeploy: boolean;
     currentObjective: mod.CapturePoint;
     spawned: boolean;
+    firstPerson: boolean;
+    thirdPerson: boolean;
 }
 
 export class PlayerVariables {
@@ -172,7 +186,9 @@ export class PlayerVariables {
                 containerWidget: mod.GetUIRoot(),
                 firstDeploy: true,
                 currentObjective: mod.GetCapturePoint(0),
-                spawned: false
+                spawned: false,
+                firstPerson: false,
+                thirdPerson: false,
             });
         }
         return PlayerVariables.playerData.get(playerId)!;

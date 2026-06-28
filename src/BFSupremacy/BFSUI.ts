@@ -336,6 +336,11 @@ export class BFSupremacyUI {
     }
 
     public static finalAssault_UI_Update() {
+        if (GameConfig.gameConfig.overtime > 0 && GameConfig.gameConfig.remainingTime == 0) {
+            mod.SetUITextLabel(mod.FindUIWidgetWithName("timer_text1"), mod.Message(mod.stringkeys.supremacy.finalassault.overtime));
+            mod.SetUITextLabel(mod.FindUIWidgetWithName("timer_text2"), mod.Message(mod.stringkeys.supremacy.finalassault.overtime));
+            return;
+        }
         let totalSeconds = GameConfig.gameConfig.remainingTime;
         let seconds = totalSeconds % 10;
         let tenseconds = Math.floor((totalSeconds % 60) / 10);
@@ -360,5 +365,161 @@ export class BFSupremacyUI {
 
     public static finalAssault_UI_Change(enable: boolean) {
         mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("finalAssault_container"), enable);
+    }
+
+
+    //-------------------------------------------------------------------------
+    //Changing Sector UI
+    //-------------------------------------------------------------------------
+    public static changingSector_UI_Setup() {
+        mod.AddUIContainer("changingSector_container", mod.CreateVector(0, 0, 0), mod.CreateVector(10000, 10000, 0), mod.UIAnchor.Center, mod.FindUIWidgetWithName("MainUI"), false, 0, mod.CreateVector(0.5, 0.5, 0.5), 0.5, mod.UIBgFill.None, mod.UIDepth.AboveGameUI);
+        UIconfig.uiConfig.changingSectorUI = mod.FindUIWidgetWithName("changingSector_container");
+        mod.AddUIText("changingSector_header1", mod.CreateVector(0, 0, 0), mod.CreateVector(180, 40, 0), mod.UIAnchor.Center, UIconfig.uiConfig.changingSectorUI, true, 0, UIconfig.uiConfig.friendlyColour, 1, mod.UIBgFill.Solid, mod.Message(mod.stringkeys.supremacy.regroup.bonustime, 0, 0, 0), 36, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(1));
+        mod.AddUIText("changingSector_header2", mod.CreateVector(0, 0, 0), mod.CreateVector(180, 40, 0), mod.UIAnchor.Center, UIconfig.uiConfig.changingSectorUI, true, 0, UIconfig.uiConfig.enemyColour, 1, mod.UIBgFill.Solid, mod.Message(mod.stringkeys.supremacy.regroup.bonustime, 0, 0, 0), 36, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(2));
+        mod.AddUIText("changingSector_counter1", mod.CreateVector(0, 0, 0), mod.CreateVector(250, 30, 0), mod.UIAnchor.Center, UIconfig.uiConfig.changingSectorUI, true, 0, mod.CreateVector(1, 1, 1), 1, mod.UIBgFill.None, mod.Message(mod.stringkeys.supremacy.finalassault.attackerMessage), 18, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(1));
+        mod.AddUIText("changingSector_counter2", mod.CreateVector(0, 0, 0), mod.CreateVector(250, 30, 0), mod.UIAnchor.Center, UIconfig.uiConfig.changingSectorUI, true, 0, mod.CreateVector(1, 1, 1), 1, mod.UIBgFill.None, mod.Message(mod.stringkeys.supremacy.finalassault.attackerMessage), 18, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(2));
+    }
+
+    public static changingSector_UI_Update(seconds: number) {
+        mod.SetUITextLabel(mod.FindUIWidgetWithName("changingSector_counter1"), mod.Message(mod.stringkeys.value, seconds));
+        mod.SetUITextLabel(mod.FindUIWidgetWithName("changingSector_counter2"), mod.Message(mod.stringkeys.value, seconds));
+    }
+
+    public static changingSector_UI_Team_Update() {
+        let attackermessage: mod.Message;
+        let defendermessage: mod.Message;
+
+        if (GameConfig.gameConfig.stage == 0) {
+            attackermessage = mod.Message(mod.stringkeys.supremacy.conquest.name);
+            defendermessage = mod.Message(mod.stringkeys.supremacy.conquest.name);
+        } else {
+            attackermessage = mod.Message(mod.stringkeys.supremacy.finalassault.attacker);
+            defendermessage = mod.Message(mod.stringkeys.supremacy.finalassault.defender);
+        }
+
+
+        if (mod.Equals(GameConfig.gameConfig.attacker, mod.GetTeam(1))) {
+            mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName("changingSector_header1"), UIconfig.uiConfig.enemyColour);
+            mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName("changingSector_header2"), UIconfig.uiConfig.friendlyColour);
+            mod.SetUITextLabel(mod.FindUIWidgetWithName("changingSector_counter1"), attackermessage);
+            mod.SetUITextLabel(mod.FindUIWidgetWithName("changingSector_counter2"), defendermessage);
+        } else {
+            mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName("changingSector_header1"), UIconfig.uiConfig.friendlyColour);
+            mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName("changingSector_header2"), UIconfig.uiConfig.enemyColour);
+            mod.SetUITextLabel(mod.FindUIWidgetWithName("changingSector_counter1"), defendermessage);
+            mod.SetUITextLabel(mod.FindUIWidgetWithName("changingSector_counter2"), attackermessage);
+        }
+    }
+
+    public static changingSector_UI_Change(enable: boolean) {
+        mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("changingSector_container"), enable);
+    }
+
+    public static async changingLocation(): Promise<void> {
+        mod.UndeployAllPlayers();
+        mod.EnableAllPlayerDeploy(false);
+        mod.PauseGameModeTime(true);
+
+        // 2. Spawn global countdown widget
+        const countdownName = "countdown";
+        const titleName = "countdown_title";
+        // Clean up any old widgets just in case
+        const oldWidget = mod.FindUIWidgetWithName(countdownName);
+        if (oldWidget) {
+            mod.DeleteUIWidget(oldWidget);
+        }
+        const oldTitle = mod.FindUIWidgetWithName(titleName);
+        if (oldTitle) {
+            mod.DeleteUIWidget(oldTitle);
+        }
+
+        mod.AddUIText(
+            countdownName, mod.CreateVector(0, 150, 0), mod.CreateVector(10000, 10000, 0), mod.UIAnchor.Center,
+            mod.Message(mod.stringkeys.value, 10)
+        );
+        const widget = mod.FindUIWidgetWithName(countdownName)!;
+        mod.SetUIWidgetBgFill(widget, mod.UIBgFill.Solid);
+        mod.SetUIWidgetBgAlpha(widget, 1);
+        mod.SetUIWidgetBgColor(widget, mod.CreateVector(0, 0, 0));
+        mod.SetUITextSize(widget, 256);
+        mod.SetUITextColor(widget, UIconfig.uiConfig.goldColour);
+        mod.SetUIWidgetDepth(widget, mod.UIDepth.AboveGameUI);
+        mod.SetUITextAnchor(widget, mod.UIAnchor.Center);
+
+        mod.AddUIText(
+            titleName, mod.CreateVector(0, -150, 0), mod.CreateVector(10000, 150, 0), mod.UIAnchor.Center,
+            mod.Message(mod.stringkeys.supremacy.finalassault.name)
+        );
+        const titleWidget = mod.FindUIWidgetWithName(titleName)!;
+        mod.SetUIWidgetBgFill(titleWidget, mod.UIBgFill.Solid);
+        mod.SetUIWidgetBgAlpha(titleWidget, 0.1);
+        mod.SetUIWidgetBgColor(titleWidget, UIconfig.uiConfig.goldBGColour);
+        mod.SetUITextSize(titleWidget, 156);
+        mod.SetUITextColor(titleWidget, UIconfig.uiConfig.goldColour);
+        mod.SetUIWidgetDepth(titleWidget, mod.UIDepth.AboveGameUI);
+        mod.SetUITextAnchor(titleWidget, mod.UIAnchor.Center);
+
+        // 3. 10-second countdown loop
+        for (let secondsLeft = 10; secondsLeft >= 1; secondsLeft--) {
+            mod.SetUITextLabel(widget, mod.Message(mod.stringkeys.value, secondsLeft));
+            if (secondsLeft <= 5) {
+                // TODO: Play sound placeholder
+            }
+
+            // Wait 1 second
+            await mod.Wait(1);
+        }
+
+        // --- SWIPE TRANSITION ---
+        const swipeOverlayName = "swipe_overlay";
+        const oldSwipe = mod.FindUIWidgetWithName(swipeOverlayName);
+        if (oldSwipe) {
+            mod.DeleteUIWidget(oldSwipe);
+        }
+
+        // Spawn swipe overlay container at the top (fully off-screen)
+        mod.AddUIContainer(
+            swipeOverlayName,
+            mod.CreateVector(0, -1200, 0),
+            mod.CreateVector(10000, 1200, 0),
+            mod.UIAnchor.TopCenter
+        );
+        const swipeWidget = mod.FindUIWidgetWithName(swipeOverlayName)!;
+        mod.SetUIWidgetBgFill(swipeWidget, mod.UIBgFill.Solid);
+        mod.SetUIWidgetBgColor(swipeWidget, UIconfig.uiConfig.goldColour);
+        mod.SetUIWidgetBgAlpha(swipeWidget, 1.0);
+        mod.SetUIWidgetDepth(swipeWidget, mod.UIDepth.AboveGameUI);
+
+        // Animate Swipe-in (fill from top)
+        const swipeSteps = 15;
+        const swipeStepDuration = 0.03; // 30ms per step = 600ms total swipe
+        for (let i = 1; i <= swipeSteps; i++) {
+            const progress = i / swipeSteps;
+            const easedProgress = progress * (2 - progress); // Ease-out quad
+            const yPos = -1200 + (1200 * easedProgress);
+            mod.SetUIWidgetPosition(swipeWidget, mod.CreateVector(0, yPos, 0));
+            await mod.Wait(swipeStepDuration);
+        }
+
+        // TODO: Play sound placeholder
+
+        // Clean up countdown UI while screen is covered
+        mod.DeleteUIWidget(widget);
+        mod.DeleteUIWidget(titleWidget);
+
+        mod.PauseGameModeTime(false);
+        mod.EnableAllPlayerDeploy(true);
+
+        // Animate Swipe-out (exit down)
+        for (let i = 1; i <= swipeSteps; i++) {
+            const progress = i / swipeSteps;
+            const easedProgress = progress * progress; // Ease-in quad
+            const yPos = 1200 * easedProgress;
+            mod.SetUIWidgetPosition(swipeWidget, mod.CreateVector(0, yPos, 0));
+            await mod.Wait(swipeStepDuration);
+        }
+
+        // Clean up swipe container
+        mod.DeleteUIWidget(swipeWidget);
     }
 }

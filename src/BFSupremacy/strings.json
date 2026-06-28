@@ -14,9 +14,12 @@
             "undeploy": "CANNOT SPAWN ON OBJECTIVE"
         },
         "finalassault": {
-            "name": "Final Assault",
+            "name": "FINAL ASSAULT",
             "attackerMessage": "ASSAULT THE OBJECTIVE",
-            "defenderMessage": "DEFEND THE OBJECTIVE"
+            "defenderMessage": "DEFEND THE OBJECTIVE",
+            "attacker": "PREPARE TO ASSAULT",
+            "defender": "PREPARE TO DEFEND",
+            "overtime": "OVERTIME"
         },
         "debug": {
             "name": "Debug"
@@ -54,5 +57,7 @@
     "vehicle_else": "Different Vehicle",
     "vehicleCheck": "Starting Check...",
     "ongoingrunning": "Ongoing Running",
-    "error_generic": "No Team Detected"
+    "error_generic": "No Team Detected",
+    "playercount": "Player Count: {}",
+    "selectedPlayer": "Selected Player: {}"
 }

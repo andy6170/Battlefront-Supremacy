@@ -27,6 +27,7 @@ export class BFSupremacyConquest {
         }
         for (let i = 260; i < 270; i++) {
             mod.EnableGameModeObjective(mod.GetMCOM(i), false);
+            mod.SetMCOMFuseTime(mod.GetMCOM(i), 30);
         }
 
         for (let i = 1; i < 10; i++) {
@@ -37,6 +38,14 @@ export class BFSupremacyConquest {
         }
         for (let i = 400; i < 410; i++) {
             mod.EnableHQ(mod.GetHQ(i), false);
+        }
+
+        for (let i = 2000; i < 2500; i++) {
+            mod.EnableVFX(mod.GetVFX(i), true);
+        }
+
+        for (let i = 3000; i < 3100; i++) {
+            mod.PlaySound(mod.GetSFX(i), 1, mod.GetObjectPosition(mod.GetSFX(i)), 100);
         }
 
         mod.EnableGameModeObjective(mod.GetSector(150), true);
@@ -130,6 +139,8 @@ export class BFSupremacyConquest {
             let capturePoint = mod.GetCapturePoint(i);
             mod.EnableGameModeObjective(capturePoint, true);
             mod.SetCapturePointOwner(capturePoint, mod.GetTeam(3));
+            mod.SetCapturePointNeutralizationTime(capturePoint, GameConfig.gameConfig.capturePointNeutralizationTime);
+            mod.SetCapturePointCapturingTime(capturePoint, GameConfig.gameConfig.capturePointCapturingTime);
         }
         TeamVariables.getTeamData(1).score = 0;
         TeamVariables.getTeamData(2).score = 0;

@@ -7,6 +7,9 @@ export class BFSupremacyFinalAssault {
     public static async init(): Promise<void> {
         mod.EnableGameModeObjective(mod.GetSector(150), false);
         GameConfig.gameConfig.remainingTime = GameConfig.gameConfig.baseAttackTime + GameConfig.gameConfig.bonusTime;
+        if (GameConfig.gameConfig.debug) {
+            GameConfig.gameConfig.remainingTime = 60;
+        }
         for (let i = 1; i < 10; i++) {
             mod.EnableHQ(mod.GetHQ(i), false);
         }
@@ -27,7 +30,8 @@ export class BFSupremacyFinalAssault {
             mod.Kill(mod.ValueInArray(vehicles, i));
         }
 
-        await mod.Wait(5);
+        await BFSupremacyUI.changingLocation();
+
 
         GameConfig.gameConfig.roundOngoing = true;
 
@@ -90,6 +94,8 @@ export class BFSupremacyFinalAssault {
         mod.SetMCOMOwner(mod.GetMCOM(262), mod.GetTeam(2));
         mod.EnableHQ(mod.GetHQ(301), enable);
         mod.EnableHQ(mod.GetHQ(401), enable);
+        BFSupremacyUI.capturePoint_UI_Colour_Update(mod.GetCapturePoint(0));
+        BFSupremacyUI.capturePoint_UI_Colour_Update(mod.GetCapturePoint(1));
     }
 
     public static team2FinalSectorLevel1(enable: boolean): void {
@@ -117,6 +123,8 @@ export class BFSupremacyFinalAssault {
         mod.SetMCOMOwner(mod.GetMCOM(265), mod.GetTeam(1));
         mod.EnableHQ(mod.GetHQ(303), enable);
         mod.EnableHQ(mod.GetHQ(403), enable);
+        BFSupremacyUI.capturePoint_UI_Colour_Update(mod.GetCapturePoint(0));
+        BFSupremacyUI.capturePoint_UI_Colour_Update(mod.GetCapturePoint(1));
     }
 
 
@@ -134,7 +142,7 @@ export class BFSupremacyFinalAssault {
             GameConfig.gameConfig.timeEven = true;
             GameConfig.gameConfig.timeOdd = false;
             UIconfig.uiConfig.flashStart = true;
-            GameConfig.gameConfig.remainingTime -= 1;
+            BFSupremacyFinalAssault.updateRemainingTime();
             BFSupremacyUI.finalAssault_UI_Update();
 
         } else if (mod.RoundToInteger(mod.GetMatchTimeElapsed()) % 2 != 0) {
@@ -144,12 +152,19 @@ export class BFSupremacyFinalAssault {
             GameConfig.gameConfig.timeEven = false;
             GameConfig.gameConfig.timeOdd = true;
             UIconfig.uiConfig.flashStart = true;
-            GameConfig.gameConfig.remainingTime -= 1;
+            BFSupremacyFinalAssault.updateRemainingTime();
             BFSupremacyUI.finalAssault_UI_Update();
         }
 
-        if (GameConfig.gameConfig.remainingTime <= 0) {
+        if (GameConfig.gameConfig.remainingTime <= 0 && GameConfig.gameConfig.overtime == 0) {
             BFSupremacyFinalAssault.returnToConquest();
+        }
+    }
+
+    public static updateRemainingTime(): void {
+        GameConfig.gameConfig.remainingTime -= 1;
+        if (GameConfig.gameConfig.remainingTime < 0) {
+            GameConfig.gameConfig.remainingTime = 0;
         }
     }
 

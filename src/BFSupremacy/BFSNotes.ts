@@ -1,6 +1,9 @@
 /*
 This is a list of all the ObjIDs being used:
 
+Weather Control:
+Night - 990
+
 Capture Points:
 Conquest - 200-219
 Final Sector (L1) - 250-253

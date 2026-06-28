@@ -6,6 +6,8 @@ import { BFSupremacyCore } from './BFSCore';
 import { BFSupremacyPlayer } from './BFSPlayer';
 import { BFSupremacyRegroup } from './BFSRegroup';
 import { BFSupremacyFinalAssault } from './BFSFinalAssault';
+import { BFSMusic } from './MFSMusic';
+import { BFSWeather } from './BFSWeather';
 
 
 
@@ -31,11 +33,28 @@ export class BFSupremacy {
             }
         });
 
+        Events.OngoingPlayer.subscribe((eventPlayer: mod.Player) => {
+            if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsAlive) && !GameConfig.gameConfig.cutscene) {
+                if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsZooming) && !PlayerVariables.getPlayerData(eventPlayer).firstPerson) {
+                    PlayerVariables.getPlayerData(eventPlayer).firstPerson = true;
+                    PlayerVariables.getPlayerData(eventPlayer).thirdPerson = false;
+                    mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.FirstPerson);
+                } else if (!mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsZooming) && !PlayerVariables.getPlayerData(eventPlayer).thirdPerson) {
+                    PlayerVariables.getPlayerData(eventPlayer).firstPerson = false;
+                    PlayerVariables.getPlayerData(eventPlayer).thirdPerson = true;
+                    mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson);
+                }
+            }
+        });
+
         Events.OnGameModeStarted.subscribe(() => {
             mod.SetGameModeTimeLimit(99999);
             BFSupremacyConquest.init();
+            BFSWeather.initWeather();
             BFSupremacyUI.UI_Setup();
-            //mod.SetCameraTypeForAll(mod.Cameras.ThirdPerson);
+            BFSMusic.init();
+            BFSMusic.testMusic();
+            mod.SetCameraTypeForAll(mod.Cameras.ThirdPerson);
             GameConfig.gameConfig.extractionIcon = mod.SpawnObject(mod.RuntimeSpawn_Common.FX_Gadget_DeployableMortar_Target_Area, mod.Subtract(mod.GetObjectPosition(mod.GetSpatialObject(902)), mod.CreateVector(0, 20, 0)), mod.CreateVector(0, 0, 0))
             if (GameConfig.gameConfig.debug) {
                 GameConfig.gameConfig.ticketSpeed = 2;
@@ -112,31 +131,54 @@ export class BFSupremacy {
         });
 
         Events.OnCapturePointLost.subscribe(async (eventCapturePoint: mod.CapturePoint) => {
+            if (mod.Equals(GameConfig.gameConfig.stage, 0)) {
+                mod.SetCapturePointCapturingTime(eventCapturePoint, 0);
+            }
             await mod.Wait(0.1)
             BFSupremacyUI.capturePoint_UI_Colour_Update(eventCapturePoint);
             BFSupremacyCore.updateFlagData(eventCapturePoint);
+        });
+
+        Events.OnCapturePointCaptured.subscribe(async (eventCapturePoint: mod.CapturePoint) => {
+            await mod.Wait(0.1)
+            mod.SetMaxCaptureMultiplier(eventCapturePoint, 0);
+            if (mod.Equals(GameConfig.gameConfig.stage, 0)) {
+                mod.SetCapturePointCapturingTime(eventCapturePoint, GameConfig.gameConfig.capturePointCapturingTime);
+            }
         });
 
         Events.OngoingCapturePoint.subscribe((eventCapturePoint: mod.CapturePoint) => {
             if (!GameConfig.gameConfig.gameStarted) {
                 return;
             }
-            BFSupremacyCore.ongoingFlagData(eventCapturePoint);
-            BFSupremacyUI.capturePoint_UI_Alpha_Update(eventCapturePoint);
+            if (mod.GetObjId(eventCapturePoint) >= GameConfig.gameConfig.flagStart && mod.GetObjId(eventCapturePoint) <= GameConfig.gameConfig.flagEnd) {
+                BFSupremacyCore.ongoingFlagData(eventCapturePoint);
+                BFSupremacyUI.capturePoint_UI_Alpha_Update(eventCapturePoint);
+            }
         });
 
         Events.OnPlayerJoinGame.subscribe((eventPlayer: mod.Player) => {
+            BFSWeather.checkNight(eventPlayer);
         });
 
         Events.OnPlayerDeployed.subscribe(async (eventPlayer: mod.Player) => {
+            PlayerVariables.getPlayerData(eventPlayer).spawned = true;
+            if (!GameConfig.gameConfig.cutscene) {
+                //Force Reset the Camera as height can bug out
+                mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.FirstPerson)
+                await mod.Wait(0.6);
+                mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson)
+            }
+            BFSWeather.checkNight(eventPlayer);
+
             if (PlayerVariables.getPlayerData(eventPlayer).firstDeploy) {
                 BFSupremacyPlayer.createPlayerUI(eventPlayer);
                 PlayerVariables.getPlayerData(eventPlayer).firstDeploy = false;
             }
             if (GameConfig.gameConfig.roundOngoing) {
                 mod.EnableAllInputRestrictions(eventPlayer, false);
+                //mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson, mod.RandomReal(0, 1000));
             }
-            PlayerVariables.getPlayerData(eventPlayer).spawned = true;
             await mod.Wait(1);
             if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsInVehicle)) {
                 if (mod.Equals(mod.GetVehicleFromPlayer(eventPlayer), GameConfig.gameConfig.regroupVehicle)) {
@@ -162,6 +204,10 @@ export class BFSupremacy {
         });
 
         Events.OnPlayerUndeploy.subscribe((eventPlayer: mod.Player) => {
+            if (PlayerVariables.getPlayerData(eventPlayer).onPoint) {
+                BFSupremacyCore.capturePointPlayers(PlayerVariables.getPlayerData(eventPlayer).currentObjective);
+                PlayerVariables.getPlayerData(eventPlayer).onPoint = false;
+            }
         });
 
         Events.OnPlayerDied.subscribe((eventPlayer: mod.Player, eventOtherPlayer: mod.Player) => {
@@ -180,6 +226,7 @@ export class BFSupremacy {
         });
 
         Events.OnSpawnerSpawned.subscribe((eventPlayer: mod.Player, eventSpawner: mod.Spawner) => {
+            mod.EnableAllInputRestrictions(eventPlayer, true);
             BFSupremacyRegroup.onBotSpawned(eventPlayer, eventSpawner);
         });
 
@@ -203,8 +250,17 @@ export class BFSupremacy {
             }
         });
 
+        Events.OnMCOMArmed.subscribe((eventMCOM: mod.MCOM) => {
+            GameConfig.gameConfig.overtime += 1;
+        });
+
         Events.OnMCOMDestroyed.subscribe((eventMCOM: mod.MCOM) => {
             BFSupremacyFinalAssault.MCOMDestroyed();
+            GameConfig.gameConfig.overtime -= 1;
+        });
+
+        Events.OnMCOMDefused.subscribe((eventMCOM: mod.MCOM) => {
+            GameConfig.gameConfig.overtime -= 1;
         });
 
         BFSupremacy.subscribed = true;

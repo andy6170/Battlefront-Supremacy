@@ -3,6 +3,8 @@ import { BFSupremacyUI } from "./BFSUI.ts";
 import { BFSupremacyConquest } from "./BFSConquest.ts";
 import { BFSupremacyRegroup } from "./BFSRegroup.ts";
 import { BFSupremacyFinalAssault } from "./BFSFinalAssault.ts";
+import { BFSMusic } from "./MFSMusic.ts";
+import { BFSWeather } from "./BFSWeather.ts";
 
 
 export class BFSupremacyCore {
@@ -39,6 +41,15 @@ export class BFSupremacyCore {
             BFSupremacyRegroup.spawnHeli();
 
         } else if (stage == 2) {
+            BFSMusic.finalAssaultMusic();
+            const players = mod.AllPlayers() as mod.Array;
+            mod.SendErrorReport(mod.Message(mod.stringkeys.playercount, mod.CountOf(players)));
+            for (let i = 0; i < mod.CountOf(players); i++) {
+                const player = mod.ValueInArray(players, i);
+                mod.SendErrorReport(mod.Message(mod.stringkeys.selectedPlayer, player));
+                BFSWeather.checkNight(player);
+                mod.EnableAllInputRestrictions(player, false);
+            }
             GameConfig.gameConfig.remainingTime = GameConfig.gameConfig.baseAttackTime + GameConfig.gameConfig.bonusTime;
             BFSupremacyFinalAssault.init();
         }
@@ -154,5 +165,16 @@ export class BFSupremacyCore {
         }
         ObjectiveVariables.objectiveVariables.get(mod.GetObjId(eventCapturePoint))!.team1Players = team1Count;
         ObjectiveVariables.objectiveVariables.get(mod.GetObjId(eventCapturePoint))!.team2Players = team2Count;
+    }
+
+    public static isSpatialValid(spatial: number | mod.SpatialObject): boolean {
+        const obj = typeof spatial === 'number' ? mod.GetSpatialObject(spatial) : spatial;
+        if (!obj) return false;
+        const pos = mod.GetObjectPosition(obj);
+        return !(
+            Math.abs(mod.XComponentOf(pos)) < 1 ||
+            Math.abs(mod.YComponentOf(pos)) < 1 ||
+            Math.abs(mod.ZComponentOf(pos)) < 1
+        );
     }
 }
