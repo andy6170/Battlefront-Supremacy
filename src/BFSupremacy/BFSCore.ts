@@ -14,6 +14,7 @@ export class BFSupremacyCore {
 
     public static async changeStage(): Promise<void> {
         GameConfig.gameConfig.roundOngoing = false;
+        const previousStage = GameConfig.gameConfig.stage;
         GameConfig.gameConfig.stage++;
         if (GameConfig.gameConfig.stage >= 3) {
             GameConfig.gameConfig.stage = 0;
@@ -26,6 +27,9 @@ export class BFSupremacyCore {
             GameConfig.gameConfig.flagStart = 200;
             GameConfig.gameConfig.flagEnd = 220;
             GameConfig.gameConfig.bonusTime = 0;
+            if (previousStage === 2) {
+                await BFSupremacyUI.changingLocation(true);
+            }
 
         } else if (stage == 1) {
             await mod.Wait(3);

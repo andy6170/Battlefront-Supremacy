@@ -415,53 +415,125 @@ export class BFSupremacyUI {
         mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("changingSector_container"), enable);
     }
 
-    public static async changingLocation(): Promise<void> {
+    public static async changingLocation(isToConquest: boolean = false): Promise<void> {
         mod.UndeployAllPlayers();
         mod.EnableAllPlayerDeploy(false);
         mod.PauseGameModeTime(true);
 
-        // 2. Spawn global countdown widget
-        const countdownName = "countdown";
-        const titleName = "countdown_title";
+        const isTeam1Attacker = mod.Equals(GameConfig.gameConfig.attacker, mod.GetTeam(1));
+        const team1Color = isTeam1Attacker ? UIconfig.uiConfig.friendlyColour : UIconfig.uiConfig.enemyColour;
+        const team2Color = isTeam1Attacker ? UIconfig.uiConfig.enemyColour : UIconfig.uiConfig.friendlyColour;
+        const team1BGColor = isTeam1Attacker ? UIconfig.uiConfig.friendlyColour : UIconfig.uiConfig.enemyColour;
+        const team2BGColor = isTeam1Attacker ? UIconfig.uiConfig.enemyColour : UIconfig.uiConfig.friendlyColour;
+
+        // 2. Spawn team-specific countdown widgets
+        const countdownName1 = "countdown_1";
+        const countdownName2 = "countdown_2";
+        const titleName1 = "countdown_title_1";
+        const titleName2 = "countdown_title_2";
+
         // Clean up any old widgets just in case
-        const oldWidget = mod.FindUIWidgetWithName(countdownName);
-        if (oldWidget) {
-            mod.DeleteUIWidget(oldWidget);
-        }
-        const oldTitle = mod.FindUIWidgetWithName(titleName);
-        if (oldTitle) {
-            mod.DeleteUIWidget(oldTitle);
-        }
+        const oldWidget1 = mod.FindUIWidgetWithName(countdownName1);
+        if (oldWidget1) mod.DeleteUIWidget(oldWidget1);
+        const oldWidget2 = mod.FindUIWidgetWithName(countdownName2);
+        if (oldWidget2) mod.DeleteUIWidget(oldWidget2);
+        const oldTitle1 = mod.FindUIWidgetWithName(titleName1);
+        if (oldTitle1) mod.DeleteUIWidget(oldTitle1);
+        const oldTitle2 = mod.FindUIWidgetWithName(titleName2);
+        if (oldTitle2) mod.DeleteUIWidget(oldTitle2);
 
         mod.AddUIText(
-            countdownName, mod.CreateVector(0, 150, 0), mod.CreateVector(10000, 10000, 0), mod.UIAnchor.Center,
-            mod.Message(mod.stringkeys.value, 10)
+            countdownName1,
+            mod.CreateVector(0, 150, 0),
+            mod.CreateVector(10000, 10000, 0),
+            mod.UIAnchor.Center,
+            mod.GetUIRoot(),
+            true,
+            0,
+            mod.CreateVector(0, 0, 0),
+            1,
+            mod.UIBgFill.Solid,
+            mod.Message(mod.stringkeys.value, 10),
+            256,
+            team1Color,
+            1,
+            mod.UIAnchor.Center,
+            mod.UIDepth.AboveGameUI,
+            mod.GetTeam(1)
         );
-        const widget = mod.FindUIWidgetWithName(countdownName)!;
-        mod.SetUIWidgetBgFill(widget, mod.UIBgFill.Solid);
-        mod.SetUIWidgetBgAlpha(widget, 1);
-        mod.SetUIWidgetBgColor(widget, mod.CreateVector(0, 0, 0));
-        mod.SetUITextSize(widget, 256);
-        mod.SetUITextColor(widget, UIconfig.uiConfig.goldColour);
-        mod.SetUIWidgetDepth(widget, mod.UIDepth.AboveGameUI);
-        mod.SetUITextAnchor(widget, mod.UIAnchor.Center);
+        const widget1 = mod.FindUIWidgetWithName(countdownName1)!;
 
         mod.AddUIText(
-            titleName, mod.CreateVector(0, -150, 0), mod.CreateVector(10000, 150, 0), mod.UIAnchor.Center,
-            mod.Message(mod.stringkeys.supremacy.finalassault.name)
+            countdownName2,
+            mod.CreateVector(0, 150, 0),
+            mod.CreateVector(10000, 10000, 0),
+            mod.UIAnchor.Center,
+            mod.GetUIRoot(),
+            true,
+            0,
+            mod.CreateVector(0, 0, 0),
+            1,
+            mod.UIBgFill.Solid,
+            mod.Message(mod.stringkeys.value, 10),
+            256,
+            team2Color,
+            1,
+            mod.UIAnchor.Center,
+            mod.UIDepth.AboveGameUI,
+            mod.GetTeam(2)
         );
-        const titleWidget = mod.FindUIWidgetWithName(titleName)!;
-        mod.SetUIWidgetBgFill(titleWidget, mod.UIBgFill.Solid);
-        mod.SetUIWidgetBgAlpha(titleWidget, 0.1);
-        mod.SetUIWidgetBgColor(titleWidget, UIconfig.uiConfig.goldBGColour);
-        mod.SetUITextSize(titleWidget, 156);
-        mod.SetUITextColor(titleWidget, UIconfig.uiConfig.goldColour);
-        mod.SetUIWidgetDepth(titleWidget, mod.UIDepth.AboveGameUI);
-        mod.SetUITextAnchor(titleWidget, mod.UIAnchor.Center);
+        const widget2 = mod.FindUIWidgetWithName(countdownName2)!;
+
+        const titleMsg = isToConquest
+            ? mod.Message(mod.stringkeys.supremacy.conquest.name)
+            : mod.Message(mod.stringkeys.supremacy.finalassault.name);
+
+        mod.AddUIText(
+            titleName1,
+            mod.CreateVector(0, -150, 0),
+            mod.CreateVector(10000, 150, 0),
+            mod.UIAnchor.Center,
+            mod.GetUIRoot(),
+            true,
+            0,
+            team1BGColor,
+            0.05,
+            mod.UIBgFill.Solid,
+            titleMsg,
+            156,
+            team1Color,
+            1,
+            mod.UIAnchor.Center,
+            mod.UIDepth.AboveGameUI,
+            mod.GetTeam(1)
+        );
+        const titleWidget1 = mod.FindUIWidgetWithName(titleName1)!;
+
+        mod.AddUIText(
+            titleName2,
+            mod.CreateVector(0, -150, 0),
+            mod.CreateVector(10000, 150, 0),
+            mod.UIAnchor.Center,
+            mod.GetUIRoot(),
+            true,
+            0,
+            team2BGColor,
+            0.05,
+            mod.UIBgFill.Solid,
+            titleMsg,
+            156,
+            team2Color,
+            1,
+            mod.UIAnchor.Center,
+            mod.UIDepth.AboveGameUI,
+            mod.GetTeam(2)
+        );
+        const titleWidget2 = mod.FindUIWidgetWithName(titleName2)!;
 
         // 3. 10-second countdown loop
         for (let secondsLeft = 10; secondsLeft >= 1; secondsLeft--) {
-            mod.SetUITextLabel(widget, mod.Message(mod.stringkeys.value, secondsLeft));
+            mod.SetUITextLabel(widget1, mod.Message(mod.stringkeys.value, secondsLeft));
+            mod.SetUITextLabel(widget2, mod.Message(mod.stringkeys.value, secondsLeft));
             if (secondsLeft <= 5) {
                 // TODO: Play sound placeholder
             }
@@ -471,24 +543,64 @@ export class BFSupremacyUI {
         }
 
         // --- SWIPE TRANSITION ---
-        const swipeOverlayName = "swipe_overlay";
-        const oldSwipe = mod.FindUIWidgetWithName(swipeOverlayName);
-        if (oldSwipe) {
-            mod.DeleteUIWidget(oldSwipe);
-        }
+        await BFSupremacyUI.playSwipeTransition(async () => {
+            // Clean up countdown UI while screen is covered
+            mod.DeleteUIWidget(widget1);
+            mod.DeleteUIWidget(widget2);
+            mod.DeleteUIWidget(titleWidget1);
+            mod.DeleteUIWidget(titleWidget2);
 
-        // Spawn swipe overlay container at the top (fully off-screen)
+            mod.PauseGameModeTime(false);
+            mod.EnableAllPlayerDeploy(true);
+        });
+    }
+
+    public static async playSwipeTransition(onCovered?: () => void | Promise<void>): Promise<void> {
+        const isTeam1Attacker = mod.Equals(GameConfig.gameConfig.attacker, mod.GetTeam(1));
+        const team1Color = isTeam1Attacker ? UIconfig.uiConfig.friendlyColour : UIconfig.uiConfig.enemyColour;
+        const team2Color = isTeam1Attacker ? UIconfig.uiConfig.enemyColour : UIconfig.uiConfig.friendlyColour;
+
+        const swipeOverlayName1 = "swipe_overlay_1";
+        const swipeOverlayName2 = "swipe_overlay_2";
+
+        const oldSwipe1 = mod.FindUIWidgetWithName(swipeOverlayName1);
+        if (oldSwipe1) mod.DeleteUIWidget(oldSwipe1);
+        const oldSwipe2 = mod.FindUIWidgetWithName(swipeOverlayName2);
+        if (oldSwipe2) mod.DeleteUIWidget(oldSwipe2);
+
+        // Spawn swipe overlay container at the top (fully off-screen) for Team 1
         mod.AddUIContainer(
-            swipeOverlayName,
+            swipeOverlayName1,
             mod.CreateVector(0, -1200, 0),
             mod.CreateVector(10000, 1200, 0),
-            mod.UIAnchor.TopCenter
+            mod.UIAnchor.TopCenter,
+            mod.GetUIRoot(),
+            true,
+            0,
+            team1Color,
+            1.0,
+            mod.UIBgFill.Solid,
+            mod.UIDepth.AboveGameUI,
+            mod.GetTeam(1)
         );
-        const swipeWidget = mod.FindUIWidgetWithName(swipeOverlayName)!;
-        mod.SetUIWidgetBgFill(swipeWidget, mod.UIBgFill.Solid);
-        mod.SetUIWidgetBgColor(swipeWidget, UIconfig.uiConfig.goldColour);
-        mod.SetUIWidgetBgAlpha(swipeWidget, 1.0);
-        mod.SetUIWidgetDepth(swipeWidget, mod.UIDepth.AboveGameUI);
+        const swipeWidget1 = mod.FindUIWidgetWithName(swipeOverlayName1)!;
+
+        // Spawn swipe overlay container at the top (fully off-screen) for Team 2
+        mod.AddUIContainer(
+            swipeOverlayName2,
+            mod.CreateVector(0, -1200, 0),
+            mod.CreateVector(10000, 1200, 0),
+            mod.UIAnchor.TopCenter,
+            mod.GetUIRoot(),
+            true,
+            0,
+            team2Color,
+            1.0,
+            mod.UIBgFill.Solid,
+            mod.UIDepth.AboveGameUI,
+            mod.GetTeam(2)
+        );
+        const swipeWidget2 = mod.FindUIWidgetWithName(swipeOverlayName2)!;
 
         // Animate Swipe-in (fill from top)
         const swipeSteps = 15;
@@ -497,29 +609,31 @@ export class BFSupremacyUI {
             const progress = i / swipeSteps;
             const easedProgress = progress * (2 - progress); // Ease-out quad
             const yPos = -1200 + (1200 * easedProgress);
-            mod.SetUIWidgetPosition(swipeWidget, mod.CreateVector(0, yPos, 0));
+            const pos = mod.CreateVector(0, yPos, 0);
+            mod.SetUIWidgetPosition(swipeWidget1, pos);
+            mod.SetUIWidgetPosition(swipeWidget2, pos);
             await mod.Wait(swipeStepDuration);
         }
 
         // TODO: Play sound placeholder
 
-        // Clean up countdown UI while screen is covered
-        mod.DeleteUIWidget(widget);
-        mod.DeleteUIWidget(titleWidget);
-
-        mod.PauseGameModeTime(false);
-        mod.EnableAllPlayerDeploy(true);
+        if (onCovered) {
+            await onCovered();
+        }
 
         // Animate Swipe-out (exit down)
         for (let i = 1; i <= swipeSteps; i++) {
             const progress = i / swipeSteps;
             const easedProgress = progress * progress; // Ease-in quad
             const yPos = 1200 * easedProgress;
-            mod.SetUIWidgetPosition(swipeWidget, mod.CreateVector(0, yPos, 0));
+            const pos = mod.CreateVector(0, yPos, 0);
+            mod.SetUIWidgetPosition(swipeWidget1, pos);
+            mod.SetUIWidgetPosition(swipeWidget2, pos);
             await mod.Wait(swipeStepDuration);
         }
 
-        // Clean up swipe container
-        mod.DeleteUIWidget(swipeWidget);
+        // Clean up swipe containers
+        mod.DeleteUIWidget(swipeWidget1);
+        mod.DeleteUIWidget(swipeWidget2);
     }
 }

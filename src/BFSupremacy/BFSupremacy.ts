@@ -38,11 +38,13 @@ export class BFSupremacy {
                 if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsZooming) && !PlayerVariables.getPlayerData(eventPlayer).firstPerson) {
                     PlayerVariables.getPlayerData(eventPlayer).firstPerson = true;
                     PlayerVariables.getPlayerData(eventPlayer).thirdPerson = false;
-                    mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.FirstPerson);
+                    //mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.FirstPerson);
+                    mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("player_aim" + mod.GetObjId(eventPlayer)), true)
                 } else if (!mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsZooming) && !PlayerVariables.getPlayerData(eventPlayer).thirdPerson) {
                     PlayerVariables.getPlayerData(eventPlayer).firstPerson = false;
                     PlayerVariables.getPlayerData(eventPlayer).thirdPerson = true;
-                    mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson);
+                    //mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson);
+                    mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("player_aim" + mod.GetObjId(eventPlayer)), false)
                 }
             }
         });
@@ -54,7 +56,7 @@ export class BFSupremacy {
             BFSupremacyUI.UI_Setup();
             BFSMusic.init();
             BFSMusic.testMusic();
-            mod.SetCameraTypeForAll(mod.Cameras.ThirdPerson);
+            //mod.SetCameraTypeForAll(mod.Cameras.ThirdPerson);
             GameConfig.gameConfig.extractionIcon = mod.SpawnObject(mod.RuntimeSpawn_Common.FX_Gadget_DeployableMortar_Target_Area, mod.Subtract(mod.GetObjectPosition(mod.GetSpatialObject(902)), mod.CreateVector(0, 20, 0)), mod.CreateVector(0, 0, 0))
             if (GameConfig.gameConfig.debug) {
                 GameConfig.gameConfig.ticketSpeed = 2;

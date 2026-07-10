@@ -3,6 +3,7 @@ import { BFSupremacyUI } from "./BFSUI.ts";
 import { BFSupremacyCore } from "./BFSCore.ts";
 import { BFSWeather } from "./BFSWeather.ts";
 import { BFSMusic } from "./MFSMusic.ts";
+import { BFSHeliAnimations } from "./BFSHeliAnimations.ts";
 
 export class BFSupremacyRegroup {
     public static spawnHeli(): void {
@@ -15,7 +16,7 @@ export class BFSupremacyRegroup {
     }
 
     public static onBotSpawned(player: mod.Player, spawner: mod.Spawner): void {
-        if (GameConfig.gameConfig.regroupVehicleSelected || GameConfig.gameConfig.stage !== 1) return;
+        if (GameConfig.gameConfig.regroupVehicleSelected) return;
         if (mod.GetObjId(spawner) === 900) {
             GameConfig.gameConfig.regroupBot = player;
             this.checkAndSetup();
@@ -23,7 +24,7 @@ export class BFSupremacyRegroup {
     }
 
     public static onVehicleSpawned(vehicle: mod.Vehicle): void {
-        if (GameConfig.gameConfig.regroupVehicleSelected || GameConfig.gameConfig.stage !== 1) return;
+        if (GameConfig.gameConfig.regroupVehicleSelected) return;
         GameConfig.gameConfig.regroupVehicle = vehicle;
         this.checkAndSetup();
     }
@@ -41,7 +42,9 @@ export class BFSupremacyRegroup {
             mod.Heal(bot, 500);
             mod.SetVehicleMaxHealthMultiplier(heli, 4);
             mod.Heal(heli, 10000);
-            this.animateHeli();
+            if (GameConfig.gameConfig.stage === 1) {
+                this.animateHeli();
+            }
         }
     }
 
@@ -53,6 +56,14 @@ export class BFSupremacyRegroup {
         const heli = GameConfig.gameConfig.regroupVehicle;
         if (!heli) return;
 
+        await BFSHeliAnimations.animateHeliLanding(
+            heli,
+            902,
+            () => GameConfig.gameConfig.stage === 1
+        );
+
+        if (!mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition)) return;
+
         const target = mod.GetSpatialObject(902);
         const targetPos = mod.GetObjectPosition(target);
         const startPos = mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition);
@@ -63,39 +74,6 @@ export class BFSupremacyRegroup {
         const dz = mod.ZComponentOf(targetPos) - mod.ZComponentOf(startPos);
         const yaw = Math.atan2(dx, dz);
 
-        // Stage 1: Horizontal move to a point above the target
-        const hoverPos = mod.CreateVector(mod.XComponentOf(targetPos), mod.YComponentOf(startPos), mod.ZComponentOf(targetPos));
-
-        while (mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition) && GameConfig.gameConfig.stage === 1) {
-            const currentPos = mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition);
-            if (!currentPos) break;
-            mod.Heal(heli, 10000);
-            const distHorizontal = mod.DistanceBetween(
-                mod.CreateVector(mod.XComponentOf(currentPos), 0, mod.ZComponentOf(currentPos)),
-                mod.CreateVector(mod.XComponentOf(targetPos), 0, mod.ZComponentOf(targetPos))
-            );
-
-            if (distHorizontal < 5) break;
-
-            const direction = mod.DirectionTowards(currentPos, hoverPos);
-            mod.Teleport(heli, mod.Add(currentPos, mod.Multiply(direction, 0.99)), yaw);
-            await mod.Wait(0.033);
-        }
-
-        // Stage 2: Landing (Vertical drop)
-        while (mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition) && GameConfig.gameConfig.stage === 1) {
-            const currentPos = mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition);
-            if (!currentPos) break;
-            mod.Heal(heli, 10000);
-            const dist = mod.DistanceBetween(currentPos, targetPos);
-
-            if (dist < 1) break;
-
-            const direction = mod.DirectionTowards(currentPos, targetPos);
-            mod.Teleport(heli, mod.Add(currentPos, mod.Multiply(direction, 0.33)), yaw); // Slower descent
-            await mod.Wait(0.033);
-        }
-        if (!mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition)) return;
         GameConfig.gameConfig.roundOngoing = true;
         GameConfig.gameConfig.extractReady = true;
         GameConfig.gameConfig.heliTakeOff = false;
@@ -129,81 +107,24 @@ export class BFSupremacyRegroup {
         const heli = GameConfig.gameConfig.regroupVehicle;
         if (!heli) return;
 
-        const departureTarget = mod.Add(mod.GetObjectPosition(mod.GetSpatialObject(903)), mod.CreateVector(0, 1, 0));
-        const departurePos = mod.Add(departureTarget, mod.CreateVector(0, 0.3, 0));
-        const startPos = mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition);
-        if (!startPos) return;
+        await BFSHeliAnimations.animateHeliTakeOff(
+            heli,
+            51,
+            903,
+            () => GameConfig.gameConfig.stage === 1,
+            () => this.pilotReset()
+        );
 
-        // Calculate direction to departure target horizontally
-        const dx = mod.XComponentOf(departurePos) - mod.XComponentOf(startPos);
-        const dz = mod.ZComponentOf(departurePos) - mod.ZComponentOf(startPos);
-        const takeoffYaw = Math.atan2(dx, dz);
-
-        // Stage 1: Vertical Lift
-        const liftTargetY = mod.YComponentOf(startPos) + 40;
-        const cameraObject = mod.GetFixedCamera(51);
-        const cameraPos = mod.GetObjectPosition(cameraObject);
-
-        const startRot = this.getLookAtRotation(cameraPos, startPos);
-        mod.SetObjectTransform(cameraObject, mod.CreateTransform(cameraPos, startRot));
-
-        await mod.Wait(1);
-        this.pilotReset();
-
-        const liftPos = mod.Add(startPos, mod.CreateVector(0, 40, 0));
-        const time1 = (40 / 0.5) * 0.066;
-        const liftRot = this.getLookAtRotation(cameraPos, liftPos);
-        mod.SetObjectTransformOverTime(cameraObject, mod.CreateTransform(cameraPos, liftRot), time1, false, false);
-
-        while (mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition)) {
-            const currentPos = mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition);
-            if (!currentPos || mod.YComponentOf(currentPos) >= liftTargetY) break;
-
-            const nextPos = mod.Add(currentPos, mod.CreateVector(0, 0.5, 0));
-            mod.Teleport(heli, nextPos, takeoffYaw);
-
-            await mod.Wait(0.033);
-        }
-
-        // Stage 2: Fly to Target
-        const time2 = (mod.DistanceBetween(liftPos, departurePos) / 1.2) * 0.066;
-        const finalRot = this.getLookAtRotation(cameraPos, departurePos);
-        mod.SetObjectTransformOverTime(cameraObject, mod.CreateTransform(cameraPos, finalRot), time2, false, false);
-
-        while (GameConfig.gameConfig.stage == 1 && mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition)) {
-            const currentPos = mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition);
-            if (!currentPos) break;
-            const dist = mod.DistanceBetween(currentPos, departurePos);
-            if (dist < 5) break;
-
-            const direction = mod.DirectionTowards(currentPos, departurePos);
-            const movePos = mod.Add(currentPos, mod.Multiply(direction, 1.2));
-            mod.Teleport(heli, movePos, takeoffYaw);
-
-            await mod.Wait(0.033);
-        }
+        BFSupremacyUI.playSwipeTransition();
 
         mod.UndeployAllPlayers();
+        await mod.Wait(0.2);
+        BFSupremacyCore.changeStage();
         await mod.Wait(1);
         mod.Kill(heli);
-        BFSupremacyCore.changeStage();
-
-        await mod.Wait(1);
 
         mod.SetCameraTypeForAll(mod.Cameras.ThirdPerson);
         GameConfig.gameConfig.cutscene = false;
-    }
-
-    private static getLookAtRotation(origin: mod.Vector, target: mod.Vector): mod.Vector {
-        const dx = mod.XComponentOf(target) - mod.XComponentOf(origin);
-        const dy = mod.YComponentOf(target) - mod.YComponentOf(origin);
-        const dz = mod.ZComponentOf(target) - mod.ZComponentOf(origin);
-
-        const distanceXZ = Math.sqrt(dx * dx + dz * dz);
-        const pitch = -Math.atan2(dy, distanceXZ);
-        const yaw = Math.atan2(dx, dz);
-
-        return mod.CreateVector(pitch, yaw, 0);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

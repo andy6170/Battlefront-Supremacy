@@ -1,7 +1,7 @@
 {
     "supremacy": {
         "conquest": {
-            "name": "Conquest",
+            "name": "RETURNING TO BATTLEFIELD",
             "description": "CAPTURE AND HOLD THE OBJECTIVES",
             "percentage": "{}%"
         },
@@ -14,8 +14,8 @@
             "undeploy": "CANNOT SPAWN ON OBJECTIVE"
         },
         "finalassault": {
-            "name": "FINAL ASSAULT",
-            "attackerMessage": "ASSAULT THE OBJECTIVE",
+            "name": "FINAL ATTACK",
+            "attackerMessage": "ATTACK THE OBJECTIVE",
             "defenderMessage": "DEFEND THE OBJECTIVE",
             "attacker": "PREPARE TO ASSAULT",
             "defender": "PREPARE TO DEFEND",

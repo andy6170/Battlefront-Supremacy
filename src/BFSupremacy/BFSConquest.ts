@@ -31,7 +31,7 @@ export class BFSupremacyConquest {
         }
 
         for (let i = 1; i < 10; i++) {
-            mod.EnableHQ(mod.GetHQ(i), true);
+            //mod.EnableHQ(mod.GetHQ(i), true);
         }
         for (let i = 300; i < 310; i++) {
             mod.EnableHQ(mod.GetHQ(i), false);
@@ -48,9 +48,18 @@ export class BFSupremacyConquest {
             mod.PlaySound(mod.GetSFX(i), 1, mod.GetObjectPosition(mod.GetSFX(i)), 100);
         }
 
+
         mod.EnableGameModeObjective(mod.GetSector(150), true);
+        mod.EnableGameModeObjective(mod.GetSector(151), true);
+        mod.EnableGameModeObjective(mod.GetSector(152), true);
         mod.EnableGameModeObjective(mod.GetCapturePoint(904), false);
         for (let i = 100; i < 110; i++) {
+            mod.EnableGameModeObjective(mod.GetSector(i), false);
+        }
+        for (let i = 310; i < 330; i++) {
+            mod.EnableGameModeObjective(mod.GetSector(i), false);
+        }
+        for (let i = 410; i < 430; i++) {
             mod.EnableGameModeObjective(mod.GetSector(i), false);
         }
     }
@@ -132,6 +141,8 @@ export class BFSupremacyConquest {
 
     public static resetConquest(): void {
         mod.EnableGameModeObjective(mod.GetSector(150), true);
+        mod.EnableGameModeObjective(mod.GetSector(151), true);
+        mod.EnableGameModeObjective(mod.GetSector(152), true);
         for (let i = 1; i < 10; i++) {
             mod.EnableHQ(mod.GetHQ(i), true);
         }
@@ -146,6 +157,7 @@ export class BFSupremacyConquest {
         TeamVariables.getTeamData(2).score = 0;
         GameConfig.gameConfig.ticketSpeed = 3;
         GameConfig.gameConfig.roundOngoing = true;
+        mod.EnableAllPlayerDeploy(true);
     }
 
     public static endConquest(): void {

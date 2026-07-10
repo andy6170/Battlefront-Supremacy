@@ -3,7 +3,7 @@ import { UIconfig } from "./BFSVariables.ts";
 
 export class BFSupremacyPlayer {
     public static createPlayerUI(player: mod.Player): void {
-        mod.AddUIContainer("player_" + mod.GetObjId(player), mod.CreateVector(0, 0, 0), mod.CreateVector(300, 50, 0), mod.UIAnchor.TopCenter, mod.GetUIRoot(), true, 0, mod.CreateVector(1, 1, 1), 0.5, mod.UIBgFill.None, mod.UIDepth.AboveGameUI);
+        mod.AddUIContainer("player_" + mod.GetObjId(player), mod.CreateVector(0, 20, 0), mod.CreateVector(300, 50, 0), mod.UIAnchor.TopCenter, mod.GetUIRoot(), true, 0, mod.CreateVector(1, 1, 1), 0.5, mod.UIBgFill.None, mod.UIDepth.AboveGameUI);
         let playerUIContainer = mod.FindUIWidgetWithName("player_" + mod.GetObjId(player));
         let data = PlayerVariables.getPlayerData(player);
         data.containerWidget = playerUIContainer;
@@ -12,6 +12,8 @@ export class BFSupremacyPlayer {
         mod.AddUIText("objCounter", mod.CreateVector(0, 210, 0), mod.CreateVector(220, 40, 0), mod.UIAnchor.TopCenter, playerUIContainer, false, 1, mod.CreateVector(0, 0, 0), 1, mod.UIBgFill.None, mod.Message(mod.stringkeys.captureProgress.none), 28, mod.CreateVector(1, 1, 1), 1, mod.UIAnchor.Center, player);
         mod.AddUIContainer("objProgressBG", mod.CreateVector(0, 200, 0), mod.CreateVector(220, 7, 0), mod.UIAnchor.TopCenter, playerUIContainer, false, 1, mod.CreateVector(0, 0, 0), 0.8, mod.UIBgFill.Blur, player);
         mod.AddUIContainer("objProgress", mod.CreateVector(0, 200, 0), mod.CreateVector(220, 7, 0), mod.UIAnchor.TopCenter, playerUIContainer, false, 1, mod.CreateVector(0, 0, 0), 1, mod.UIBgFill.Solid, player);
+
+        mod.AddUIContainer("player_aim" + mod.GetObjId(player), mod.CreateVector(-10, 0, 0), mod.CreateVector(3, 3, 0), mod.UIAnchor.Center, mod.GetUIRoot(), false, 0, mod.CreateVector(1, 1, 1), 0.9, mod.UIBgFill.Solid, mod.UIDepth.AboveGameUI);
     }
 
     public static updatePlayerCaptureUI(player: mod.Player, capturePoint: mod.CapturePoint): void {
