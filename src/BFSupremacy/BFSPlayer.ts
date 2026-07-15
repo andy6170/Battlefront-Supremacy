@@ -13,7 +13,7 @@ export class BFSupremacyPlayer {
         mod.AddUIContainer("objProgressBG", mod.CreateVector(0, 200, 0), mod.CreateVector(220, 7, 0), mod.UIAnchor.TopCenter, playerUIContainer, false, 1, mod.CreateVector(0, 0, 0), 0.8, mod.UIBgFill.Blur, player);
         mod.AddUIContainer("objProgress", mod.CreateVector(0, 200, 0), mod.CreateVector(220, 7, 0), mod.UIAnchor.TopCenter, playerUIContainer, false, 1, mod.CreateVector(0, 0, 0), 1, mod.UIBgFill.Solid, player);
 
-        mod.AddUIContainer("player_aim" + mod.GetObjId(player), mod.CreateVector(-10, 0, 0), mod.CreateVector(3, 3, 0), mod.UIAnchor.Center, mod.GetUIRoot(), false, 0, mod.CreateVector(1, 1, 1), 0.9, mod.UIBgFill.Solid, mod.UIDepth.AboveGameUI);
+        mod.AddUIContainer("player_aim" + mod.GetObjId(player), mod.CreateVector(-10, 0, 0), mod.CreateVector(3, 3, 0), mod.UIAnchor.Center, mod.GetUIRoot(), false, 0, mod.CreateVector(1, 1, 1), 0.9, mod.UIBgFill.Solid, mod.UIDepth.AboveGameUI, player);
     }
 
     public static updatePlayerCaptureUI(player: mod.Player, capturePoint: mod.CapturePoint): void {

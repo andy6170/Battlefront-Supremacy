@@ -1,6 +1,7 @@
-import { Payload } from './Payload/Payload.ts';
+//import { Payload } from './Payload/Payload.ts';
 import { BFSupremacy } from './BFSupremacy/BFSupremacy.ts';
 import { Events } from 'bf6-portal-utils/events';
+import { GameConfig, ObjectiveVariables, PlayerVariables, UIconfig } from './BFSupremacy/BFSVariables.ts';
 
 enum GameModes {
     BFSupremacy = 1

@@ -6,15 +6,19 @@ import { BFSHeliAnimations } from "./BFSHeliAnimations.ts";
 
 export class BFSupremacyFinalAssault {
     public static async init(): Promise<void> {
-        mod.EnableGameModeObjective(mod.GetSector(150), false);
-        mod.EnableGameModeObjective(mod.GetSector(151), false);
-        mod.EnableGameModeObjective(mod.GetSector(152), false);
+        let s150 = mod.GetSector(150);
+        if (s150) mod.EnableGameModeObjective(s150, false);
+        let s151 = mod.GetSector(151);
+        if (s151) mod.EnableGameModeObjective(s151, false);
+        let s152 = mod.GetSector(152);
+        if (s152) mod.EnableGameModeObjective(s152, false);
         GameConfig.gameConfig.remainingTime = GameConfig.gameConfig.baseAttackTime + GameConfig.gameConfig.bonusTime;
         if (GameConfig.gameConfig.debug) {
             GameConfig.gameConfig.remainingTime = 60;
         }
         for (let i = 1; i < 10; i++) {
-            mod.EnableHQ(mod.GetHQ(i), false);
+            let hq = mod.GetHQ(i);
+            if (hq) mod.EnableHQ(hq, false);
         }
 
         BFSupremacyFinalAssault.manageFinalSector(true);
@@ -23,9 +27,11 @@ export class BFSupremacyFinalAssault {
 
         for (let i = 250; i <= 260; i++) {
             let flag = mod.GetCapturePoint(GameConfig.gameConfig.flagStart + i);
-            mod.SetCapturePointCapturingTime(flag, GameConfig.gameConfig.finalCaptureTime);
-            mod.SetCapturePointNeutralizationTime(flag, GameConfig.gameConfig.finalNeutralizeTime);
-            mod.SetMaxCaptureMultiplier(flag, GameConfig.gameConfig.finalCaptureMultiplier);
+            if (flag) {
+                mod.SetCapturePointCapturingTime(flag, GameConfig.gameConfig.finalCaptureTime);
+                mod.SetCapturePointNeutralizationTime(flag, GameConfig.gameConfig.finalNeutralizeTime);
+                mod.SetMaxCaptureMultiplier(flag, GameConfig.gameConfig.finalCaptureMultiplier);
+            }
         }
 
         let vehicles = mod.AllVehicles();
@@ -43,11 +49,12 @@ export class BFSupremacyFinalAssault {
 
     public static flagSetup(id: number): void {
         let flag = mod.GetCapturePoint(id);
-        mod.SetCapturePointCapturingTime(flag, GameConfig.gameConfig.finalCaptureTime);
-        mod.SetCapturePointNeutralizationTime(flag, GameConfig.gameConfig.finalNeutralizeTime);
-        mod.SetMaxCaptureMultiplier(flag, GameConfig.gameConfig.finalCaptureMultiplier);
-        mod.EnableCapturePointDeploying(flag, false);
-
+        if (flag) {
+            mod.SetCapturePointCapturingTime(flag, GameConfig.gameConfig.finalCaptureTime);
+            mod.SetCapturePointNeutralizationTime(flag, GameConfig.gameConfig.finalNeutralizeTime);
+            mod.SetMaxCaptureMultiplier(flag, GameConfig.gameConfig.finalCaptureMultiplier);
+            mod.EnableCapturePointDeploying(flag, false);
+        }
     }
 
     public static manageFinalSector(enable: boolean): void {
@@ -74,68 +81,114 @@ export class BFSupremacyFinalAssault {
 
     public static team1FinalSectorLevel1(enable: boolean): void {
         mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("capturepoint_container_finalAssault"), enable)
-        mod.EnableGameModeObjective(mod.GetCapturePoint(250), enable);
-        mod.EnableGameModeObjective(mod.GetCapturePoint(251), enable);
-        mod.EnableGameModeObjective(mod.GetSector(100), enable);
-        mod.EnableGameModeObjective(mod.GetSector(310), enable);
-        mod.EnableGameModeObjective(mod.GetSector(410), enable);
+        let cp250 = mod.GetCapturePoint(250);
+        if (cp250) mod.EnableGameModeObjective(cp250, enable);
+        let cp251 = mod.GetCapturePoint(251);
+        if (cp251) mod.EnableGameModeObjective(cp251, enable);
+        let s100 = mod.GetSector(100);
+        if (s100) mod.EnableGameModeObjective(s100, enable);
+        let s310 = mod.GetSector(310);
+        if (s310) mod.EnableGameModeObjective(s310, enable);
+        let s410 = mod.GetSector(410);
+        if (s410) mod.EnableGameModeObjective(s410, enable);
         GameConfig.gameConfig.flagStart = 250;
         GameConfig.gameConfig.flagEnd = 251;
-        mod.EnableHQ(mod.GetHQ(300), enable);
-        mod.EnableHQ(mod.GetHQ(400), enable);
-        BFSupremacyUI.capturePoint_UI_Colour_Update(mod.GetCapturePoint(250));
-        BFSupremacyUI.capturePoint_UI_Colour_Update(mod.GetCapturePoint(251));
+        let hq300 = mod.GetHQ(300);
+        if (hq300) mod.EnableHQ(hq300, enable);
+        let hq400 = mod.GetHQ(400);
+        if (hq400) mod.EnableHQ(hq400, enable);
+        if (cp250) BFSupremacyUI.capturePoint_UI_Colour_Update(cp250);
+        if (cp251) BFSupremacyUI.capturePoint_UI_Colour_Update(cp251);
     }
 
     public static team1FinalSectorLevel2(enable: boolean): void {
-        mod.EnableGameModeObjective(mod.GetMCOM(260), enable);
-        mod.EnableGameModeObjective(mod.GetMCOM(261), enable);
-        mod.EnableGameModeObjective(mod.GetMCOM(262), enable);
-        mod.EnableGameModeObjective(mod.GetSector(101), enable);
-        mod.EnableGameModeObjective(mod.GetSector(311), enable);
-        mod.EnableGameModeObjective(mod.GetSector(411), enable);
+        let mcom260 = mod.GetMCOM(260);
+        if (mcom260) {
+            mod.EnableGameModeObjective(mcom260, enable);
+            mod.SetMCOMOwner(mcom260, mod.GetTeam(2));
+        }
+        let mcom261 = mod.GetMCOM(261);
+        if (mcom261) {
+            mod.EnableGameModeObjective(mcom261, enable);
+            mod.SetMCOMOwner(mcom261, mod.GetTeam(2));
+        }
+        let mcom262 = mod.GetMCOM(262);
+        if (mcom262) {
+            mod.EnableGameModeObjective(mcom262, enable);
+            mod.SetMCOMOwner(mcom262, mod.GetTeam(2));
+        }
+        let s101 = mod.GetSector(101);
+        if (s101) mod.EnableGameModeObjective(s101, enable);
+        let s311 = mod.GetSector(311);
+        if (s311) mod.EnableGameModeObjective(s311, enable);
+        let s411 = mod.GetSector(411);
+        if (s411) mod.EnableGameModeObjective(s411, enable);
         GameConfig.gameConfig.flagStart = 0;
         GameConfig.gameConfig.flagEnd = 0;
-        mod.SetMCOMOwner(mod.GetMCOM(260), mod.GetTeam(2));
-        mod.SetMCOMOwner(mod.GetMCOM(261), mod.GetTeam(2));
-        mod.SetMCOMOwner(mod.GetMCOM(262), mod.GetTeam(2));
-        mod.EnableHQ(mod.GetHQ(301), enable);
-        mod.EnableHQ(mod.GetHQ(401), enable);
-        BFSupremacyUI.capturePoint_UI_Colour_Update(mod.GetCapturePoint(0));
-        BFSupremacyUI.capturePoint_UI_Colour_Update(mod.GetCapturePoint(1));
+        let hq301 = mod.GetHQ(301);
+        if (hq301) mod.EnableHQ(hq301, enable);
+        let hq401 = mod.GetHQ(401);
+        if (hq401) mod.EnableHQ(hq401, enable);
+        let cp0 = mod.GetCapturePoint(0);
+        if (cp0) BFSupremacyUI.capturePoint_UI_Colour_Update(cp0);
+        let cp1 = mod.GetCapturePoint(1);
+        if (cp1) BFSupremacyUI.capturePoint_UI_Colour_Update(cp1);
     }
 
     public static team2FinalSectorLevel1(enable: boolean): void {
         mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("capturepoint_container_finalAssault"), enable)
-        mod.EnableGameModeObjective(mod.GetCapturePoint(252), enable);
-        mod.EnableGameModeObjective(mod.GetCapturePoint(253), enable);
-        mod.EnableGameModeObjective(mod.GetSector(102), enable);
-        mod.EnableGameModeObjective(mod.GetSector(312), enable);
-        mod.EnableGameModeObjective(mod.GetSector(412), enable);
+        let cp252 = mod.GetCapturePoint(252);
+        if (cp252) mod.EnableGameModeObjective(cp252, enable);
+        let cp253 = mod.GetCapturePoint(253);
+        if (cp253) mod.EnableGameModeObjective(cp253, enable);
+        let s102 = mod.GetSector(102);
+        if (s102) mod.EnableGameModeObjective(s102, enable);
+        let s312 = mod.GetSector(312);
+        if (s312) mod.EnableGameModeObjective(s312, enable);
+        let s412 = mod.GetSector(412);
+        if (s412) mod.EnableGameModeObjective(s412, enable);
         GameConfig.gameConfig.flagStart = 252;
         GameConfig.gameConfig.flagEnd = 253;
-        mod.EnableHQ(mod.GetHQ(302), enable);
-        mod.EnableHQ(mod.GetHQ(402), enable);
-        BFSupremacyUI.capturePoint_UI_Colour_Update(mod.GetCapturePoint(252));
-        BFSupremacyUI.capturePoint_UI_Colour_Update(mod.GetCapturePoint(253));
+        let hq302 = mod.GetHQ(302);
+        if (hq302) mod.EnableHQ(hq302, enable);
+        let hq402 = mod.GetHQ(402);
+        if (hq402) mod.EnableHQ(hq402, enable);
+        if (cp252) BFSupremacyUI.capturePoint_UI_Colour_Update(cp252);
+        if (cp253) BFSupremacyUI.capturePoint_UI_Colour_Update(cp253);
     }
 
     public static team2FinalSectorLevel2(enable: boolean): void {
-        mod.EnableGameModeObjective(mod.GetMCOM(263), enable);
-        mod.EnableGameModeObjective(mod.GetMCOM(264), enable);
-        mod.EnableGameModeObjective(mod.GetMCOM(265), enable);
-        mod.EnableGameModeObjective(mod.GetSector(103), enable);
-        mod.EnableGameModeObjective(mod.GetSector(313), enable);
-        mod.EnableGameModeObjective(mod.GetSector(413), enable);
+        let mcom263 = mod.GetMCOM(263);
+        if (mcom263) {
+            mod.EnableGameModeObjective(mcom263, enable);
+            mod.SetMCOMOwner(mcom263, mod.GetTeam(1));
+        }
+        let mcom264 = mod.GetMCOM(264);
+        if (mcom264) {
+            mod.EnableGameModeObjective(mcom264, enable);
+            mod.SetMCOMOwner(mcom264, mod.GetTeam(1));
+        }
+        let mcom265 = mod.GetMCOM(265);
+        if (mcom265) {
+            mod.EnableGameModeObjective(mcom265, enable);
+            mod.SetMCOMOwner(mcom265, mod.GetTeam(1));
+        }
+        let s103 = mod.GetSector(103);
+        if (s103) mod.EnableGameModeObjective(s103, enable);
+        let s313 = mod.GetSector(313);
+        if (s313) mod.EnableGameModeObjective(s313, enable);
+        let s413 = mod.GetSector(413);
+        if (s413) mod.EnableGameModeObjective(s413, enable);
         GameConfig.gameConfig.flagStart = 0;
         GameConfig.gameConfig.flagEnd = 0;
-        mod.SetMCOMOwner(mod.GetMCOM(263), mod.GetTeam(1));
-        mod.SetMCOMOwner(mod.GetMCOM(264), mod.GetTeam(1));
-        mod.SetMCOMOwner(mod.GetMCOM(265), mod.GetTeam(1));
-        mod.EnableHQ(mod.GetHQ(303), enable);
-        mod.EnableHQ(mod.GetHQ(403), enable);
-        BFSupremacyUI.capturePoint_UI_Colour_Update(mod.GetCapturePoint(0));
-        BFSupremacyUI.capturePoint_UI_Colour_Update(mod.GetCapturePoint(1));
+        let hq303 = mod.GetHQ(303);
+        if (hq303) mod.EnableHQ(hq303, enable);
+        let hq403 = mod.GetHQ(403);
+        if (hq403) mod.EnableHQ(hq403, enable);
+        let cp0 = mod.GetCapturePoint(0);
+        if (cp0) BFSupremacyUI.capturePoint_UI_Colour_Update(cp0);
+        let cp1 = mod.GetCapturePoint(1);
+        if (cp1) BFSupremacyUI.capturePoint_UI_Colour_Update(cp1);
     }
 
 
@@ -249,11 +302,23 @@ export class BFSupremacyFinalAssault {
     // Move to final sector level 2
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public static moveToFinalSectorLevel2(): void {
+    public static async moveToFinalSectorLevel2(): Promise<void> {
         GameConfig.gameConfig.roundOngoing = false;
-        mod.EnableGameModeObjective(mod.GetCapturePoint(GameConfig.gameConfig.flagStart), false);
-        mod.EnableGameModeObjective(mod.GetCapturePoint(GameConfig.gameConfig.flagEnd), false);
+        let cpStart = mod.GetCapturePoint(GameConfig.gameConfig.flagStart);
+        if (cpStart) mod.EnableGameModeObjective(cpStart, false);
+        let cpEnd = mod.GetCapturePoint(GameConfig.gameConfig.flagEnd);
+        if (cpEnd) mod.EnableGameModeObjective(cpEnd, false);
+
+        BFSupremacyUI.changingSector_UI_Team_Update();
+        BFSupremacyUI.changingSector_UI_Change(true);
+        for (let i = 30; i > 0; i--) {
+            BFSupremacyUI.changingSector_UI_Update(i);
+            await mod.Wait(1);
+        }
+        BFSupremacyUI.changingSector_UI_Change(false);
+
         BFSupremacyFinalAssault.manageFinalSector(false);
+
         if (mod.Equals(GameConfig.gameConfig.attacker, mod.GetTeam(1))) {
             TeamVariables.getTeamData(GameConfig.gameConfig.attacker).finalSectorBreached += 1;
         } else {

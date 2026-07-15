@@ -14,6 +14,7 @@ export class BFSupremacyUI {
         BFSupremacyUI.regroup_UI_Setup();
         BFSupremacyUI.finalAssault_UI_Setup();
         BFSupremacyUI.capturePoint_UI_Setup_FinalAssault();
+        BFSupremacyUI.changingSector_UI_Setup();
     }
 
     public static UI_Update() {
@@ -222,7 +223,7 @@ export class BFSupremacyUI {
         if (id > 20 || id < 0)
             return;
 
-        if (mod.LessThan(mod.GetCaptureProgress(eventCapturePoint), 0.9) && mod.GreaterThan(mod.GetCaptureProgress(eventCapturePoint), 0.1)) {
+        if (mod.LessThan(mod.GetCaptureProgress(eventCapturePoint), 0.99) && mod.GreaterThan(mod.GetCaptureProgress(eventCapturePoint), 0.01)) {
             alpha = UIconfig.uiConfig.uiAlpha
             if (alpha < 0.8) {
                 alpha2 = alpha
@@ -310,15 +311,15 @@ export class BFSupremacyUI {
             mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName("bonustime_background2"), UIconfig.uiConfig.enemyBGColour);
             mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName("bonustime_bar1"), UIconfig.uiConfig.friendlyColour);
             mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName("bonustime_bar2"), UIconfig.uiConfig.enemyColour);
-            mod.SetUITextLabel(mod.FindUIWidgetWithName("regoup_message1"), mod.Message(mod.stringkeys.supremacy.regroup.attackerextract));
-            mod.SetUITextLabel(mod.FindUIWidgetWithName("regoup_message2"), mod.Message(mod.stringkeys.supremacy.regroup.defenderextract));
+            mod.SetUITextLabel(mod.FindUIWidgetWithName("regoup_message1"), mod.Message(mod.stringkeys.supremacy.regroup.attackerMessage));
+            mod.SetUITextLabel(mod.FindUIWidgetWithName("regoup_message2"), mod.Message(mod.stringkeys.supremacy.regroup.defenderMessage));
         } else {
             mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName("bonustime_background1"), UIconfig.uiConfig.enemyBGColour);
             mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName("bonustime_background2"), UIconfig.uiConfig.friendlyBGColour);
             mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName("bonustime_bar1"), UIconfig.uiConfig.enemyColour);
             mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName("bonustime_bar2"), UIconfig.uiConfig.friendlyColour);
-            mod.SetUITextLabel(mod.FindUIWidgetWithName("regoup_message1"), mod.Message(mod.stringkeys.supremacy.regroup.defenderextract));
-            mod.SetUITextLabel(mod.FindUIWidgetWithName("regoup_message2"), mod.Message(mod.stringkeys.supremacy.regroup.attackerextract));
+            mod.SetUITextLabel(mod.FindUIWidgetWithName("regoup_message1"), mod.Message(mod.stringkeys.supremacy.regroup.defenderMessage));
+            mod.SetUITextLabel(mod.FindUIWidgetWithName("regoup_message2"), mod.Message(mod.stringkeys.supremacy.regroup.attackerMessage));
         }
     }
 

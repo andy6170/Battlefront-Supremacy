@@ -43,6 +43,7 @@ export interface GameConfig {
     overtime: number;
     snow: boolean;
     cutscene: boolean;
+    uniqueID: number;
 }
 
 export class GameConfig {
@@ -90,7 +91,8 @@ export class GameConfig {
         nightFinalArea: false,
         overtime: 0,
         snow: false,
-        cutscene: false
+        cutscene: false,
+        uniqueID: 0
     };
 }
 
@@ -117,6 +119,8 @@ export interface UIconfig {
     ProgressFlashT1: boolean;
     ProgressFlashT2: boolean;
     flagLetters: string[];
+    snipers: mod.Weapons[]
+    launchers: mod.Gadgets[]
 }
 
 export class UIconfig {
@@ -154,12 +158,29 @@ export class UIconfig {
             mod.stringkeys.objective.i,
             mod.stringkeys.objective.j
         ],
+        snipers: [
+            mod.Weapons.Sniper_M2010_ESR,
+            mod.Weapons.Sniper_Mini_Scout,
+            mod.Weapons.Sniper_PSR,
+            mod.Weapons.Sniper_SV_98
+        ],
+        launchers: [
+            mod.Gadgets.Launcher_Aim_Guided,
+            mod.Gadgets.Launcher_Air_Defense,
+            mod.Gadgets.Launcher_Auto_Guided,
+            mod.Gadgets.Launcher_IGLA,
+            mod.Gadgets.Launcher_Unguided_Rocket,
+            mod.Gadgets.Launcher_Long_Range,
+        ]
     };
 }
 
 export interface SupremacyPlayerData {
+    score: number;
     kills: number;
     deaths: number;
+    assists: number;
+    captures: number;
     status: number;
     onPoint: boolean;
     uniqueUI: string;
@@ -169,6 +190,10 @@ export interface SupremacyPlayerData {
     spawned: boolean;
     firstPerson: boolean;
     thirdPerson: boolean;
+    hasSniper: boolean;
+    hasLauncher: boolean;
+    flagTick: number;
+    stance: string;
 }
 
 export class PlayerVariables {
@@ -178,8 +203,11 @@ export class PlayerVariables {
         const playerId = typeof player === 'number' ? player : mod.GetObjId(player);
         if (!PlayerVariables.playerData.has(playerId)) {
             PlayerVariables.playerData.set(playerId, {
+                score: 0,
                 kills: 0,
                 deaths: 0,
+                assists: 0,
+                captures: 0,
                 status: 0,
                 onPoint: false,
                 uniqueUI: "",
@@ -189,6 +217,10 @@ export class PlayerVariables {
                 spawned: false,
                 firstPerson: false,
                 thirdPerson: false,
+                hasSniper: false,
+                hasLauncher: false,
+                flagTick: 0,
+                stance: "standing"
             });
         }
         return PlayerVariables.playerData.get(playerId)!;

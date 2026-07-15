@@ -2,7 +2,7 @@ import { GameConfig } from "./BFSVariables.ts";
 import { BFSupremacyUI } from "./BFSUI.ts";
 import { BFSupremacyCore } from "./BFSCore.ts";
 import { BFSWeather } from "./BFSWeather.ts";
-import { BFSMusic } from "./MFSMusic.ts";
+import { BFSAudio } from "./MFSAudio.ts";
 import { BFSHeliAnimations } from "./BFSHeliAnimations.ts";
 
 export class BFSupremacyRegroup {
@@ -10,7 +10,7 @@ export class BFSupremacyRegroup {
         GameConfig.gameConfig.regroupVehicleSelected = false;
         GameConfig.gameConfig.regroupBot = undefined;
         GameConfig.gameConfig.regroupVehicle = undefined;
-        BFSMusic.regroupMusic();
+        BFSAudio.regroupMusic();
         mod.SpawnAIFromAISpawner(mod.GetSpawner(900), mod.Message(mod.stringkeys.supremacy.regroup.extract), GameConfig.gameConfig.attacker);
         mod.ForceVehicleSpawnerSpawn(mod.GetVehicleSpawner(901));
     }

@@ -45,6 +45,13 @@
         "losing": "LOSING",
         "counter": "{} - {}"
     },
+    "scoreboard": {
+        "score": "Score",
+        "kills": "K",
+        "deaths": "D",
+        "assists": "A",
+        "captures": "Captures"
+    },
     "value": "{}",
     "debug1": "T1Score:{}",
     "debug2": "T2Score:{}",
@@ -59,5 +66,9 @@
     "ongoingrunning": "Ongoing Running",
     "error_generic": "No Team Detected",
     "playercount": "Player Count: {}",
-    "selectedPlayer": "Selected Player: {}"
+    "selectedPlayer": "Selected Player: {}",
+    "flagstart": "FLAG START {}",
+    "flagend": "FLAG END {}",
+    "debugSoundStart": "Debug Sound Start",
+    "debugSoundEnd": "Debug Sound End"
 }

@@ -8,9 +8,11 @@ export class BFSupremacyConquest {
     public static init(): void {
         for (let i = 200; i < 220; i++) {
             let capturePoint = mod.GetCapturePoint(i);
-            mod.EnableGameModeObjective(capturePoint, true);
-            mod.SetCapturePointNeutralizationTime(capturePoint, GameConfig.gameConfig.capturePointNeutralizationTime);
-            mod.SetCapturePointCapturingTime(capturePoint, GameConfig.gameConfig.capturePointCapturingTime);
+            if (capturePoint) {
+                mod.EnableGameModeObjective(capturePoint, true);
+                mod.SetCapturePointNeutralizationTime(capturePoint, GameConfig.gameConfig.capturePointNeutralizationTime);
+                mod.SetCapturePointCapturingTime(capturePoint, GameConfig.gameConfig.capturePointCapturingTime);
+            }
         }
         let count = 0;
         let allPoints = mod.AllCapturePoints();
@@ -23,44 +25,76 @@ export class BFSupremacyConquest {
         }
         GameConfig.gameConfig.conquestCapturePoints = count;
         for (let i = 250; i < 260; i++) {
-            mod.EnableGameModeObjective(mod.GetCapturePoint(i), false);
+            let capturePoint = mod.GetCapturePoint(i);
+            if (capturePoint) {
+                mod.EnableGameModeObjective(capturePoint, false);
+            }
         }
         for (let i = 260; i < 270; i++) {
-            mod.EnableGameModeObjective(mod.GetMCOM(i), false);
-            mod.SetMCOMFuseTime(mod.GetMCOM(i), 30);
+            let mcom = mod.GetMCOM(i);
+            if (mcom) {
+                mod.EnableGameModeObjective(mcom, false);
+                mod.SetMCOMFuseTime(mcom, 30);
+            }
         }
 
         for (let i = 1; i < 10; i++) {
-            //mod.EnableHQ(mod.GetHQ(i), true);
+            //let hq = mod.GetHQ(i);
+            //if (hq) mod.EnableHQ(hq, true);
         }
         for (let i = 300; i < 310; i++) {
-            mod.EnableHQ(mod.GetHQ(i), false);
+            let hq = mod.GetHQ(i);
+            if (hq) {
+                mod.EnableHQ(hq, false);
+            }
         }
         for (let i = 400; i < 410; i++) {
-            mod.EnableHQ(mod.GetHQ(i), false);
+            let hq = mod.GetHQ(i);
+            if (hq) {
+                mod.EnableHQ(hq, false);
+            }
         }
 
         for (let i = 2000; i < 2500; i++) {
-            mod.EnableVFX(mod.GetVFX(i), true);
+            let vfx = mod.GetVFX(i);
+            if (vfx) {
+                mod.EnableVFX(vfx, true);
+            }
         }
 
         for (let i = 3000; i < 3100; i++) {
-            mod.PlaySound(mod.GetSFX(i), 1, mod.GetObjectPosition(mod.GetSFX(i)), 100);
+            let sfx = mod.GetSFX(i);
+            if (sfx) {
+                mod.PlaySound(sfx, 1, mod.GetObjectPosition(sfx), 100);
+            }
         }
 
 
-        mod.EnableGameModeObjective(mod.GetSector(150), true);
-        mod.EnableGameModeObjective(mod.GetSector(151), true);
-        mod.EnableGameModeObjective(mod.GetSector(152), true);
-        mod.EnableGameModeObjective(mod.GetCapturePoint(904), false);
+        let s150 = mod.GetSector(150);
+        if (s150) mod.EnableGameModeObjective(s150, true);
+        let s151 = mod.GetSector(151);
+        if (s151) mod.EnableGameModeObjective(s151, true);
+        let s152 = mod.GetSector(152);
+        if (s152) mod.EnableGameModeObjective(s152, true);
+        let cp904 = mod.GetCapturePoint(904);
+        if (cp904) mod.EnableGameModeObjective(cp904, false);
         for (let i = 100; i < 110; i++) {
-            mod.EnableGameModeObjective(mod.GetSector(i), false);
+            let sector = mod.GetSector(i);
+            if (sector) {
+                mod.EnableGameModeObjective(sector, false);
+            }
         }
         for (let i = 310; i < 330; i++) {
-            mod.EnableGameModeObjective(mod.GetSector(i), false);
+            let sector = mod.GetSector(i);
+            if (sector) {
+                mod.EnableGameModeObjective(sector, false);
+            }
         }
         for (let i = 410; i < 430; i++) {
-            mod.EnableGameModeObjective(mod.GetSector(i), false);
+            let sector = mod.GetSector(i);
+            if (sector) {
+                mod.EnableGameModeObjective(sector, false);
+            }
         }
     }
 
@@ -105,11 +139,13 @@ export class BFSupremacyConquest {
 
         for (let i = 200; i < 220; i++) {
             let capturePoint = mod.GetCapturePoint(i);
-            let owner = mod.GetCurrentOwnerTeam(capturePoint);
-            if (mod.Equals(owner, mod.GetTeam(1))) {
-                t1Control++;
-            } else if (mod.Equals(owner, mod.GetTeam(2))) {
-                t2Control++;
+            if (capturePoint) {
+                let owner = mod.GetCurrentOwnerTeam(capturePoint);
+                if (mod.Equals(owner, mod.GetTeam(1))) {
+                    t1Control++;
+                } else if (mod.Equals(owner, mod.GetTeam(2))) {
+                    t2Control++;
+                }
             }
         }
         if (t1Control > t2Control) {
@@ -140,18 +176,24 @@ export class BFSupremacyConquest {
     }
 
     public static resetConquest(): void {
-        mod.EnableGameModeObjective(mod.GetSector(150), true);
-        mod.EnableGameModeObjective(mod.GetSector(151), true);
-        mod.EnableGameModeObjective(mod.GetSector(152), true);
+        let s150 = mod.GetSector(150);
+        if (s150) mod.EnableGameModeObjective(s150, true);
+        let s151 = mod.GetSector(151);
+        if (s151) mod.EnableGameModeObjective(s151, true);
+        let s152 = mod.GetSector(152);
+        if (s152) mod.EnableGameModeObjective(s152, true);
         for (let i = 1; i < 10; i++) {
-            mod.EnableHQ(mod.GetHQ(i), true);
+            let hq = mod.GetHQ(i);
+            if (hq) mod.EnableHQ(hq, true);
         }
         for (let i = 200; i < 220; i++) {
             let capturePoint = mod.GetCapturePoint(i);
-            mod.EnableGameModeObjective(capturePoint, true);
-            mod.SetCapturePointOwner(capturePoint, mod.GetTeam(3));
-            mod.SetCapturePointNeutralizationTime(capturePoint, GameConfig.gameConfig.capturePointNeutralizationTime);
-            mod.SetCapturePointCapturingTime(capturePoint, GameConfig.gameConfig.capturePointCapturingTime);
+            if (capturePoint) {
+                mod.EnableGameModeObjective(capturePoint, true);
+                mod.SetCapturePointOwner(capturePoint, mod.GetTeam(3));
+                mod.SetCapturePointNeutralizationTime(capturePoint, GameConfig.gameConfig.capturePointNeutralizationTime);
+                mod.SetCapturePointCapturingTime(capturePoint, GameConfig.gameConfig.capturePointCapturingTime);
+            }
         }
         TeamVariables.getTeamData(1).score = 0;
         TeamVariables.getTeamData(2).score = 0;
@@ -163,7 +205,9 @@ export class BFSupremacyConquest {
     public static endConquest(): void {
         for (let i = 200; i < 220; i++) {
             let capturePoint = mod.GetCapturePoint(i);
-            mod.EnableGameModeObjective(capturePoint, false);
+            if (capturePoint) {
+                mod.EnableGameModeObjective(capturePoint, false);
+            }
         }
     }
 

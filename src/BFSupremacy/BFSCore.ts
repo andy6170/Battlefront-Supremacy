@@ -1,9 +1,9 @@
-import { GameConfig, ObjectiveVariables, UIconfig } from "./BFSVariables.ts";
+import { GameConfig, ObjectiveVariables, PlayerVariables, UIconfig } from "./BFSVariables.ts";
 import { BFSupremacyUI } from "./BFSUI.ts";
 import { BFSupremacyConquest } from "./BFSConquest.ts";
 import { BFSupremacyRegroup } from "./BFSRegroup.ts";
 import { BFSupremacyFinalAssault } from "./BFSFinalAssault.ts";
-import { BFSMusic } from "./MFSMusic.ts";
+import { BFSAudio } from "./MFSAudio.ts";
 import { BFSWeather } from "./BFSWeather.ts";
 
 
@@ -45,7 +45,7 @@ export class BFSupremacyCore {
             BFSupremacyRegroup.spawnHeli();
 
         } else if (stage == 2) {
-            BFSMusic.finalAssaultMusic();
+            BFSAudio.finalAssaultMusic();
             const players = mod.AllPlayers() as mod.Array;
             mod.SendErrorReport(mod.Message(mod.stringkeys.playercount, mod.CountOf(players)));
             for (let i = 0; i < mod.CountOf(players); i++) {
@@ -181,4 +181,22 @@ export class BFSupremacyCore {
             Math.abs(mod.ZComponentOf(pos)) < 1
         );
     }
+
+    public static scoreboardInit() {
+        mod.SetScoreboardType(mod.ScoreboardType.CustomTwoTeams);
+        mod.SetScoreboardColumnNames(mod.stringkeys.scoreboard.score, mod.stringkeys.scoreboard.kills, mod.stringkeys.scoreboard.deaths, mod.stringkeys.scoreboard.assists, mod.stringkeys.scoreboard.captures);
+        mod.SetScoreboardColumnWidths(1, 0.5, 0.5, 0.5, 0.7)
+
+    }
+
+    public static scoreboardUpdate(eventPlayer: mod.Player) {
+        let score = PlayerVariables.getPlayerData(eventPlayer).score;
+        let kills = PlayerVariables.getPlayerData(eventPlayer).kills;
+        let deaths = PlayerVariables.getPlayerData(eventPlayer).deaths;
+        let assists = PlayerVariables.getPlayerData(eventPlayer).assists;
+        let captures = PlayerVariables.getPlayerData(eventPlayer).captures;
+        mod.SetScoreboardPlayerValues(eventPlayer, score, kills, deaths, assists, captures);
+
+    }
+
 }
