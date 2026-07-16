@@ -3,6 +3,7 @@ import { UIconfig } from "./BFSVariables.ts";
 import { BFSupremacyUI } from "./BFSUI.ts";
 import { BFSupremacyCore } from "./BFSCore.ts";
 import { BFSHeliAnimations } from "./BFSHeliAnimations.ts";
+import { BFSAudio } from "./MFSAudio.ts";
 
 export class BFSupremacyFinalAssault {
     public static async init(): Promise<void> {
@@ -309,8 +310,9 @@ export class BFSupremacyFinalAssault {
         let cpEnd = mod.GetCapturePoint(GameConfig.gameConfig.flagEnd);
         if (cpEnd) mod.EnableGameModeObjective(cpEnd, false);
 
-        BFSupremacyUI.finalAssault_UI_Change(false);
+        //BFSupremacyUI.finalAssault_UI_Change(false);
         mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("capturepoint_container_finalAssault"), false);
+        /*
         BFSupremacyUI.changingSector_UI_Team_Update();
         BFSupremacyUI.changingSector_UI_Change(true);
         for (let i = 30; i > 0; i--) {
@@ -319,6 +321,11 @@ export class BFSupremacyFinalAssault {
         }
         BFSupremacyUI.changingSector_UI_Change(false);
         BFSupremacyUI.finalAssault_UI_Change(true);
+        */
+
+        BFSupremacyFinalAssault.additionalTimeAnimation()
+
+        await mod.Wait(5)
 
         BFSupremacyFinalAssault.manageFinalSector(false);
 
@@ -329,6 +336,23 @@ export class BFSupremacyFinalAssault {
         }
         BFSupremacyFinalAssault.manageFinalSector(true);
         GameConfig.gameConfig.roundOngoing = true;
+    }
+
+
+    public static async additionalTimeAnimation(): Promise<void> {
+        for (let i = 0; i < 180; i += 5) {
+            BFSAudio.playCounter();
+            GameConfig.gameConfig.remainingTime += 5;
+            if (GameConfig.gameConfig.remainingTime > GameConfig.gameConfig.baseAttackTime) {
+                GameConfig.gameConfig.remainingTime = GameConfig.gameConfig.baseAttackTime;
+            }
+            BFSupremacyUI.finalAssault_UI_Update()
+            await mod.Wait(0.066);
+            if (GameConfig.gameConfig.remainingTime == GameConfig.gameConfig.baseAttackTime) {
+                break;
+            }
+        }
+
     }
 
 

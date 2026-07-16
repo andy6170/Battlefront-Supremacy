@@ -53,6 +53,7 @@ export class BFSupremacyCore {
                 mod.SendErrorReport(mod.Message(mod.stringkeys.selectedPlayer, player));
                 BFSWeather.checkNight(player);
                 mod.EnableAllInputRestrictions(player, false);
+                PlayerVariables.getPlayerData(player).cameraEnabled = true;
             }
             GameConfig.gameConfig.remainingTime = GameConfig.gameConfig.baseAttackTime + GameConfig.gameConfig.bonusTime;
             BFSupremacyFinalAssault.init();

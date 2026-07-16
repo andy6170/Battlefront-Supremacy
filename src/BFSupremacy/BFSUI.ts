@@ -1,6 +1,7 @@
 import { GameConfig } from "./BFSVariables.ts";
 import { TeamVariables } from "./BFSVariables.ts";
 import { UIconfig } from "./BFSVariables.ts";
+import { BFSAudio } from "./MFSAudio.ts";
 
 
 export class BFSupremacyUI {
@@ -12,6 +13,9 @@ export class BFSupremacyUI {
         mod.AddUIContainer("MainUICenter", mod.CreateVector(0, 0, 0), mod.CreateVector(10000, 10000, 0), mod.UIAnchor.Center);
         mod.SetUIWidgetBgFill(mod.FindUIWidgetWithName("MainUICenter"), mod.UIBgFill.None);
         mod.SetUIWidgetDepth(mod.FindUIWidgetWithName("MainUICenter"), mod.UIDepth.AboveGameUI);
+        mod.AddUIContainer("MainAnimationUI", mod.CreateVector(0, 0, 0), mod.CreateVector(10000, 10000, 0), mod.UIAnchor.TopCenter);
+        mod.SetUIWidgetBgFill(mod.FindUIWidgetWithName("MainAnimationUI"), mod.UIBgFill.None);
+        mod.SetUIWidgetDepth(mod.FindUIWidgetWithName("MainAnimationUI"), mod.UIDepth.AboveGameUI);
         BFSupremacyUI.conquest_UI_Setup();
         BFSupremacyUI.capturePoint_UI_Setup_Conquest();
         BFSupremacyUI.regroup_UI_Setup();
@@ -335,8 +339,8 @@ export class BFSupremacyUI {
         UIconfig.uiConfig.finalAssaultUI = mod.FindUIWidgetWithName("finalAssault_container");
         mod.AddUIText("timer_text1", mod.CreateVector(0, 0, 0), mod.CreateVector(180, 40, 0), mod.UIAnchor.TopCenter, UIconfig.uiConfig.finalAssaultUI, true, 0, UIconfig.uiConfig.friendlyColour, 1, mod.UIBgFill.Solid, mod.Message(mod.stringkeys.supremacy.regroup.bonustime, 0, 0, 0), 36, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(1));
         mod.AddUIText("timer_text2", mod.CreateVector(0, 0, 0), mod.CreateVector(180, 40, 0), mod.UIAnchor.TopCenter, UIconfig.uiConfig.finalAssaultUI, true, 0, UIconfig.uiConfig.enemyColour, 1, mod.UIBgFill.Solid, mod.Message(mod.stringkeys.supremacy.regroup.bonustime, 0, 0, 0), 36, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(2));
-        mod.AddUIText("finalAssault_message1", mod.CreateVector(0, -40, 0), mod.CreateVector(250, 30, 0), mod.UIAnchor.BottomCenter, UIconfig.uiConfig.finalAssaultUI, true, 0, mod.CreateVector(1, 1, 1), 1, mod.UIBgFill.None, mod.Message(mod.stringkeys.supremacy.finalassault.attackerMessage), 18, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(1));
-        mod.AddUIText("finalAssault_message2", mod.CreateVector(0, -40, 0), mod.CreateVector(250, 30, 0), mod.UIAnchor.BottomCenter, UIconfig.uiConfig.finalAssaultUI, true, 0, mod.CreateVector(1, 1, 1), 1, mod.UIBgFill.None, mod.Message(mod.stringkeys.supremacy.finalassault.attackerMessage), 18, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(2));
+        mod.AddUIText("finalAssault_message1", mod.CreateVector(0, -40, 0), mod.CreateVector(250, 30, 0), mod.UIAnchor.BottomCenter, UIconfig.uiConfig.finalAssaultUI, false, 0, mod.CreateVector(1, 1, 1), 1, mod.UIBgFill.None, mod.Message(mod.stringkeys.supremacy.finalassault.attackerMessage), 18, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(1));
+        mod.AddUIText("finalAssault_message2", mod.CreateVector(0, -40, 0), mod.CreateVector(250, 30, 0), mod.UIAnchor.BottomCenter, UIconfig.uiConfig.finalAssaultUI, false, 0, mod.CreateVector(1, 1, 1), 1, mod.UIBgFill.None, mod.Message(mod.stringkeys.supremacy.finalassault.attackerMessage), 18, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(2));
     }
 
     public static finalAssault_UI_Update() {
@@ -567,12 +571,15 @@ export class BFSupremacyUI {
             mod.SetUITextLabel(widget1, mod.Message(mod.stringkeys.value, secondsLeft));
             mod.SetUITextLabel(widget2, mod.Message(mod.stringkeys.value, secondsLeft));
             if (secondsLeft <= 5) {
-                // TODO: Play sound placeholder
+                BFSAudio.playTimerLongTick();
+            } else {
+                BFSAudio.playTimerShortTick();
             }
 
             // Wait 1 second
             await mod.Wait(1);
         }
+        BFSAudio.playTimerEnd();
 
         // --- SWIPE TRANSITION ---
         await BFSupremacyUI.playSwipeTransition(async () => {
@@ -622,7 +629,7 @@ export class BFSupremacyUI {
             mod.CreateVector(0, -1200, 0),
             mod.CreateVector(10000, 1200, 0),
             mod.UIAnchor.TopCenter,
-            mod.FindUIWidgetWithName("MainUI"),
+            mod.FindUIWidgetWithName("MainAnimationUI"),
             true,
             0,
             t1colour,
@@ -639,7 +646,7 @@ export class BFSupremacyUI {
             mod.CreateVector(0, -1200, 0),
             mod.CreateVector(10000, 1200, 0),
             mod.UIAnchor.TopCenter,
-            mod.FindUIWidgetWithName("MainUI"),
+            mod.FindUIWidgetWithName("MainAnimationUI"),
             true,
             0,
             t2colour,

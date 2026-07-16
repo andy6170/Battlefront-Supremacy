@@ -11,7 +11,9 @@
             "defenderMessage": "STOP THE EXTRACT",
             "bonustime": "0{}:{}{}",
             "extract": "EXTRACT",
-            "undeploy": "CANNOT SPAWN ON OBJECTIVE"
+            "undeploy": "CANNOT SPAWN ON OBJECTIVE",
+            "secured": "BATTLEFIELD SECURED",
+            "lost": "BATTLEFIELD LOST"
         },
         "finalassault": {
             "name": "FINAL ATTACK",
@@ -70,5 +72,16 @@
     "flagstart": "FLAG START {}",
     "flagend": "FLAG END {}",
     "debugSoundStart": "Debug Sound Start",
-    "debugSoundEnd": "Debug Sound End"
+    "debugSoundEnd": "Debug Sound End",
+    "debugEnterVehicle": "Debug Enter Vehicle",
+    "debugStateConfirmed": "Debug State Confirmed",
+    "debugRegroupVehicleConfirmed": "Debug Regroup Vehicle Confirmed",
+    "debugNotPilot": "Debug Not Pilot",
+    "debugFreshSpawn": "Debug Fresh Spawn",
+    "debugPlayerBoarding": "Debug Player Boarding",
+    "debugPlayerRejected": "Debug Player Rejected",
+    "eventVehicleMatchesRegroupVehicle": "Event Vehicle Matches Regroup Vehicle",
+    "eventVehicleDoesNotMatch": "Event Vehicles DOES NOT Match",
+    "playerVehicleIsRegroupVehicle": "Player Vehicle IS Regroup Vehicle",
+    "playerVehicleIsNotRegroupVehicle": "Player Vehicle IS NOT Regroup Vehicle"
 }

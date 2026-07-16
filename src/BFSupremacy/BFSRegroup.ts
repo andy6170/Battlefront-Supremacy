@@ -1,4 +1,4 @@
-import { GameConfig } from "./BFSVariables.ts";
+import { GameConfig, PlayerVariables } from "./BFSVariables.ts";
 import { BFSupremacyUI } from "./BFSUI.ts";
 import { BFSupremacyCore } from "./BFSCore.ts";
 import { BFSWeather } from "./BFSWeather.ts";
@@ -134,6 +134,7 @@ export class BFSupremacyRegroup {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static playerBoarding(player: mod.Player, vehicle: mod.Vehicle): void {
+        PlayerVariables.getPlayerData(player).cameraEnabled = false;
         GameConfig.gameConfig.bonusTime += GameConfig.gameConfig.bonusTimeAddition;
         BFSupremacyUI.regroup_UI_Text_Update();
         BFSupremacyUI.regroup_UI_Text_Flash();

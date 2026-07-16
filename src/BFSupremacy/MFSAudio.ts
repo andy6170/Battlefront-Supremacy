@@ -10,6 +10,10 @@ export class BFSAudio {
     private static VO2: mod.SFX;
     private static VO3: mod.SFX;
     private static VO4: mod.SFX;
+    private static timerShortTick: mod.SFX;
+    private static timerLongTick: mod.SFX;
+    private static timerEnd: mod.SFX;
+    private static counter: mod.SFX
 
 
 
@@ -24,6 +28,10 @@ export class BFSAudio {
         BFSAudio.VO2 = mod.SpawnObject(mod.RuntimeSpawn_Common.SFX_VOModule_OneShot2D, mod.CreateVector(0, 0, 0), mod.CreateVector(0, 0, 0));
         BFSAudio.VO3 = mod.SpawnObject(mod.RuntimeSpawn_Common.SFX_VOModule_OneShot2D, mod.CreateVector(0, 0, 0), mod.CreateVector(0, 0, 0));
         BFSAudio.VO4 = mod.SpawnObject(mod.RuntimeSpawn_Common.SFX_VOModule_OneShot2D, mod.CreateVector(0, 0, 0), mod.CreateVector(0, 0, 0));
+        BFSAudio.timerShortTick = mod.SpawnObject(mod.RuntimeSpawn_Common.SFX_UI_Gamemode_Shared_CaptureObjectives_ObjetiveUnlockCountdownTick_OneShot2D, mod.CreateVector(0, 0, 0), mod.CreateVector(0, 0, 0))
+        BFSAudio.timerLongTick = mod.SpawnObject(mod.RuntimeSpawn_Common.SFX_UI_Gamemode_Shared_Intro_Countdown_Final_OneShot2D, mod.CreateVector(0, 0, 0), mod.CreateVector(0, 0, 0))
+        BFSAudio.timerEnd = mod.SpawnObject(mod.RuntimeSpawn_Common.SFX_UI_Gamemode_Shared_Intro_FinalImpact_OneShot2D, mod.CreateVector(0, 0, 0), mod.CreateVector(0, 0, 0))
+        BFSAudio.counter = mod.SpawnObject(mod.RuntimeSpawn_Common.SFX_UI_Gauntlet_Beacons_CalibrationTick_OneShot2D, mod.CreateVector(0, 0, 0), mod.CreateVector(0, 0, 0))
 
 
         mod.LoadMusic(mod.MusicPackages.Radio)
@@ -93,6 +101,22 @@ export class BFSAudio {
         else if (friendly < enemy) {
             mod.PlaySound(BFSAudio.capturetickSoundLosing, 0.5, eventPlayer);
         }
+    }
+
+    public static playTimerShortTick(): void {
+        mod.PlaySound(BFSAudio.timerShortTick, 0.6);
+    }
+
+    public static playTimerLongTick(): void {
+        mod.PlaySound(BFSAudio.timerLongTick, 0.5);
+    }
+
+    public static playTimerEnd(): void {
+        mod.PlaySound(BFSAudio.timerEnd, 0.5);
+    }
+
+    public static playCounter(): void {
+        mod.PlaySound(BFSAudio.counter, 0.5);
     }
 
 

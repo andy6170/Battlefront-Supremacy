@@ -194,6 +194,7 @@ export interface SupremacyPlayerData {
     hasLauncher: boolean;
     flagTick: number;
     stance: string;
+    cameraEnabled: boolean;
 }
 
 export class PlayerVariables {
@@ -220,7 +221,8 @@ export class PlayerVariables {
                 hasSniper: false,
                 hasLauncher: false,
                 flagTick: 0,
-                stance: "standing"
+                stance: "standing",
+                cameraEnabled: true,
             });
         }
         return PlayerVariables.playerData.get(playerId)!;

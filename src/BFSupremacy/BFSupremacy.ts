@@ -35,7 +35,7 @@ export class BFSupremacy {
         });
 
         Events.OngoingPlayer.subscribe((eventPlayer: mod.Player) => {
-            if (GameConfig.gameConfig.gameStarted as boolean) {
+            if (GameConfig.gameConfig.gameStarted as boolean && PlayerVariables.getPlayerData(eventPlayer).cameraEnabled) {
                 if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsAlive) && !GameConfig.gameConfig.cutscene) {
                     if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsZooming)) {
                         if ((PlayerVariables.getPlayerData(eventPlayer).hasSniper && mod.IsInventorySlotActive(eventPlayer, mod.InventorySlots.PrimaryWeapon)) || (PlayerVariables.getPlayerData(eventPlayer).hasLauncher && (mod.IsInventorySlotActive(eventPlayer, mod.InventorySlots.GadgetOne) || mod.IsInventorySlotActive(eventPlayer, mod.InventorySlots.GadgetTwo)) && !PlayerVariables.getPlayerData(eventPlayer).firstPerson)) {
@@ -317,17 +317,40 @@ export class BFSupremacy {
         });
 
         Events.OnPlayerEnterVehicle.subscribe((eventPlayer: mod.Player, eventVehicle: mod.Vehicle) => {
+            mod.SendErrorReport(mod.Message(mod.stringkeys.value, eventPlayer));
+            mod.SendErrorReport(mod.Message(mod.stringkeys.selectedPlayer, GameConfig.gameConfig.regroupBot as mod.Player));
+
             let vehicle = mod.GetVehicleFromPlayer(eventPlayer);
+
+            if (mod.Equals(eventVehicle as mod.Vehicle, GameConfig.gameConfig.regroupVehicle as mod.Vehicle)) {
+                mod.SendErrorReport(mod.Message(mod.stringkeys.eventVehicleMatchesRegroupVehicle));
+            } else {
+                mod.SendErrorReport(mod.Message(mod.stringkeys.eventVehicleDoesNotMatch));
+            }
+
+            if (mod.Equals(vehicle as mod.Vehicle, GameConfig.gameConfig.regroupVehicle as mod.Vehicle)) {
+                mod.SendErrorReport(mod.Message(mod.stringkeys.playerVehicleIsRegroupVehicle));
+            } else {
+                mod.SendErrorReport(mod.Message(mod.stringkeys.playerVehicleIsNotRegroupVehicle));
+            }
+
+
+
             if (GameConfig.gameConfig.stage === 1) {
-                if (vehicle == GameConfig.gameConfig.regroupVehicle) {
-                    if (!(eventPlayer == GameConfig.gameConfig.regroupBot)) {
-                        if (PlayerVariables.getPlayerData(eventPlayer).spawned) {
+                mod.SendErrorReport(mod.Message(mod.stringkeys.debugEnterVehicle));
+                if (mod.Equals(eventVehicle as mod.Vehicle, GameConfig.gameConfig.regroupVehicle as mod.Vehicle)) {
+                    mod.SendErrorReport(mod.Message(mod.stringkeys.debugRegroupVehicleConfirmed));
+                    if (!mod.Equals(eventPlayer as mod.Player, GameConfig.gameConfig.regroupBot as mod.Player)) {
+                        mod.SendErrorReport(mod.Message(mod.stringkeys.debugNotPilot));
+                        if (GameConfig.gameConfig.extractReady) {
+                            BFSupremacyRegroup.playerBoarding(eventPlayer, eventVehicle);
+                        } else if (PlayerVariables.getPlayerData(eventPlayer).spawned) {
+                            mod.SendErrorReport(mod.Message(mod.stringkeys.debugFreshSpawn));
                             mod.UndeployPlayer(eventPlayer);
                             mod.DisplayNotificationMessage(mod.Message(mod.stringkeys.regroup.undeploy), eventPlayer);
-                        } else if (GameConfig.gameConfig.extractReady) {
-                            BFSupremacyRegroup.playerBoarding(eventPlayer, eventVehicle);
                         } else {
                             mod.ForcePlayerExitVehicle(eventPlayer, eventVehicle);
+                            mod.SendErrorReport(mod.Message(mod.stringkeys.debugPlayerRejected));
                         }
                     }
                 }
@@ -337,7 +360,7 @@ export class BFSupremacy {
         Events.OnPlayerExitVehicle.subscribe(async (eventPlayer: mod.Player, eventVehicle: mod.Vehicle) => {
             if (!GameConfig.gameConfig.cutscene) {
                 //Force Reset the Camera as height can bug out
-                if (!(eventVehicle == GameConfig.gameConfig.regroupVehicle)) {
+                if (!mod.Equals(eventVehicle as mod.Vehicle, GameConfig.gameConfig.regroupVehicle as mod.Vehicle)) {
                     mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.FirstPerson)
                     mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.FirstPerson)
                     mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson)
