@@ -320,12 +320,14 @@ export class BFSupremacy {
             let vehicle = mod.GetVehicleFromPlayer(eventPlayer);
             if (GameConfig.gameConfig.stage === 1) {
                 if (vehicle == GameConfig.gameConfig.regroupVehicle) {
-                    if (mod.Not(mod.Equals(eventPlayer, GameConfig.gameConfig.regroupBot))) {
+                    if (!(eventPlayer == GameConfig.gameConfig.regroupBot)) {
                         if (PlayerVariables.getPlayerData(eventPlayer).spawned) {
                             mod.UndeployPlayer(eventPlayer);
                             mod.DisplayNotificationMessage(mod.Message(mod.stringkeys.regroup.undeploy), eventPlayer);
-                        } else if (GameConfig.gameConfig.roundOngoing) {
+                        } else if (GameConfig.gameConfig.extractReady) {
                             BFSupremacyRegroup.playerBoarding(eventPlayer, eventVehicle);
+                        } else {
+                            mod.ForcePlayerExitVehicle(eventPlayer, eventVehicle);
                         }
                     }
                 }

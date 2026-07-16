@@ -7,6 +7,7 @@ import { BFSHeliAnimations } from "./BFSHeliAnimations.ts";
 
 export class BFSupremacyRegroup {
     public static spawnHeli(): void {
+        GameConfig.gameConfig.extractReady = false;
         GameConfig.gameConfig.regroupVehicleSelected = false;
         GameConfig.gameConfig.regroupBot = undefined;
         GameConfig.gameConfig.regroupVehicle = undefined;
@@ -102,6 +103,7 @@ export class BFSupremacyRegroup {
         if (GameConfig.gameConfig.heliTakeOff) return;
         GameConfig.gameConfig.heliTakeOff = true;
         GameConfig.gameConfig.roundOngoing = false;
+        GameConfig.gameConfig.extractReady = false;
         mod.EnableVFX(GameConfig.gameConfig.extractionIcon, false);
         mod.EnableGameModeObjective(mod.GetCapturePoint(904), false);
         const heli = GameConfig.gameConfig.regroupVehicle;

@@ -309,6 +309,8 @@ export class BFSupremacyFinalAssault {
         let cpEnd = mod.GetCapturePoint(GameConfig.gameConfig.flagEnd);
         if (cpEnd) mod.EnableGameModeObjective(cpEnd, false);
 
+        BFSupremacyUI.finalAssault_UI_Change(false);
+        mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("capturepoint_container_finalAssault"), false);
         BFSupremacyUI.changingSector_UI_Team_Update();
         BFSupremacyUI.changingSector_UI_Change(true);
         for (let i = 30; i > 0; i--) {
@@ -316,6 +318,7 @@ export class BFSupremacyFinalAssault {
             await mod.Wait(1);
         }
         BFSupremacyUI.changingSector_UI_Change(false);
+        BFSupremacyUI.finalAssault_UI_Change(true);
 
         BFSupremacyFinalAssault.manageFinalSector(false);
 

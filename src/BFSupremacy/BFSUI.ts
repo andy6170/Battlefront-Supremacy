@@ -9,6 +9,9 @@ export class BFSupremacyUI {
         mod.AddUIContainer("MainUI", mod.CreateVector(0, 0, 0), mod.CreateVector(10000, 10000, 0), mod.UIAnchor.TopCenter);
         mod.SetUIWidgetBgFill(mod.FindUIWidgetWithName("MainUI"), mod.UIBgFill.None);
         mod.SetUIWidgetDepth(mod.FindUIWidgetWithName("MainUI"), mod.UIDepth.AboveGameUI);
+        mod.AddUIContainer("MainUICenter", mod.CreateVector(0, 0, 0), mod.CreateVector(10000, 10000, 0), mod.UIAnchor.Center);
+        mod.SetUIWidgetBgFill(mod.FindUIWidgetWithName("MainUICenter"), mod.UIBgFill.None);
+        mod.SetUIWidgetDepth(mod.FindUIWidgetWithName("MainUICenter"), mod.UIDepth.AboveGameUI);
         BFSupremacyUI.conquest_UI_Setup();
         BFSupremacyUI.capturePoint_UI_Setup_Conquest();
         BFSupremacyUI.regroup_UI_Setup();
@@ -157,7 +160,7 @@ export class BFSupremacyUI {
     }
 
     public static capturePoint_UI_Setup_FinalAssault() {
-        mod.AddUIContainer("capturepoint_container_finalAssault", mod.CreateVector(0, 115, 0), mod.CreateVector(900, 30, 0), mod.UIAnchor.TopCenter, mod.FindUIWidgetWithName("MainUI"), false, 0, mod.CreateVector(0.5, 0.5, 0.5), 0.5, mod.UIBgFill.None, mod.UIDepth.AboveGameUI);
+        mod.AddUIContainer("capturepoint_container_finalAssault", mod.CreateVector(0, 105, 0), mod.CreateVector(900, 30, 0), mod.UIAnchor.TopCenter, mod.FindUIWidgetWithName("MainUI"), false, 0, mod.CreateVector(0.5, 0.5, 0.5), 0.5, mod.UIBgFill.None, mod.UIDepth.AboveGameUI);
         UIconfig.uiConfig.capturepointUIFinalAssault = mod.FindUIWidgetWithName("capturepoint_container_finalAssault");
         for (let i = 0; i < 2; i++) {
             mod.AddUIContainer("finalflag_bg1_" + i, mod.CreateVector(((i - (2 - 1) / 2) * 60), 0, 0), mod.CreateVector(35, 35, 0), mod.UIAnchor.TopCenter, UIconfig.uiConfig.capturepointUIFinalAssault, true, 0, mod.CreateVector(0, 0, 0), 0.8, mod.UIBgFill.Blur, mod.UIDepth.AboveGameUI, mod.GetTeam(1));
@@ -332,8 +335,8 @@ export class BFSupremacyUI {
         UIconfig.uiConfig.finalAssaultUI = mod.FindUIWidgetWithName("finalAssault_container");
         mod.AddUIText("timer_text1", mod.CreateVector(0, 0, 0), mod.CreateVector(180, 40, 0), mod.UIAnchor.TopCenter, UIconfig.uiConfig.finalAssaultUI, true, 0, UIconfig.uiConfig.friendlyColour, 1, mod.UIBgFill.Solid, mod.Message(mod.stringkeys.supremacy.regroup.bonustime, 0, 0, 0), 36, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(1));
         mod.AddUIText("timer_text2", mod.CreateVector(0, 0, 0), mod.CreateVector(180, 40, 0), mod.UIAnchor.TopCenter, UIconfig.uiConfig.finalAssaultUI, true, 0, UIconfig.uiConfig.enemyColour, 1, mod.UIBgFill.Solid, mod.Message(mod.stringkeys.supremacy.regroup.bonustime, 0, 0, 0), 36, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(2));
-        mod.AddUIText("finalAssault_message1", mod.CreateVector(0, 0, 0), mod.CreateVector(250, 30, 0), mod.UIAnchor.BottomCenter, UIconfig.uiConfig.finalAssaultUI, true, 0, mod.CreateVector(1, 1, 1), 1, mod.UIBgFill.None, mod.Message(mod.stringkeys.supremacy.finalassault.attackerMessage), 18, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(1));
-        mod.AddUIText("finalAssault_message2", mod.CreateVector(0, 0, 0), mod.CreateVector(250, 30, 0), mod.UIAnchor.BottomCenter, UIconfig.uiConfig.finalAssaultUI, true, 0, mod.CreateVector(1, 1, 1), 1, mod.UIBgFill.None, mod.Message(mod.stringkeys.supremacy.finalassault.attackerMessage), 18, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(2));
+        mod.AddUIText("finalAssault_message1", mod.CreateVector(0, -40, 0), mod.CreateVector(250, 30, 0), mod.UIAnchor.BottomCenter, UIconfig.uiConfig.finalAssaultUI, true, 0, mod.CreateVector(1, 1, 1), 1, mod.UIBgFill.None, mod.Message(mod.stringkeys.supremacy.finalassault.attackerMessage), 18, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(1));
+        mod.AddUIText("finalAssault_message2", mod.CreateVector(0, -40, 0), mod.CreateVector(250, 30, 0), mod.UIAnchor.BottomCenter, UIconfig.uiConfig.finalAssaultUI, true, 0, mod.CreateVector(1, 1, 1), 1, mod.UIBgFill.None, mod.Message(mod.stringkeys.supremacy.finalassault.attackerMessage), 18, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(2));
     }
 
     public static finalAssault_UI_Update() {
@@ -373,12 +376,12 @@ export class BFSupremacyUI {
     //Changing Sector UI
     //-------------------------------------------------------------------------
     public static changingSector_UI_Setup() {
-        mod.AddUIContainer("changingSector_container", mod.CreateVector(0, 0, 0), mod.CreateVector(10000, 10000, 0), mod.UIAnchor.Center, mod.FindUIWidgetWithName("MainUI"), false, 0, mod.CreateVector(0.5, 0.5, 0.5), 0.5, mod.UIBgFill.None, mod.UIDepth.AboveGameUI);
+        mod.AddUIContainer("changingSector_container", mod.CreateVector(0, 0, 0), mod.CreateVector(250, 70, 0), mod.UIAnchor.TopCenter, mod.FindUIWidgetWithName("MainUI"), false, 0, mod.CreateVector(0.5, 0.5, 0.5), 0.5, mod.UIBgFill.None, mod.UIDepth.AboveGameUI);
         UIconfig.uiConfig.changingSectorUI = mod.FindUIWidgetWithName("changingSector_container");
-        mod.AddUIText("changingSector_header1", mod.CreateVector(0, 0, 0), mod.CreateVector(180, 40, 0), mod.UIAnchor.Center, UIconfig.uiConfig.changingSectorUI, true, 0, UIconfig.uiConfig.friendlyColour, 1, mod.UIBgFill.Solid, mod.Message(mod.stringkeys.supremacy.regroup.bonustime, 0, 0, 0), 36, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(1));
-        mod.AddUIText("changingSector_header2", mod.CreateVector(0, 0, 0), mod.CreateVector(180, 40, 0), mod.UIAnchor.Center, UIconfig.uiConfig.changingSectorUI, true, 0, UIconfig.uiConfig.enemyColour, 1, mod.UIBgFill.Solid, mod.Message(mod.stringkeys.supremacy.regroup.bonustime, 0, 0, 0), 36, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(2));
-        mod.AddUIText("changingSector_counter1", mod.CreateVector(0, 0, 0), mod.CreateVector(250, 30, 0), mod.UIAnchor.Center, UIconfig.uiConfig.changingSectorUI, true, 0, mod.CreateVector(1, 1, 1), 1, mod.UIBgFill.None, mod.Message(mod.stringkeys.supremacy.finalassault.attackerMessage), 18, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(1));
-        mod.AddUIText("changingSector_counter2", mod.CreateVector(0, 0, 0), mod.CreateVector(250, 30, 0), mod.UIAnchor.Center, UIconfig.uiConfig.changingSectorUI, true, 0, mod.CreateVector(1, 1, 1), 1, mod.UIBgFill.None, mod.Message(mod.stringkeys.supremacy.finalassault.attackerMessage), 18, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(2));
+        mod.AddUIText("changingSector_header1", mod.CreateVector(0, 0, 0), mod.CreateVector(180, 40, 0), mod.UIAnchor.TopCenter, UIconfig.uiConfig.changingSectorUI, true, 0, UIconfig.uiConfig.friendlyColour, 1, mod.UIBgFill.Solid, mod.Message(mod.stringkeys.supremacy.regroup.name), 36, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(1));
+        mod.AddUIText("changingSector_header2", mod.CreateVector(0, 0, 0), mod.CreateVector(180, 40, 0), mod.UIAnchor.TopCenter, UIconfig.uiConfig.changingSectorUI, true, 0, UIconfig.uiConfig.enemyColour, 1, mod.UIBgFill.Solid, mod.Message(mod.stringkeys.supremacy.regroup.name), 36, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(2));
+        mod.AddUIText("changingSector_counter1", mod.CreateVector(0, 0, 0), mod.CreateVector(250, 30, 0), mod.UIAnchor.BottomCenter, UIconfig.uiConfig.changingSectorUI, true, 0, mod.CreateVector(1, 1, 1), 1, mod.UIBgFill.None, mod.Message(mod.stringkeys.supremacy.finalassault.attackerMessage), 18, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(1));
+        mod.AddUIText("changingSector_counter2", mod.CreateVector(0, 0, 0), mod.CreateVector(250, 30, 0), mod.UIAnchor.BottomCenter, UIconfig.uiConfig.changingSectorUI, true, 0, mod.CreateVector(1, 1, 1), 1, mod.UIBgFill.None, mod.Message(mod.stringkeys.supremacy.finalassault.attackerMessage), 18, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(2));
     }
 
     public static changingSector_UI_Update(seconds: number) {
@@ -389,28 +392,32 @@ export class BFSupremacyUI {
     public static changingSector_UI_Team_Update() {
         let attackermessage: mod.Message;
         let defendermessage: mod.Message;
+        let attackercolour: mod.Vector;
+        let defendercolour: mod.Vector;
 
-        if (GameConfig.gameConfig.stage == 0) {
-            attackermessage = mod.Message(mod.stringkeys.supremacy.conquest.name);
-            defendermessage = mod.Message(mod.stringkeys.supremacy.conquest.name);
+        if (GameConfig.gameConfig.attacker == mod.GetTeam(1)) {
+            attackermessage = mod.Message(mod.stringkeys.supremacy.conquest.attacker);
+            defendermessage = mod.Message(mod.stringkeys.supremacy.conquest.defender);
+            attackercolour = UIconfig.uiConfig.friendlyColour;
+            defendercolour = UIconfig.uiConfig.enemyColour;
         } else {
-            attackermessage = mod.Message(mod.stringkeys.supremacy.finalassault.attacker);
-            defendermessage = mod.Message(mod.stringkeys.supremacy.finalassault.defender);
+            attackermessage = mod.Message(mod.stringkeys.supremacy.finalassault.defender);
+            defendermessage = mod.Message(mod.stringkeys.supremacy.finalassault.attacker);
+            attackercolour = UIconfig.uiConfig.enemyColour;
+            defendercolour = UIconfig.uiConfig.friendlyColour;
         }
 
-
-        if (mod.Equals(GameConfig.gameConfig.attacker, mod.GetTeam(1))) {
-            mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName("changingSector_header1"), UIconfig.uiConfig.enemyColour);
-            mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName("changingSector_header2"), UIconfig.uiConfig.friendlyColour);
-            mod.SetUITextLabel(mod.FindUIWidgetWithName("changingSector_counter1"), attackermessage);
-            mod.SetUITextLabel(mod.FindUIWidgetWithName("changingSector_counter2"), defendermessage);
-        } else {
-            mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName("changingSector_header1"), UIconfig.uiConfig.friendlyColour);
-            mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName("changingSector_header2"), UIconfig.uiConfig.enemyColour);
-            mod.SetUITextLabel(mod.FindUIWidgetWithName("changingSector_counter1"), defendermessage);
-            mod.SetUITextLabel(mod.FindUIWidgetWithName("changingSector_counter2"), attackermessage);
-        }
+        mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName("changingSector_header1"), attackercolour);
+        mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName("changingSector_header2"), defendercolour);
+        mod.SetUITextLabel(mod.FindUIWidgetWithName("changingSector_counter1"), attackermessage);
+        mod.SetUITextLabel(mod.FindUIWidgetWithName("changingSector_counter2"), defendermessage);
     }
+
+
+
+
+
+
 
     public static changingSector_UI_Change(enable: boolean) {
         mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("changingSector_container"), enable);
@@ -421,11 +428,33 @@ export class BFSupremacyUI {
         mod.EnableAllPlayerDeploy(false);
         mod.PauseGameModeTime(true);
 
-        const isTeam1Attacker = mod.Equals(GameConfig.gameConfig.attacker, mod.GetTeam(1));
-        const team1Color = isTeam1Attacker ? UIconfig.uiConfig.friendlyColour : UIconfig.uiConfig.enemyColour;
-        const team2Color = isTeam1Attacker ? UIconfig.uiConfig.enemyColour : UIconfig.uiConfig.friendlyColour;
-        const team1BGColor = isTeam1Attacker ? UIconfig.uiConfig.friendlyColour : UIconfig.uiConfig.enemyColour;
-        const team2BGColor = isTeam1Attacker ? UIconfig.uiConfig.enemyColour : UIconfig.uiConfig.friendlyColour;
+        let t1message: mod.Message;
+        let t2message: mod.Message;
+        let t1colour: mod.Vector;
+        let t2colour: mod.Vector;
+        let root = mod.FindUIWidgetWithName("MainUICenter")
+
+        if (GameConfig.gameConfig.stage == 0) {
+            t1message = mod.Message(mod.stringkeys.supremacy.conquest.name);
+            t2message = mod.Message(mod.stringkeys.supremacy.conquest.name);
+            if (mod.Equals(GameConfig.gameConfig.attacker, mod.GetTeam(1))) {
+                t1colour = UIconfig.uiConfig.enemyColour;
+                t2colour = UIconfig.uiConfig.friendlyColour;
+            } else {
+                t1colour = UIconfig.uiConfig.friendlyColour;
+                t2colour = UIconfig.uiConfig.enemyColour;
+            }
+        } else {
+            t1message = mod.Message(mod.stringkeys.supremacy.finalassault.attacker);
+            t2message = mod.Message(mod.stringkeys.supremacy.finalassault.defender);
+            if (mod.Equals(GameConfig.gameConfig.attacker, mod.GetTeam(1))) {
+                t1colour = UIconfig.uiConfig.friendlyColour;
+                t2colour = UIconfig.uiConfig.enemyColour;
+            } else {
+                t1colour = UIconfig.uiConfig.enemyColour;
+                t2colour = UIconfig.uiConfig.friendlyColour;
+            }
+        }
 
         // 2. Spawn team-specific countdown widgets
         const countdownName1 = "countdown_1";
@@ -448,7 +477,7 @@ export class BFSupremacyUI {
             mod.CreateVector(0, 150, 0),
             mod.CreateVector(10000, 10000, 0),
             mod.UIAnchor.Center,
-            mod.GetUIRoot(),
+            root,
             true,
             0,
             mod.CreateVector(0, 0, 0),
@@ -456,7 +485,7 @@ export class BFSupremacyUI {
             mod.UIBgFill.Solid,
             mod.Message(mod.stringkeys.value, 10),
             256,
-            team1Color,
+            t1colour,
             1,
             mod.UIAnchor.Center,
             mod.UIDepth.AboveGameUI,
@@ -469,7 +498,7 @@ export class BFSupremacyUI {
             mod.CreateVector(0, 150, 0),
             mod.CreateVector(10000, 10000, 0),
             mod.UIAnchor.Center,
-            mod.GetUIRoot(),
+            root,
             true,
             0,
             mod.CreateVector(0, 0, 0),
@@ -477,7 +506,7 @@ export class BFSupremacyUI {
             mod.UIBgFill.Solid,
             mod.Message(mod.stringkeys.value, 10),
             256,
-            team2Color,
+            t2colour,
             1,
             mod.UIAnchor.Center,
             mod.UIDepth.AboveGameUI,
@@ -494,15 +523,15 @@ export class BFSupremacyUI {
             mod.CreateVector(0, -150, 0),
             mod.CreateVector(10000, 150, 0),
             mod.UIAnchor.Center,
-            mod.GetUIRoot(),
+            root,
             true,
             0,
-            team1BGColor,
+            t1colour,
             0.05,
             mod.UIBgFill.Solid,
-            titleMsg,
+            t1message,
             156,
-            team1Color,
+            t1colour,
             1,
             mod.UIAnchor.Center,
             mod.UIDepth.AboveGameUI,
@@ -515,21 +544,23 @@ export class BFSupremacyUI {
             mod.CreateVector(0, -150, 0),
             mod.CreateVector(10000, 150, 0),
             mod.UIAnchor.Center,
-            mod.GetUIRoot(),
+            root,
             true,
             0,
-            team2BGColor,
+            t2colour,
             0.05,
             mod.UIBgFill.Solid,
-            titleMsg,
+            t2message,
             156,
-            team2Color,
+            t2colour,
             1,
             mod.UIAnchor.Center,
             mod.UIDepth.AboveGameUI,
             mod.GetTeam(2)
         );
+
         const titleWidget2 = mod.FindUIWidgetWithName(titleName2)!;
+
 
         // 3. 10-second countdown loop
         for (let secondsLeft = 10; secondsLeft >= 1; secondsLeft--) {
@@ -557,9 +588,25 @@ export class BFSupremacyUI {
     }
 
     public static async playSwipeTransition(onCovered?: () => void | Promise<void>): Promise<void> {
-        const isTeam1Attacker = mod.Equals(GameConfig.gameConfig.attacker, mod.GetTeam(1));
-        const team1Color = isTeam1Attacker ? UIconfig.uiConfig.friendlyColour : UIconfig.uiConfig.enemyColour;
-        const team2Color = isTeam1Attacker ? UIconfig.uiConfig.enemyColour : UIconfig.uiConfig.friendlyColour;
+        let t1colour: mod.Vector;
+        let t2colour: mod.Vector;
+        if (GameConfig.gameConfig.stage == 0) {
+            if (mod.Equals(GameConfig.gameConfig.attacker, mod.GetTeam(1))) {
+                t1colour = UIconfig.uiConfig.enemyBGColour;
+                t2colour = UIconfig.uiConfig.friendlyBGColour;
+            } else {
+                t1colour = UIconfig.uiConfig.friendlyBGColour;
+                t2colour = UIconfig.uiConfig.enemyBGColour;
+            }
+        } else {
+            if (mod.Equals(GameConfig.gameConfig.attacker, mod.GetTeam(1))) {
+                t1colour = UIconfig.uiConfig.friendlyColour;
+                t2colour = UIconfig.uiConfig.enemyColour;
+            } else {
+                t1colour = UIconfig.uiConfig.enemyColour;
+                t2colour = UIconfig.uiConfig.friendlyColour;
+            }
+        }
 
         const swipeOverlayName1 = "swipe_overlay_1";
         const swipeOverlayName2 = "swipe_overlay_2";
@@ -575,10 +622,10 @@ export class BFSupremacyUI {
             mod.CreateVector(0, -1200, 0),
             mod.CreateVector(10000, 1200, 0),
             mod.UIAnchor.TopCenter,
-            mod.GetUIRoot(),
+            mod.FindUIWidgetWithName("MainUI"),
             true,
             0,
-            team1Color,
+            t1colour,
             1.0,
             mod.UIBgFill.Solid,
             mod.UIDepth.AboveGameUI,
@@ -592,10 +639,10 @@ export class BFSupremacyUI {
             mod.CreateVector(0, -1200, 0),
             mod.CreateVector(10000, 1200, 0),
             mod.UIAnchor.TopCenter,
-            mod.GetUIRoot(),
+            mod.FindUIWidgetWithName("MainUI"),
             true,
             0,
-            team2Color,
+            t2colour,
             1.0,
             mod.UIBgFill.Solid,
             mod.UIDepth.AboveGameUI,

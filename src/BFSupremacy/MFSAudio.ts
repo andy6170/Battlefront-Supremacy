@@ -72,13 +72,10 @@ export class BFSAudio {
     }
 
     public static playTickSound(eventPlayer: mod.Player, flagID: number, team: mod.Team): void {
-        mod.SendErrorReport(mod.Message(mod.stringkeys.debugSoundStart))
         let data = ObjectiveVariables.getObjectiveVariables(flagID);
         let friendly: number;
         let enemy: number;
         let captureProgress = data.progress;
-
-        mod.SendErrorReport(mod.Message(mod.stringkeys.value, captureProgress))
 
         if ((captureProgress == 1) || (captureProgress == 0)) return;
 
@@ -96,7 +93,6 @@ export class BFSAudio {
         else if (friendly < enemy) {
             mod.PlaySound(BFSAudio.capturetickSoundLosing, 0.5, eventPlayer);
         }
-        mod.SendErrorReport(mod.Message(mod.stringkeys.debugSoundEnd))
     }
 
 

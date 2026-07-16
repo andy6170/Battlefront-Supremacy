@@ -184,7 +184,7 @@ export class BFSupremacyCore {
 
     public static scoreboardInit() {
         mod.SetScoreboardType(mod.ScoreboardType.CustomTwoTeams);
-        mod.SetScoreboardColumnNames(mod.stringkeys.scoreboard.score, mod.stringkeys.scoreboard.kills, mod.stringkeys.scoreboard.deaths, mod.stringkeys.scoreboard.assists, mod.stringkeys.scoreboard.captures);
+        mod.SetScoreboardColumnNames(mod.Message(mod.stringkeys.scoreboard.score), mod.Message(mod.stringkeys.scoreboard.kills), mod.Message(mod.stringkeys.scoreboard.deaths), mod.Message(mod.stringkeys.scoreboard.assists), mod.Message(mod.stringkeys.scoreboard.captures));
         mod.SetScoreboardColumnWidths(1, 0.5, 0.5, 0.5, 0.7)
 
     }
