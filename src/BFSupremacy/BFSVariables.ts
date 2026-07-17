@@ -44,6 +44,7 @@ export interface GameConfig {
     snow: boolean;
     cutscene: boolean;
     uniqueID: number;
+    airVehicles: mod.VehicleList[];
 }
 
 export class GameConfig {
@@ -92,7 +93,18 @@ export class GameConfig {
         overtime: 0,
         snow: false,
         cutscene: false,
-        uniqueID: 0
+        uniqueID: 0,
+        airVehicles: [
+            mod.VehicleList.F16,
+            mod.VehicleList.F22,
+            mod.VehicleList.AH64,
+            mod.VehicleList.AH6M,
+            mod.VehicleList.AH6M_Pax,
+            mod.VehicleList.JAS39,
+            mod.VehicleList.SU57,
+            mod.VehicleList.UH60,
+            mod.VehicleList.UH60_Pax
+        ]
     };
 }
 
@@ -119,8 +131,8 @@ export interface UIconfig {
     ProgressFlashT1: boolean;
     ProgressFlashT2: boolean;
     flagLetters: string[];
-    snipers: mod.Weapons[]
-    launchers: mod.Gadgets[]
+    snipers: mod.Weapons[];
+    launchers: mod.Gadgets[];
 }
 
 export class UIconfig {
@@ -195,6 +207,11 @@ export interface SupremacyPlayerData {
     flagTick: number;
     stance: string;
     cameraEnabled: boolean;
+    outOfBounds: boolean;
+    oobTimer: number;
+    inAirspace: boolean;
+    area: number;
+
 }
 
 export class PlayerVariables {
@@ -223,6 +240,10 @@ export class PlayerVariables {
                 flagTick: 0,
                 stance: "standing",
                 cameraEnabled: true,
+                outOfBounds: false,
+                oobTimer: 0,
+                inAirspace: false,
+                area: 0,
             });
         }
         return PlayerVariables.playerData.get(playerId)!;

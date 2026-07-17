@@ -32,6 +32,7 @@ export class BFSupremacyCore {
             }
 
         } else if (stage == 1) {
+            BFSAudio.playConquestEnd()
             await mod.Wait(3);
             GameConfig.gameConfig.extractionRemainingTime = GameConfig.gameConfig.extractionTime;
             if (GameConfig.gameConfig.debug) {
@@ -139,7 +140,7 @@ export class BFSupremacyCore {
             previousProgress: previousProgress,
             progress: progress,
             progressSize: mod.CreateVector(220 * progress, 7, 0),
-            position: mod.CreateVector(-110 + ((220 * progress) / 2), 200, 0),
+            position: mod.CreateVector(-110 + ((220 * progress) / 2), 220, 0),
             ownerTeam: owner,
             team1Players: data.team1Players,
             team2Players: data.team2Players,

@@ -100,6 +100,9 @@ export class BFSupremacyFinalAssault {
         if (hq400) mod.EnableHQ(hq400, enable);
         if (cp250) BFSupremacyUI.capturePoint_UI_Colour_Update(cp250);
         if (cp251) BFSupremacyUI.capturePoint_UI_Colour_Update(cp251);
+        mod.EnableAreaTrigger(mod.GetAreaTrigger(1001), enable);
+        mod.EnableAreaTrigger(mod.GetAreaTrigger(1101), enable);
+        mod.EnableAreaTrigger(mod.GetAreaTrigger(1201), enable);
     }
 
     public static team1FinalSectorLevel2(enable: boolean): void {
@@ -134,6 +137,9 @@ export class BFSupremacyFinalAssault {
         if (cp0) BFSupremacyUI.capturePoint_UI_Colour_Update(cp0);
         let cp1 = mod.GetCapturePoint(1);
         if (cp1) BFSupremacyUI.capturePoint_UI_Colour_Update(cp1);
+        mod.EnableAreaTrigger(mod.GetAreaTrigger(1002), enable);
+        mod.EnableAreaTrigger(mod.GetAreaTrigger(1102), enable);
+        mod.EnableAreaTrigger(mod.GetAreaTrigger(1202), enable);
     }
 
     public static team2FinalSectorLevel1(enable: boolean): void {
@@ -156,6 +162,9 @@ export class BFSupremacyFinalAssault {
         if (hq402) mod.EnableHQ(hq402, enable);
         if (cp252) BFSupremacyUI.capturePoint_UI_Colour_Update(cp252);
         if (cp253) BFSupremacyUI.capturePoint_UI_Colour_Update(cp253);
+        mod.EnableAreaTrigger(mod.GetAreaTrigger(1003), enable);
+        mod.EnableAreaTrigger(mod.GetAreaTrigger(1103), enable);
+        mod.EnableAreaTrigger(mod.GetAreaTrigger(1203), enable);
     }
 
     public static team2FinalSectorLevel2(enable: boolean): void {
@@ -190,6 +199,9 @@ export class BFSupremacyFinalAssault {
         if (cp0) BFSupremacyUI.capturePoint_UI_Colour_Update(cp0);
         let cp1 = mod.GetCapturePoint(1);
         if (cp1) BFSupremacyUI.capturePoint_UI_Colour_Update(cp1);
+        mod.EnableAreaTrigger(mod.GetAreaTrigger(1004), enable);
+        mod.EnableAreaTrigger(mod.GetAreaTrigger(1104), enable);
+        mod.EnableAreaTrigger(mod.GetAreaTrigger(1204), enable);
     }
 
 
@@ -237,6 +249,7 @@ export class BFSupremacyFinalAssault {
         GameConfig.gameConfig.roundOngoing = false;
         GameConfig.gameConfig.cutscene = true;
         BFSupremacyFinalAssault.manageFinalSector(false);
+        BFSAudio.returnMusic();
 
         // Determine ObjIDs based on attacker team
         const isTeam1Attacking = mod.Equals(GameConfig.gameConfig.attacker, mod.GetTeam(1));
@@ -310,22 +323,13 @@ export class BFSupremacyFinalAssault {
         let cpEnd = mod.GetCapturePoint(GameConfig.gameConfig.flagEnd);
         if (cpEnd) mod.EnableGameModeObjective(cpEnd, false);
 
-        //BFSupremacyUI.finalAssault_UI_Change(false);
+        mod.PauseGameModeTime(true);
         mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("capturepoint_container_finalAssault"), false);
-        /*
-        BFSupremacyUI.changingSector_UI_Team_Update();
-        BFSupremacyUI.changingSector_UI_Change(true);
-        for (let i = 30; i > 0; i--) {
-            BFSupremacyUI.changingSector_UI_Update(i);
-            await mod.Wait(1);
-        }
-        BFSupremacyUI.changingSector_UI_Change(false);
-        BFSupremacyUI.finalAssault_UI_Change(true);
-        */
-
         BFSupremacyFinalAssault.additionalTimeAnimation()
 
         await mod.Wait(5)
+
+        mod.PauseGameModeTime(false);
 
         BFSupremacyFinalAssault.manageFinalSector(false);
 
@@ -340,14 +344,14 @@ export class BFSupremacyFinalAssault {
 
 
     public static async additionalTimeAnimation(): Promise<void> {
-        for (let i = 0; i < 180; i += 5) {
+        for (let i = 0; i < 180; i += 2) {
             BFSAudio.playCounter();
-            GameConfig.gameConfig.remainingTime += 5;
+            GameConfig.gameConfig.remainingTime += 2;
             if (GameConfig.gameConfig.remainingTime > GameConfig.gameConfig.baseAttackTime) {
                 GameConfig.gameConfig.remainingTime = GameConfig.gameConfig.baseAttackTime;
             }
             BFSupremacyUI.finalAssault_UI_Update()
-            await mod.Wait(0.066);
+            await mod.Wait(0.033);
             if (GameConfig.gameConfig.remainingTime == GameConfig.gameConfig.baseAttackTime) {
                 break;
             }
@@ -367,12 +371,12 @@ export class BFSupremacyFinalAssault {
         if (mod.Equals(GameConfig.gameConfig.attacker, mod.GetTeam(1))) {
             TeamVariables.getTeamData(GameConfig.gameConfig.attacker).mcomCount -= 1;
             if (TeamVariables.getTeamData(GameConfig.gameConfig.attacker).mcomCount == 0) {
-                this.endGame(mod.GetTeam(1), 60);
+                this.endGame(mod.GetTeam(1), 60, 800);
             }
         } else {
             TeamVariables.getTeamData(GameConfig.gameConfig.defender).mcomCount -= 1;
             if (TeamVariables.getTeamData(GameConfig.gameConfig.defender).mcomCount == 0) {
-                this.endGame(mod.GetTeam(2), 61);
+                this.endGame(mod.GetTeam(2), 61, 810);
             }
         }
     }
@@ -383,9 +387,19 @@ export class BFSupremacyFinalAssault {
     // End game
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public static endGame(winningTeam: mod.Team, camera: number): void {
+    public static async endGame(winningTeam: mod.Team, camera: number, vfxId: number): Promise<void> {
         GameConfig.gameConfig.roundOngoing = false;
-        //mod.SetCameraTypeForAll(mod.Cameras.Fixed, camera);
+        mod.SetCameraTypeForAll(mod.Cameras.Fixed, camera);
+        mod.SetObjectTransformOverTime(mod.GetFixedCamera(camera), mod.CreateTransform(mod.GetObjectPosition(mod.GetSpatialObject(camera + 5)), mod.GetObjectRotation(mod.GetFixedCamera(camera))), 15, false, false);
+        await mod.Wait(1);
+        mod.EnableVFX(mod.GetVFX(vfxId), true);
+        await mod.Wait(1);
+        mod.EnableVFX(mod.GetVFX(vfxId + 1), true);
+        await mod.Wait(1);
+        mod.EnableVFX(mod.GetVFX(vfxId + 2), true);
+        await mod.Wait(3);
+        mod.EnableVFX(mod.GetVFX(vfxId + 3), true);
+        await mod.Wait(4);
         mod.EndGameMode(winningTeam);
     }
 

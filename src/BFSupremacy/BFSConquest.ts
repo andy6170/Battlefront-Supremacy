@@ -69,6 +69,27 @@ export class BFSupremacyConquest {
             }
         }
 
+        for (let i = 1001; i < 1020; i++) {
+            let areaTrigger = mod.GetAreaTrigger(i);
+            if (areaTrigger) {
+                mod.EnableAreaTrigger(areaTrigger, false);
+            }
+        }
+
+        for (let i = 1101; i < 1120; i++) {
+            let areaTrigger = mod.GetAreaTrigger(i);
+            if (areaTrigger) {
+                mod.EnableAreaTrigger(areaTrigger, false);
+            }
+        }
+
+        for (let i = 1201; i < 1220; i++) {
+            let areaTrigger = mod.GetAreaTrigger(i);
+            if (areaTrigger) {
+                mod.EnableAreaTrigger(areaTrigger, false);
+            }
+        }
+
 
         let s150 = mod.GetSector(150);
         if (s150) mod.EnableGameModeObjective(s150, true);
@@ -175,7 +196,7 @@ export class BFSupremacyConquest {
         }
     }
 
-    public static resetConquest(): void {
+    public static async resetConquest(): Promise<void> {
         let s150 = mod.GetSector(150);
         if (s150) mod.EnableGameModeObjective(s150, true);
         let s151 = mod.GetSector(151);
@@ -191,6 +212,16 @@ export class BFSupremacyConquest {
             if (capturePoint) {
                 mod.EnableGameModeObjective(capturePoint, true);
                 mod.SetCapturePointOwner(capturePoint, mod.GetTeam(3));
+                mod.SetCapturePointNeutralizationTime(capturePoint, GameConfig.gameConfig.capturePointNeutralizationTime);
+                mod.SetCapturePointCapturingTime(capturePoint, GameConfig.gameConfig.capturePointCapturingTime);
+            }
+        }
+
+        await mod.Wait(1)
+
+        for (let i = 200; i < 220; i++) {
+            let capturePoint = mod.GetCapturePoint(i);
+            if (capturePoint) {
                 mod.SetCapturePointNeutralizationTime(capturePoint, GameConfig.gameConfig.capturePointNeutralizationTime);
                 mod.SetCapturePointCapturingTime(capturePoint, GameConfig.gameConfig.capturePointCapturingTime);
             }

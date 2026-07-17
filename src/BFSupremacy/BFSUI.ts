@@ -1,6 +1,5 @@
 import { GameConfig } from "./BFSVariables.ts";
-import { TeamVariables } from "./BFSVariables.ts";
-import { UIconfig } from "./BFSVariables.ts";
+import { TeamVariables, PlayerVariables, UIconfig } from "./BFSVariables.ts";
 import { BFSAudio } from "./MFSAudio.ts";
 
 
@@ -690,5 +689,49 @@ export class BFSupremacyUI {
         // Clean up swipe containers
         mod.DeleteUIWidget(swipeWidget1);
         mod.DeleteUIWidget(swipeWidget2);
+    }
+
+
+    // PLAYER OOB UI
+    public static async outOfBoundsUI(eventPlayer: mod.Player): Promise<void> {
+        await mod.Wait(0.066);
+        if (!GameConfig.gameConfig.roundOngoing || !mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsAlive)) return;
+        const playerData = PlayerVariables.getPlayerData(eventPlayer);
+        playerData.outOfBounds = true;
+        if (playerData.oobTimer > 0) return;
+
+        playerData.outOfBounds = true;
+        playerData.oobTimer = 10;
+        mod.SkipManDown(eventPlayer, true);
+        mod.SetUIWidgetVisible(mod.FindUIWidgetWithName('OOBBackground' + mod.GetObjId(eventPlayer)), true);
+        mod.SetUIWidgetVisible(mod.FindUIWidgetWithName('OOBText' + mod.GetObjId(eventPlayer)), true);
+        mod.SetUIWidgetVisible(mod.FindUIWidgetWithName('Countdown' + mod.GetObjId(eventPlayer)), true);
+
+        for (let i = playerData.oobTimer; i > 0; i--) {
+            mod.SetUITextLabel(mod.FindUIWidgetWithName('Countdown' + mod.GetObjId(eventPlayer)), mod.Message(mod.stringkeys.value, i));
+            BFSAudio.playOutOfBounds();
+            await mod.Wait(0.5);
+            if (!GameConfig.gameConfig.roundOngoing || !playerData.outOfBounds || !mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsAlive)) {
+                playerData.outOfBounds = false;
+                break;
+            }
+            await mod.Wait(0.5);
+            if (!GameConfig.gameConfig.roundOngoing || !playerData.outOfBounds || !mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsAlive)) {
+                playerData.outOfBounds = false;
+                break;
+            }
+        }
+
+        playerData.oobTimer = 0;
+        if (playerData.outOfBounds) {
+            mod.DealDamage(eventPlayer, 10000);
+        } else {
+            mod.SkipManDown(eventPlayer, false);
+        }
+
+        mod.SetUIWidgetVisible(mod.FindUIWidgetWithName('OOBBackground' + mod.GetObjId(eventPlayer)), false);
+        mod.SetUIWidgetVisible(mod.FindUIWidgetWithName('OOBText' + mod.GetObjId(eventPlayer)), false);
+        mod.SetUIWidgetVisible(mod.FindUIWidgetWithName('Countdown' + mod.GetObjId(eventPlayer)), false);
+        playerData.outOfBounds = false;
     }
 }

@@ -55,9 +55,36 @@ Takeoff Target - 903
 Cameras (Fixed):
 Regroup Boarding - 50
 Regroup Takeoff - 51
-End Game (T1 Win) - 60
-End Game (T2 Win) - 61
+End Game (T1 Win) - 60 - Target 65
+End Game (T2 Win) - 61 - Target 66
 Returning to Conquest T1- 70
 Returning to Conquest T2- 71
+
+VFX:
+Ending T1 - 800, - 803
+Ending T2 - 810, - 813
+
+Area Triggers:
+Play Areas:
+Conquest - 1000
+Final Assault T1 S0: 1001
+Final Assault T1 S1: 1002
+Final Assault T2 S0: 1003
+Final Assault T2 S1: 1004
+Air Combat: 1400
+
+Team 1 HQ:
+Conquest - 1100
+Final Assault T1 S0 - 1101
+Final Assault T1 S1 - 1102
+Final Assault T2 S0 - 1103
+Final Assault T2 S1 - 1104
+
+Team 2 HQ:
+Conquest - 1200
+Final Assault T2 S0 - 1201
+Final Assault T2 S1 - 1202
+Final Assault T1 S0 - 1203
+Final Assault T1 S1 - 1204
 
 */

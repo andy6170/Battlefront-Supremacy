@@ -55,6 +55,7 @@
         "captures": "Captures"
     },
     "value": "{}",
+    "returnToCombat": "RETURN TO COMBAT",
     "debug1": "T1Score:{}",
     "debug2": "T2Score:{}",
     "ui_setup": "UI Setup",
@@ -83,5 +84,6 @@
     "eventVehicleMatchesRegroupVehicle": "Event Vehicle Matches Regroup Vehicle",
     "eventVehicleDoesNotMatch": "Event Vehicles DOES NOT Match",
     "playerVehicleIsRegroupVehicle": "Player Vehicle IS Regroup Vehicle",
-    "playerVehicleIsNotRegroupVehicle": "Player Vehicle IS NOT Regroup Vehicle"
+    "playerVehicleIsNotRegroupVehicle": "Player Vehicle IS NOT Regroup Vehicle",
+    "playerTracking": "Area:{}"
 }

@@ -47,11 +47,11 @@ export class BFSupremacy {
                                 PlayerVariables.getPlayerData(eventPlayer).stance = "standing"
                                 mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("player_aim" + mod.GetObjId(eventPlayer)), true)
                             } else if (!(PlayerVariables.getPlayerData(eventPlayer).stance == "crouching") && mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsCrouching)) {
-                                mod.SetThirdPersonCameraPositionForPlayer(eventPlayer, 0.9, -0.1, 0.25)
+                                mod.SetThirdPersonCameraPositionForPlayer(eventPlayer, 0.9, -0.15, 0.25)
                                 PlayerVariables.getPlayerData(eventPlayer).stance = "crouching"
                                 mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("player_aim" + mod.GetObjId(eventPlayer)), true)
                             } else if (!(PlayerVariables.getPlayerData(eventPlayer).stance == "prone") && mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsProne)) {
-                                mod.SetThirdPersonCameraPositionForPlayer(eventPlayer, 0.8, -0.2, 0.25)
+                                mod.SetThirdPersonCameraPositionForPlayer(eventPlayer, 0.8, -0.25, 0.25)
                                 PlayerVariables.getPlayerData(eventPlayer).stance = "prone"
                                 mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("player_aim" + mod.GetObjId(eventPlayer)), true)
                             }
@@ -67,7 +67,7 @@ export class BFSupremacy {
                         if ((PlayerVariables.getPlayerData(eventPlayer).hasSniper && mod.IsInventorySlotActive(eventPlayer, mod.InventorySlots.PrimaryWeapon)) || (PlayerVariables.getPlayerData(eventPlayer).hasLauncher && (mod.IsInventorySlotActive(eventPlayer, mod.InventorySlots.GadgetOne) || mod.IsInventorySlotActive(eventPlayer, mod.InventorySlots.GadgetTwo)))) {
                             mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson);
                         }
-                        mod.SetThirdPersonCameraPositionForPlayer(eventPlayer, 2, 0, 0.4)
+                        mod.SetThirdPersonCameraPositionForPlayer(eventPlayer, 2.5, 0, 0.4)
                         mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("player_aim" + mod.GetObjId(eventPlayer)), false)
                     }
                 }
@@ -281,7 +281,7 @@ export class BFSupremacy {
             }
         });
 
-        Events.OnPlayerUndeploy.subscribe((eventPlayer: mod.Player) => {
+        Events.OnPlayerUndeploy.subscribe(async (eventPlayer: mod.Player) => {
             if (PlayerVariables.getPlayerData(eventPlayer).onPoint) {
                 BFSupremacyCore.capturePointPlayers(PlayerVariables.getPlayerData(eventPlayer).currentObjective);
                 PlayerVariables.getPlayerData(eventPlayer).onPoint = false;
@@ -290,6 +290,8 @@ export class BFSupremacy {
                 PlayerVariables.getPlayerData(eventPlayer).deaths++;
                 BFSupremacyCore.scoreboardUpdate(eventPlayer);
             }
+            await mod.Wait(0.1);
+            PlayerVariables.getPlayerData(eventPlayer).area = 0;
         });
 
         Events.OnPlayerDied.subscribe((eventPlayer: mod.Player, eventOtherPlayer: mod.Player) => {
@@ -302,9 +304,61 @@ export class BFSupremacy {
         });
 
         Events.OnPlayerEnterAreaTrigger.subscribe((eventPlayer: mod.Player, eventAreaTrigger: mod.AreaTrigger) => {
+            PlayerVariables.getPlayerData(eventPlayer).area++;
+            let areaID = mod.GetObjId(eventAreaTrigger);
+            let team = mod.GetTeam(eventPlayer);
+
+            if (areaID == 1400) {
+                PlayerVariables.getPlayerData(eventPlayer).inAirspace = true;
+                if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsInVehicle)) {
+                    if (GameConfig.gameConfig.airVehicles.some(vehicle => mod.CompareVehicleName(mod.GetVehicleFromPlayer(eventPlayer), vehicle))) {
+                        PlayerVariables.getPlayerData(eventPlayer).outOfBounds = false;
+                    }
+                }
+            } else if (mod.Equals(team, mod.GetTeam(1))) {
+                if (areaID >= 1200 && areaID <= 1299) {
+                    BFSupremacyUI.outOfBoundsUI(eventPlayer);
+                } else {
+                    PlayerVariables.getPlayerData(eventPlayer).outOfBounds = false;
+                }
+            } else if (mod.Equals(team, mod.GetTeam(2))) {
+                if (areaID >= 1100 && areaID <= 1199) {
+                    BFSupremacyUI.outOfBoundsUI(eventPlayer);
+                } else {
+                    PlayerVariables.getPlayerData(eventPlayer).outOfBounds = false;
+                }
+            }
+
+            mod.DisplayHighlightedWorldLogMessage(mod.Message(mod.stringkeys.playerTracking, PlayerVariables.getPlayerData(eventPlayer).area))
         });
 
         Events.OnPlayerExitAreaTrigger.subscribe((eventPlayer: mod.Player, eventAreaTrigger: mod.AreaTrigger) => {
+            PlayerVariables.getPlayerData(eventPlayer).area--;
+            let areaID = mod.GetObjId(eventAreaTrigger);
+
+
+            if (areaID == 1400) {
+                PlayerVariables.getPlayerData(eventPlayer).inAirspace = false;
+                BFSupremacyUI.outOfBoundsUI(eventPlayer);
+            }
+
+            if (PlayerVariables.getPlayerData(eventPlayer).inAirspace) {
+                if (PlayerVariables.getPlayerData(eventPlayer).area == 1) {
+                    if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsInVehicle)) {
+                        if (GameConfig.gameConfig.airVehicles.some(vehicle => mod.CompareVehicleName(mod.GetVehicleFromPlayer(eventPlayer), vehicle))) {
+                            PlayerVariables.getPlayerData(eventPlayer).outOfBounds = false;
+                        } else {
+                            BFSupremacyUI.outOfBoundsUI(eventPlayer);
+                        }
+                    } else {
+                        BFSupremacyUI.outOfBoundsUI(eventPlayer);
+                    }
+                }
+            } else if (!PlayerVariables.getPlayerData(eventPlayer).inAirspace && PlayerVariables.getPlayerData(eventPlayer).area < 1) {
+                BFSupremacyUI.outOfBoundsUI(eventPlayer);
+            }
+
+            mod.DisplayHighlightedWorldLogMessage(mod.Message(mod.stringkeys.playerTracking, PlayerVariables.getPlayerData(eventPlayer).area))
         });
 
         Events.OnSpawnerSpawned.subscribe((eventPlayer: mod.Player, eventSpawner: mod.Spawner) => {
@@ -365,6 +419,12 @@ export class BFSupremacy {
                     mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.FirstPerson)
                     mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson)
                 }
+            }
+        });
+
+        Events.OnPlayerDamaged.subscribe((eventPlayer: mod.Player) => {
+            if (mod.Equals(eventPlayer as mod.Player, GameConfig.gameConfig.regroupBot as mod.Player)) {
+                mod.Heal(eventPlayer, 500);
             }
         });
 

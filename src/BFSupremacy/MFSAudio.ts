@@ -14,6 +14,8 @@ export class BFSAudio {
     private static timerLongTick: mod.SFX;
     private static timerEnd: mod.SFX;
     private static counter: mod.SFX
+    private static conquestEnd: mod.SFX
+    private static outOfBounds: mod.SFX
 
 
 
@@ -28,10 +30,13 @@ export class BFSAudio {
         BFSAudio.VO2 = mod.SpawnObject(mod.RuntimeSpawn_Common.SFX_VOModule_OneShot2D, mod.CreateVector(0, 0, 0), mod.CreateVector(0, 0, 0));
         BFSAudio.VO3 = mod.SpawnObject(mod.RuntimeSpawn_Common.SFX_VOModule_OneShot2D, mod.CreateVector(0, 0, 0), mod.CreateVector(0, 0, 0));
         BFSAudio.VO4 = mod.SpawnObject(mod.RuntimeSpawn_Common.SFX_VOModule_OneShot2D, mod.CreateVector(0, 0, 0), mod.CreateVector(0, 0, 0));
-        BFSAudio.timerShortTick = mod.SpawnObject(mod.RuntimeSpawn_Common.SFX_UI_Gamemode_Shared_CaptureObjectives_ObjetiveUnlockCountdownTick_OneShot2D, mod.CreateVector(0, 0, 0), mod.CreateVector(0, 0, 0))
+        BFSAudio.timerShortTick = mod.SpawnObject(mod.RuntimeSpawn_Common.SFX_UI_Shared_Countdown_Tick_OneShot2D, mod.CreateVector(0, 0, 0), mod.CreateVector(0, 0, 0))
         BFSAudio.timerLongTick = mod.SpawnObject(mod.RuntimeSpawn_Common.SFX_UI_Gamemode_Shared_Intro_Countdown_Final_OneShot2D, mod.CreateVector(0, 0, 0), mod.CreateVector(0, 0, 0))
         BFSAudio.timerEnd = mod.SpawnObject(mod.RuntimeSpawn_Common.SFX_UI_Gamemode_Shared_Intro_FinalImpact_OneShot2D, mod.CreateVector(0, 0, 0), mod.CreateVector(0, 0, 0))
         BFSAudio.counter = mod.SpawnObject(mod.RuntimeSpawn_Common.SFX_UI_Gauntlet_Beacons_CalibrationTick_OneShot2D, mod.CreateVector(0, 0, 0), mod.CreateVector(0, 0, 0))
+        BFSAudio.conquestEnd = mod.SpawnObject(mod.RuntimeSpawn_Common.SFX_UI_Gauntlet_Standoff_ZoneCaptured_OneShot2D, mod.CreateVector(0, 0, 0), mod.CreateVector(0, 0, 0))
+        BFSAudio.outOfBounds = mod.SpawnObject(mod.RuntimeSpawn_Common.SFX_UI_Gamemode_Shared_OutOfBounds_Countdown_OneShot2D, mod.CreateVector(0, 0, 0), mod.CreateVector(0, 0, 0))
+
 
 
         mod.LoadMusic(mod.MusicPackages.Radio)
@@ -39,6 +44,7 @@ export class BFSAudio {
         mod.SetMusicParam(mod.MusicParams.Radio_ContinueQueueOnTrackEnd, 0);
         mod.SetMusicParam(mod.MusicParams.Radio_Amplitude, 3);
         mod.SetMusicParam(mod.MusicParams.Radio_QueueTrackNumber, 7);
+        mod.LoadMusic(mod.MusicPackages.Core)
     }
 
 
@@ -79,6 +85,13 @@ export class BFSAudio {
         this.stopRegroupMusic();
     }
 
+    public static returnMusic(): void {
+        this.stopRegroupMusic();
+        mod.SetMusicParam(mod.MusicParams.Core_IsWinning, 1);
+        mod.SetMusicParam(mod.MusicParams.Core_Sector, 3);
+        mod.PlayMusic(mod.MusicEvents.Core_PhaseEnded)
+    }
+
     public static playTickSound(eventPlayer: mod.Player, flagID: number, team: mod.Team): void {
         let data = ObjectiveVariables.getObjectiveVariables(flagID);
         let friendly: number;
@@ -116,7 +129,15 @@ export class BFSAudio {
     }
 
     public static playCounter(): void {
-        mod.PlaySound(BFSAudio.counter, 0.5);
+        mod.PlaySound(BFSAudio.counter, 0.7);
+    }
+
+    public static playConquestEnd(): void {
+        mod.PlaySound(BFSAudio.conquestEnd, 0.5);
+    }
+
+    public static playOutOfBounds(): void {
+        mod.PlaySound(BFSAudio.outOfBounds, 0.5);
     }
 
 
