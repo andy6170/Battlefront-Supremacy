@@ -16,16 +16,6 @@ export class BFSWeather {
     }
 
     public static checkNight(eventPlayer: mod.Player): void {
-        if (GameConfig.gameConfig.nightMap = true && GameConfig.gameConfig.stage <= 2) {
-            mod.EnableScreenEffect(eventPlayer, mod.ScreenEffects.Night, true);
-        } else {
-            mod.EnableScreenEffect(eventPlayer, mod.ScreenEffects.Night, false);
-        }
-
-        if (GameConfig.gameConfig.nightFinalArea = true && GameConfig.gameConfig.stage >= 2) {
-            mod.EnableScreenEffect(eventPlayer, mod.ScreenEffects.Night, true);
-        } else {
-            mod.EnableScreenEffect(eventPlayer, mod.ScreenEffects.Night, false);
-        }
+        mod.EnableScreenEffect(eventPlayer, mod.ScreenEffects.Night, GameConfig.gameConfig.night);
     }
 }

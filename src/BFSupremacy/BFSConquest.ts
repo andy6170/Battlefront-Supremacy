@@ -3,9 +3,16 @@ import { BFSupremacyUI } from "./BFSUI.ts";
 import { TeamVariables } from "./BFSVariables.ts";
 import { BFSupremacyCore } from "./BFSCore.ts";
 import { UIconfig } from "./BFSVariables.ts";
+import { BFSAudio } from "./MFSAudio.ts";
 
 export class BFSupremacyConquest {
     public static init(): void {
+        if (GameConfig.gameConfig.nightMap) {
+            GameConfig.gameConfig.night = true;
+        } else {
+            GameConfig.gameConfig.night = false;
+        }
+
         for (let i = 200; i < 220; i++) {
             let capturePoint = mod.GetCapturePoint(i);
             if (capturePoint) {
@@ -183,6 +190,14 @@ export class BFSupremacyConquest {
         }
         BFSupremacyUI.conquest_UI_Update();
 
+        if (TeamVariables.getTeamData(1).score > TeamVariables.getTeamData(2).score && (GameConfig.gameConfig.winning != 1)) {
+            GameConfig.gameConfig.winning = 1;
+            BFSAudio.winningVO(mod.GetTeam(1));
+        } else if (TeamVariables.getTeamData(1).score < TeamVariables.getTeamData(2).score && (GameConfig.gameConfig.winning != 2)) {
+            GameConfig.gameConfig.winning = 2;
+            BFSAudio.winningVO(mod.GetTeam(2));
+        }
+
         if (TeamVariables.getTeamData(1).score >= 100) {
             GameConfig.gameConfig.roundOngoing = false;
             GameConfig.gameConfig.attacker = mod.GetTeam(1);
@@ -197,6 +212,7 @@ export class BFSupremacyConquest {
     }
 
     public static async resetConquest(): Promise<void> {
+        GameConfig.gameConfig.winning = 0;
         let s150 = mod.GetSector(150);
         if (s150) mod.EnableGameModeObjective(s150, true);
         let s151 = mod.GetSector(151);
@@ -230,7 +246,7 @@ export class BFSupremacyConquest {
         TeamVariables.getTeamData(2).score = 0;
         GameConfig.gameConfig.ticketSpeed = 3;
         GameConfig.gameConfig.roundOngoing = true;
-        mod.EnableAllPlayerDeploy(true);
+        //mod.EnableAllPlayerDeploy(true);
     }
 
     public static endConquest(): void {

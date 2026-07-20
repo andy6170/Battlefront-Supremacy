@@ -1,5 +1,6 @@
 import { PlayerVariables, ObjectiveVariables } from "./BFSVariables.ts";
 import { UIconfig } from "./BFSVariables.ts";
+import { BFSupremacyCore } from "./BFSCore.ts";
 
 export class BFSupremacyPlayer {
     public static createPlayerUI(player: mod.Player): void {
@@ -13,7 +14,7 @@ export class BFSupremacyPlayer {
         mod.AddUIContainer("objProgressBG", mod.CreateVector(0, 220, 0), mod.CreateVector(220, 7, 0), mod.UIAnchor.TopCenter, playerUIContainer, false, 1, mod.CreateVector(0, 0, 0), 0.8, mod.UIBgFill.Blur, player);
         mod.AddUIContainer("objProgress", mod.CreateVector(0, 220, 0), mod.CreateVector(220, 7, 0), mod.UIAnchor.TopCenter, playerUIContainer, false, 1, mod.CreateVector(0, 0, 0), 1, mod.UIBgFill.Solid, player);
 
-        mod.AddUIContainer("player_aim" + mod.GetObjId(player), mod.CreateVector(-10, 20, 0), mod.CreateVector(3, 3, 0), mod.UIAnchor.Center, mod.GetUIRoot(), false, 0, mod.CreateVector(1, 1, 1), 0.9, mod.UIBgFill.Solid, mod.UIDepth.AboveGameUI, player);
+        mod.AddUIContainer("player_aim" + mod.GetObjId(player), mod.CreateVector(-12, 5, 0), mod.CreateVector(3, 3, 0), mod.UIAnchor.Center, mod.GetUIRoot(), false, 0, mod.CreateVector(1, 1, 1), 0.9, mod.UIBgFill.Solid, mod.UIDepth.AboveGameUI, player);
 
         mod.AddUIContainer('OOBBackground' + mod.GetObjId(player), mod.CreateVector(0, 0, 0), mod.CreateVector(10000, 10000, 0), mod.UIAnchor.TopCenter, playerUIContainer, false, 1, mod.CreateVector(0, 0, 0), 0.9, mod.UIBgFill.Blur, player);
         mod.AddUIText('OOBText' + mod.GetObjId(player), mod.CreateVector(0, 470, 0), mod.CreateVector(450, 150, 0), mod.UIAnchor.TopCenter, playerUIContainer, false, 1, mod.CreateVector(0.6, 0.1, 0.1), 0.8, mod.UIBgFill.Blur, mod.Message(mod.stringkeys.returnToCombat), 56, mod.CreateVector(1, 0.2, 0.2), 1, mod.UIAnchor.TopCenter, player);
@@ -73,5 +74,11 @@ export class BFSupremacyPlayer {
         mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("objCounter", playerUI), enable);
         mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("objProgressBG", playerUI), enable);
         mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("objProgress", playerUI), enable);
+    }
+
+    public static MCOMScoring(eventPlayer: mod.Player) {
+        PlayerVariables.getPlayerData(eventPlayer).score += 200;
+        PlayerVariables.getPlayerData(eventPlayer).captures++;
+        BFSupremacyCore.scoreboardUpdate(eventPlayer);
     }
 }

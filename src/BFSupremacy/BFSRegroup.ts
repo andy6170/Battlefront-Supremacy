@@ -39,8 +39,8 @@ export class BFSupremacyRegroup {
             await mod.Wait(0.033);
             mod.EnableAllInputRestrictions(bot, true);
             mod.ForcePlayerToSeat(bot, heli, -1);
-            mod.SetPlayerMaxHealth(bot, 500);
-            mod.Heal(bot, 500);
+            //mod.SetPlayerMaxHealth(bot, 500);
+            //mod.Heal(bot, 500);
             mod.SetVehicleMaxHealthMultiplier(heli, 4);
             mod.Heal(heli, 10000);
             if (GameConfig.gameConfig.stage === 1) {
@@ -82,15 +82,16 @@ export class BFSupremacyRegroup {
         mod.EnableGameModeObjective(mod.GetCapturePoint(904), true);
         mod.SetCapturePointOwner(mod.GetCapturePoint(904), GameConfig.gameConfig.attacker);
         mod.EnableCapturePointDeploying(mod.GetCapturePoint(904), false);
+        BFSAudio.regoupVO();
         while (GameConfig.gameConfig.stage === 1 && GameConfig.gameConfig.extractionRemainingTime > 0 && mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition)) {
             const currentPos = mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition);
             if (currentPos && mod.DistanceBetween(currentPos, targetPos) > 0.5) {
                 mod.Teleport(heli, targetPos, yaw);
             }
             mod.Heal(heli, 10000);
-            if (GameConfig.gameConfig.regroupBot) {
-                mod.Heal(GameConfig.gameConfig.regroupBot, 500);
-            }
+            //if (GameConfig.gameConfig.regroupBot) {
+            //    mod.Heal(GameConfig.gameConfig.regroupBot, 500);
+            //}
             await mod.Wait(0.2);
         }
     }
@@ -120,6 +121,7 @@ export class BFSupremacyRegroup {
         BFSupremacyUI.playSwipeTransition();
 
         mod.UndeployAllPlayers();
+        mod.EnableAllPlayerDeploy(false);
         await mod.Wait(0.2);
         BFSupremacyCore.changeStage();
         await mod.Wait(1);

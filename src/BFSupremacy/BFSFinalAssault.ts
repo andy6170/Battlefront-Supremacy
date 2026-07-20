@@ -1,4 +1,4 @@
-import { GameConfig, TeamVariables } from "./BFSVariables.ts";
+import { GameConfig, TeamVariables, PlayerVariables } from "./BFSVariables.ts";
 import { UIconfig } from "./BFSVariables.ts";
 import { BFSupremacyUI } from "./BFSUI.ts";
 import { BFSupremacyCore } from "./BFSCore.ts";
@@ -15,7 +15,7 @@ export class BFSupremacyFinalAssault {
         if (s152) mod.EnableGameModeObjective(s152, false);
         GameConfig.gameConfig.remainingTime = GameConfig.gameConfig.baseAttackTime + GameConfig.gameConfig.bonusTime;
         if (GameConfig.gameConfig.debug) {
-            GameConfig.gameConfig.remainingTime = 60;
+            GameConfig.gameConfig.remainingTime = 300;
         }
         for (let i = 1; i < 10; i++) {
             let hq = mod.GetHQ(i);
@@ -106,20 +106,19 @@ export class BFSupremacyFinalAssault {
     }
 
     public static team1FinalSectorLevel2(enable: boolean): void {
-        let mcom260 = mod.GetMCOM(260);
-        if (mcom260) {
-            mod.EnableGameModeObjective(mcom260, enable);
-            mod.SetMCOMOwner(mcom260, mod.GetTeam(2));
+        mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("mcom_container"), enable);
+        if (enable) {
+            BFSupremacyUI.MCOM_UI_Update();
         }
-        let mcom261 = mod.GetMCOM(261);
-        if (mcom261) {
-            mod.EnableGameModeObjective(mcom261, enable);
-            mod.SetMCOMOwner(mcom261, mod.GetTeam(2));
-        }
-        let mcom262 = mod.GetMCOM(262);
-        if (mcom262) {
-            mod.EnableGameModeObjective(mcom262, enable);
-            mod.SetMCOMOwner(mcom262, mod.GetTeam(2));
+
+        GameConfig.gameConfig.MCOMStart = 260;
+
+        for (let i = 0; i < 3; i++) {
+            let mcom = mod.GetMCOM(GameConfig.gameConfig.MCOMStart + i);
+            if (mcom) {
+                mod.EnableGameModeObjective(mcom, enable);
+                mod.SetMCOMOwner(mcom, mod.GetTeam(2));
+            }
         }
         let s101 = mod.GetSector(101);
         if (s101) mod.EnableGameModeObjective(s101, enable);
@@ -168,20 +167,19 @@ export class BFSupremacyFinalAssault {
     }
 
     public static team2FinalSectorLevel2(enable: boolean): void {
-        let mcom263 = mod.GetMCOM(263);
-        if (mcom263) {
-            mod.EnableGameModeObjective(mcom263, enable);
-            mod.SetMCOMOwner(mcom263, mod.GetTeam(1));
+        mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("mcom_container"), enable);
+        if (enable) {
+            BFSupremacyUI.MCOM_UI_Update();
         }
-        let mcom264 = mod.GetMCOM(264);
-        if (mcom264) {
-            mod.EnableGameModeObjective(mcom264, enable);
-            mod.SetMCOMOwner(mcom264, mod.GetTeam(1));
-        }
-        let mcom265 = mod.GetMCOM(265);
-        if (mcom265) {
-            mod.EnableGameModeObjective(mcom265, enable);
-            mod.SetMCOMOwner(mcom265, mod.GetTeam(1));
+
+        GameConfig.gameConfig.MCOMStart = 263;
+
+        for (let i = 0; i < 3; i++) {
+            let mcom = mod.GetMCOM(GameConfig.gameConfig.MCOMStart + i);
+            if (mcom) {
+                mod.EnableGameModeObjective(mcom, enable);
+                mod.SetMCOMOwner(mcom, mod.GetTeam(1));
+            }
         }
         let s103 = mod.GetSector(103);
         if (s103) mod.EnableGameModeObjective(s103, enable);
@@ -246,10 +244,25 @@ export class BFSupremacyFinalAssault {
     }
 
     public static async returnToConquest(): Promise<void> {
+
+        if (TeamVariables.getTeamData(GameConfig.gameConfig.attacker).attempts == 3) {
+            if (TeamVariables.getTeamData(mod.GetTeam(1)).mcomCount > TeamVariables.getTeamData(mod.GetTeam(2)).mcomCount) {
+                mod.EndGameMode(mod.GetTeam(1))
+            }
+            else if (TeamVariables.getTeamData(mod.GetTeam(1)).mcomCount < TeamVariables.getTeamData(mod.GetTeam(2)).mcomCount) {
+                mod.EndGameMode(mod.GetTeam(2))
+            }
+            else {
+                mod.EndGameMode(mod.GetTeam(0))
+            }
+        }
+
         GameConfig.gameConfig.roundOngoing = false;
         GameConfig.gameConfig.cutscene = true;
         BFSupremacyFinalAssault.manageFinalSector(false);
         BFSAudio.returnMusic();
+        BFSAudio.returnToConquestVO();
+        BFSupremacyUI.finalAssault_UI_Change(false);
 
         // Determine ObjIDs based on attacker team
         const isTeam1Attacking = mod.Equals(GameConfig.gameConfig.attacker, mod.GetTeam(1));
@@ -317,7 +330,9 @@ export class BFSupremacyFinalAssault {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static async moveToFinalSectorLevel2(): Promise<void> {
-        GameConfig.gameConfig.roundOngoing = false;
+        GameConfig.gameConfig.flagStart = 0;
+        GameConfig.gameConfig.flagEnd = 0;
+        //GameConfig.gameConfig.roundOngoing = false;
         let cpStart = mod.GetCapturePoint(GameConfig.gameConfig.flagStart);
         if (cpStart) mod.EnableGameModeObjective(cpStart, false);
         let cpEnd = mod.GetCapturePoint(GameConfig.gameConfig.flagEnd);
@@ -326,20 +341,28 @@ export class BFSupremacyFinalAssault {
         mod.PauseGameModeTime(true);
         mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("capturepoint_container_finalAssault"), false);
         BFSupremacyFinalAssault.additionalTimeAnimation()
+        BFSAudio.finalAssaultMusic();
+        await BFSupremacyUI.conquest_End_UI()
 
-        await mod.Wait(5)
+        BFSAudio.defencesBreachedVO()
+
+        await mod.Wait(2)
 
         mod.PauseGameModeTime(false);
 
         BFSupremacyFinalAssault.manageFinalSector(false);
 
-        if (mod.Equals(GameConfig.gameConfig.attacker, mod.GetTeam(1))) {
-            TeamVariables.getTeamData(GameConfig.gameConfig.attacker).finalSectorBreached += 1;
-        } else {
-            TeamVariables.getTeamData(GameConfig.gameConfig.attacker).finalSectorBreached += 1;
+        TeamVariables.getTeamData(GameConfig.gameConfig.attacker).finalSectorBreached += 1;
+
+        const players = mod.AllPlayers() as mod.Array;
+        for (let i = 0; i < mod.CountOf(players); i++) {
+            const player = mod.ValueInArray(players, i);
+            PlayerVariables.getPlayerData(player).area = 0;
         }
         BFSupremacyFinalAssault.manageFinalSector(true);
-        GameConfig.gameConfig.roundOngoing = true;
+
+        BFSAudio.playNextObjective();
+        //GameConfig.gameConfig.roundOngoing = true;
     }
 
 
@@ -368,14 +391,11 @@ export class BFSupremacyFinalAssault {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static MCOMDestroyed(): void {
-        if (mod.Equals(GameConfig.gameConfig.attacker, mod.GetTeam(1))) {
-            TeamVariables.getTeamData(GameConfig.gameConfig.attacker).mcomCount -= 1;
-            if (TeamVariables.getTeamData(GameConfig.gameConfig.attacker).mcomCount == 0) {
+        TeamVariables.getTeamData(GameConfig.gameConfig.defender).mcomCount -= 1
+        if (TeamVariables.getTeamData(GameConfig.gameConfig.defender).mcomCount == 0) {
+            if (mod.Equals(GameConfig.gameConfig.attacker, mod.GetTeam(1))) {
                 this.endGame(mod.GetTeam(1), 60, 800);
-            }
-        } else {
-            TeamVariables.getTeamData(GameConfig.gameConfig.defender).mcomCount -= 1;
-            if (TeamVariables.getTeamData(GameConfig.gameConfig.defender).mcomCount == 0) {
+            } else {
                 this.endGame(mod.GetTeam(2), 61, 810);
             }
         }
@@ -388,7 +408,9 @@ export class BFSupremacyFinalAssault {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static async endGame(winningTeam: mod.Team, camera: number, vfxId: number): Promise<void> {
+        BFSAudio.endMusic();
         GameConfig.gameConfig.roundOngoing = false;
+        await mod.Wait(2)
         mod.SetCameraTypeForAll(mod.Cameras.Fixed, camera);
         mod.SetObjectTransformOverTime(mod.GetFixedCamera(camera), mod.CreateTransform(mod.GetObjectPosition(mod.GetSpatialObject(camera + 5)), mod.GetObjectRotation(mod.GetFixedCamera(camera))), 15, false, false);
         await mod.Wait(1);
@@ -397,9 +419,8 @@ export class BFSupremacyFinalAssault {
         mod.EnableVFX(mod.GetVFX(vfxId + 1), true);
         await mod.Wait(1);
         mod.EnableVFX(mod.GetVFX(vfxId + 2), true);
-        await mod.Wait(3);
+        await mod.Wait(2);
         mod.EnableVFX(mod.GetVFX(vfxId + 3), true);
-        await mod.Wait(4);
         mod.EndGameMode(winningTeam);
     }
 

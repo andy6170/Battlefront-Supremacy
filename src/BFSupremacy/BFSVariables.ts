@@ -45,6 +45,10 @@ export interface GameConfig {
     cutscene: boolean;
     uniqueID: number;
     airVehicles: mod.VehicleList[];
+    flagsVO: mod.VoiceOverFlags[];
+    MCOMStart: number;
+    winning: number;
+    night: boolean;
 }
 
 export class GameConfig {
@@ -104,7 +108,21 @@ export class GameConfig {
             mod.VehicleList.SU57,
             mod.VehicleList.UH60,
             mod.VehicleList.UH60_Pax
-        ]
+        ],
+        flagsVO: [
+            mod.VoiceOverFlags.Alpha,
+            mod.VoiceOverFlags.Bravo,
+            mod.VoiceOverFlags.Charlie,
+            mod.VoiceOverFlags.Delta,
+            mod.VoiceOverFlags.Echo,
+            mod.VoiceOverFlags.Foxtrot,
+            mod.VoiceOverFlags.Golf,
+            mod.VoiceOverFlags.Hotel,
+            mod.VoiceOverFlags.India
+        ],
+        MCOMStart: 0,
+        winning: 0,
+        night: false
     };
 }
 
@@ -133,6 +151,7 @@ export interface UIconfig {
     flagLetters: string[];
     snipers: mod.Weapons[];
     launchers: mod.Gadgets[];
+    conquestEndUI: mod.UIWidget;
 }
 
 export class UIconfig {
@@ -183,7 +202,8 @@ export class UIconfig {
             mod.Gadgets.Launcher_IGLA,
             mod.Gadgets.Launcher_Unguided_Rocket,
             mod.Gadgets.Launcher_Long_Range,
-        ]
+        ],
+        conquestEndUI: mod.GetUIRoot(),
     };
 }
 
@@ -211,6 +231,8 @@ export interface SupremacyPlayerData {
     oobTimer: number;
     inAirspace: boolean;
     area: number;
+    ingoreOOB: boolean;
+    boarded: boolean;
 
 }
 
@@ -244,6 +266,8 @@ export class PlayerVariables {
                 oobTimer: 0,
                 inAirspace: false,
                 area: 0,
+                ingoreOOB: false,
+                boarded: false,
             });
         }
         return PlayerVariables.playerData.get(playerId)!;
@@ -259,6 +283,7 @@ export interface TeamData {
     score: number;
     mcomCount: number;
     finalSectorBreached: number;
+    attempts: number;
 }
 
 export class TeamVariables {
@@ -270,7 +295,8 @@ export class TeamVariables {
             TeamVariables.teamData.set(teamId, {
                 score: 0,
                 mcomCount: 3,
-                finalSectorBreached: 1
+                finalSectorBreached: 1,
+                attempts: 0,
             });
         }
         return TeamVariables.teamData.get(teamId)!;
@@ -326,6 +352,35 @@ export class ObjectiveVariables {
     public static setObjectiveVariables(objective: mod.CapturePoint | number, value: CapturePointData): void {
         const objectiveId = typeof objective === 'number' ? objective : mod.GetObjId(objective);
         ObjectiveVariables.objectiveVariables.set(objectiveId, value);
+    }
+}
+
+export interface MCOMData {
+    isDestroyed: boolean;
+    isArmed: boolean;
+    armedBy: mod.Player | null;
+
+
+}
+
+export class MCOMVariables {
+    public static mcomVariables: Map<number, MCOMData> = new Map<number, MCOMData>();
+
+    public static getMCOMData(mcom: mod.MCOM | number): MCOMData {
+        const mcomId = typeof mcom === 'number' ? mcom : mod.GetObjId(mcom);
+        if (!MCOMVariables.mcomVariables.has(mcomId)) {
+            MCOMVariables.mcomVariables.set(mcomId, {
+                isDestroyed: false,
+                isArmed: false,
+                armedBy: null
+            });
+        }
+        return MCOMVariables.mcomVariables.get(mcomId)!;
+    }
+
+    public static setMCOMData(mcom: mod.MCOM | number, value: MCOMData): void {
+        const mcomId = typeof mcom === 'number' ? mcom : mod.GetObjId(mcom);
+        MCOMVariables.mcomVariables.set(mcomId, value);
     }
 }
 

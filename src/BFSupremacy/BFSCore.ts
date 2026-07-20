@@ -1,4 +1,4 @@
-import { GameConfig, ObjectiveVariables, PlayerVariables, UIconfig } from "./BFSVariables.ts";
+import { GameConfig, ObjectiveVariables, PlayerVariables, UIconfig, TeamVariables } from "./BFSVariables.ts";
 import { BFSupremacyUI } from "./BFSUI.ts";
 import { BFSupremacyConquest } from "./BFSConquest.ts";
 import { BFSupremacyRegroup } from "./BFSRegroup.ts";
@@ -23,6 +23,11 @@ export class BFSupremacyCore {
         let stage = GameConfig.gameConfig.stage;
 
         if (stage == 0) {
+            if (GameConfig.gameConfig.nightMap) {
+                GameConfig.gameConfig.night = true;
+            } else {
+                GameConfig.gameConfig.night = false;
+            }
             BFSupremacyConquest.resetConquest();
             GameConfig.gameConfig.flagStart = 200;
             GameConfig.gameConfig.flagEnd = 220;
@@ -32,8 +37,8 @@ export class BFSupremacyCore {
             }
 
         } else if (stage == 1) {
-            BFSAudio.playConquestEnd()
-            await mod.Wait(3);
+            TeamVariables.getTeamData(GameConfig.gameConfig.attacker).attempts++;
+            await BFSupremacyUI.conquest_End_UI();
             GameConfig.gameConfig.extractionRemainingTime = GameConfig.gameConfig.extractionTime;
             if (GameConfig.gameConfig.debug) {
                 GameConfig.gameConfig.extractionRemainingTime = 20;
@@ -46,22 +51,29 @@ export class BFSupremacyCore {
             BFSupremacyRegroup.spawnHeli();
 
         } else if (stage == 2) {
+            BFSupremacyUI.UI_Update();
+            BFSupremacyUI.UI_Change();
             BFSAudio.finalAssaultMusic();
             const players = mod.AllPlayers() as mod.Array;
-            mod.SendErrorReport(mod.Message(mod.stringkeys.playercount, mod.CountOf(players)));
+            GameConfig.gameConfig.remainingTime = GameConfig.gameConfig.baseAttackTime + GameConfig.gameConfig.bonusTime;
+            BFSupremacyFinalAssault.init();
+            if (GameConfig.gameConfig.nightFinalArea) {
+                GameConfig.gameConfig.night = true;
+            } else {
+                GameConfig.gameConfig.night = false;
+            }
             for (let i = 0; i < mod.CountOf(players); i++) {
                 const player = mod.ValueInArray(players, i);
-                mod.SendErrorReport(mod.Message(mod.stringkeys.selectedPlayer, player));
                 BFSWeather.checkNight(player);
                 mod.EnableAllInputRestrictions(player, false);
                 PlayerVariables.getPlayerData(player).cameraEnabled = true;
+                PlayerVariables.getPlayerData(player).onPoint = false;
+                PlayerVariables.getPlayerData(player).boarded = false;
+                await mod.Wait(0.033)
             }
-            GameConfig.gameConfig.remainingTime = GameConfig.gameConfig.baseAttackTime + GameConfig.gameConfig.bonusTime;
-            BFSupremacyFinalAssault.init();
         }
-        await mod.Wait(0.1);
-        BFSupremacyUI.UI_Change();
         BFSupremacyUI.UI_Update();
+        BFSupremacyUI.UI_Change()
     }
 
     public static ongoingFlagData(eventCapturePoint: mod.CapturePoint): void {

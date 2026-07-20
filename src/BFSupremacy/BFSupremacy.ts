@@ -1,6 +1,6 @@
 import { Events } from 'bf6-portal-utils/events';
 import { BFSupremacyConquest } from './BFSConquest';
-import { GameConfig, ObjectiveVariables, PlayerVariables, UIconfig } from './BFSVariables';
+import { GameConfig, ObjectiveVariables, PlayerVariables, UIconfig, MCOMVariables } from './BFSVariables';
 import { BFSupremacyUI } from './BFSUI';
 import { BFSupremacyCore } from './BFSCore';
 import { BFSupremacyPlayer } from './BFSPlayer';
@@ -76,17 +76,20 @@ export class BFSupremacy {
 
         Events.OnGameModeStarted.subscribe(() => {
             mod.SetGameModeTimeLimit(99999);
+            if (GameConfig.gameConfig.debug) {
+                GameConfig.gameConfig.ticketSpeed = 2;
+                GameConfig.gameConfig.capturePointCapturingTime = 4;
+                GameConfig.gameConfig.finalCaptureTime = 4;
+                GameConfig.gameConfig.finalNeutralizeTime = 4;
+            }
             BFSupremacyConquest.init();
             BFSWeather.initWeather();
             BFSupremacyUI.UI_Setup();
             BFSAudio.init();
-            BFSAudio.testMusic();
+            //BFSAudio.testMusic();
             BFSupremacyCore.scoreboardInit()
             //mod.SetCameraTypeForAll(mod.Cameras.ThirdPerson);
             GameConfig.gameConfig.extractionIcon = mod.SpawnObject(mod.RuntimeSpawn_Common.FX_Gadget_DeployableMortar_Target_Area, mod.Subtract(mod.GetObjectPosition(mod.GetSpatialObject(902)), mod.CreateVector(0, 20, 0)), mod.CreateVector(0, 0, 0))
-            if (GameConfig.gameConfig.debug) {
-                GameConfig.gameConfig.ticketSpeed = 2;
-            }
             GameConfig.gameConfig.roundOngoing = true;
             GameConfig.gameConfig.gameStarted = true;
         });
@@ -131,6 +134,9 @@ export class BFSupremacy {
 
         Events.OnCapturePointCaptured.subscribe(async (eventCapturePoint: mod.CapturePoint) => {
             await mod.Wait(0.1)
+            BFSAudio.plagFlagCapturedVO(eventCapturePoint);
+            let flagID = mod.GetObjId(eventCapturePoint);
+            mod.SetMaxCaptureMultiplier(eventCapturePoint, 1);
             if (GameConfig.gameConfig.gameStarted) {
                 BFSupremacyUI.capturePoint_UI_Colour_Update(eventCapturePoint);
                 BFSupremacyCore.updateFlagData(eventCapturePoint);
@@ -141,18 +147,19 @@ export class BFSupremacy {
                 for (let i = 0; i < mod.CountOf(playersOnPoint); i++) {
                     let p = mod.ValueInArray(playersOnPoint, i) as mod.Player;
                     if (mod.Equals(mod.GetTeam(p), ownerTeam)) {
-                        PlayerVariables.getPlayerData(p).score += 300;
+                        PlayerVariables.getPlayerData(p).score += 200;
                         PlayerVariables.getPlayerData(p).captures++;
                         BFSupremacyCore.scoreboardUpdate(p);
+                        BFSAudio.playCapturedSound(p);
                     }
                 }
 
                 if (mod.Equals(GameConfig.gameConfig.stage, 2)) {
-                    if (mod.Equals(ownerTeam, GameConfig.gameConfig.attacker)) {
+                    if (mod.Equals(ownerTeam, GameConfig.gameConfig.attacker) && (flagID >= GameConfig.gameConfig.flagStart && flagID <= GameConfig.gameConfig.flagEnd)) {
                         await BFSupremacyFinalAssault.moveToFinalSectorLevel2();
                     }
                 } else {
-                    mod.SetCapturePointCapturingTime(eventCapturePoint, 0)
+                    mod.SetCapturePointCapturingTime(eventCapturePoint, GameConfig.gameConfig.capturePointCapturingTime);
                 }
                 let t1Control = 0;
                 let t2Control = 0;
@@ -187,13 +194,15 @@ export class BFSupremacy {
             await mod.Wait(0.1)
             BFSupremacyUI.capturePoint_UI_Colour_Update(eventCapturePoint);
             BFSupremacyCore.updateFlagData(eventCapturePoint);
-        });
-
-        Events.OnCapturePointCaptured.subscribe(async (eventCapturePoint: mod.CapturePoint) => {
-            await mod.Wait(0.1)
-            mod.SetMaxCaptureMultiplier(eventCapturePoint, 0);
-            if (mod.Equals(GameConfig.gameConfig.stage, 0)) {
-                mod.SetCapturePointCapturingTime(eventCapturePoint, GameConfig.gameConfig.capturePointCapturingTime);
+            let ownerTeam = mod.GetOwnerProgressTeam(eventCapturePoint);
+            let playersOnPoint = mod.GetPlayersOnPoint(eventCapturePoint) as mod.Array;
+            for (let i = 0; i < mod.CountOf(playersOnPoint); i++) {
+                let p = mod.ValueInArray(playersOnPoint, i) as mod.Player;
+                if (mod.Equals(mod.GetTeam(p), ownerTeam)) {
+                    PlayerVariables.getPlayerData(p).score += 200;
+                    PlayerVariables.getPlayerData(p).captures++;
+                    BFSupremacyCore.scoreboardUpdate(p);
+                }
             }
         });
 
@@ -270,8 +279,8 @@ export class BFSupremacy {
         });
 
         Events.OnPlayerEarnedKillAssist.subscribe((eventPlayer: mod.Player, eventOtherPlayer: mod.Player) => {
-            //PlayerVariables.getPlayerData(eventPlayer).assists++;
-            //PlayerVariables.getPlayerData(eventPlayer).score += 50;
+            PlayerVariables.getPlayerData(eventPlayer).assists++;
+            PlayerVariables.getPlayerData(eventPlayer).score += 50;
             BFSupremacyCore.scoreboardUpdate(eventPlayer);
         });
 
@@ -284,14 +293,15 @@ export class BFSupremacy {
         Events.OnPlayerUndeploy.subscribe(async (eventPlayer: mod.Player) => {
             if (PlayerVariables.getPlayerData(eventPlayer).onPoint) {
                 BFSupremacyCore.capturePointPlayers(PlayerVariables.getPlayerData(eventPlayer).currentObjective);
-                PlayerVariables.getPlayerData(eventPlayer).onPoint = false;
             }
             if (GameConfig.gameConfig.roundOngoing) {
                 PlayerVariables.getPlayerData(eventPlayer).deaths++;
                 BFSupremacyCore.scoreboardUpdate(eventPlayer);
             }
-            await mod.Wait(0.1);
+            await mod.Wait(1);
+            PlayerVariables.getPlayerData(eventPlayer).onPoint = false;
             PlayerVariables.getPlayerData(eventPlayer).area = 0;
+            PlayerVariables.getPlayerData(eventPlayer).ingoreOOB = false;
         });
 
         Events.OnPlayerDied.subscribe((eventPlayer: mod.Player, eventOtherPlayer: mod.Player) => {
@@ -329,7 +339,7 @@ export class BFSupremacy {
                 }
             }
 
-            mod.DisplayHighlightedWorldLogMessage(mod.Message(mod.stringkeys.playerTracking, PlayerVariables.getPlayerData(eventPlayer).area))
+            //mod.DisplayHighlightedWorldLogMessage(mod.Message(mod.stringkeys.playerTracking, PlayerVariables.getPlayerData(eventPlayer).area))
         });
 
         Events.OnPlayerExitAreaTrigger.subscribe((eventPlayer: mod.Player, eventAreaTrigger: mod.AreaTrigger) => {
@@ -358,10 +368,12 @@ export class BFSupremacy {
                 BFSupremacyUI.outOfBoundsUI(eventPlayer);
             }
 
-            mod.DisplayHighlightedWorldLogMessage(mod.Message(mod.stringkeys.playerTracking, PlayerVariables.getPlayerData(eventPlayer).area))
+            //mod.DisplayHighlightedWorldLogMessage(mod.Message(mod.stringkeys.playerTracking, PlayerVariables.getPlayerData(eventPlayer).area))
         });
 
         Events.OnSpawnerSpawned.subscribe((eventPlayer: mod.Player, eventSpawner: mod.Spawner) => {
+            mod.SetPlayerMaxHealth(eventPlayer, 500);
+            mod.SetPlayerIncomingDamageFactor(eventPlayer, 0);
             mod.EnableAllInputRestrictions(eventPlayer, true);
             BFSupremacyRegroup.onBotSpawned(eventPlayer, eventSpawner);
         });
@@ -373,6 +385,12 @@ export class BFSupremacy {
         Events.OnPlayerEnterVehicle.subscribe((eventPlayer: mod.Player, eventVehicle: mod.Vehicle) => {
             mod.SendErrorReport(mod.Message(mod.stringkeys.value, eventPlayer));
             mod.SendErrorReport(mod.Message(mod.stringkeys.selectedPlayer, GameConfig.gameConfig.regroupBot as mod.Player));
+
+            if (PlayerVariables.getPlayerData(eventPlayer).area > 0) {
+                if (GameConfig.gameConfig.airVehicles.some(vehicle => mod.CompareVehicleName(mod.GetVehicleFromPlayer(eventPlayer), vehicle))) {
+                    PlayerVariables.getPlayerData(eventPlayer).outOfBounds = false;
+                }
+            }
 
             let vehicle = mod.GetVehicleFromPlayer(eventPlayer);
 
@@ -396,9 +414,11 @@ export class BFSupremacy {
                     mod.SendErrorReport(mod.Message(mod.stringkeys.debugRegroupVehicleConfirmed));
                     if (!mod.Equals(eventPlayer as mod.Player, GameConfig.gameConfig.regroupBot as mod.Player)) {
                         mod.SendErrorReport(mod.Message(mod.stringkeys.debugNotPilot));
-                        if (GameConfig.gameConfig.extractReady) {
+                        if (GameConfig.gameConfig.extractReady && !PlayerVariables.getPlayerData(eventPlayer).spawned && !PlayerVariables.getPlayerData(eventPlayer).boarded) {
+                            PlayerVariables.getPlayerData(eventPlayer).ingoreOOB = true;
+                            PlayerVariables.getPlayerData(eventPlayer).boarded = true;
                             BFSupremacyRegroup.playerBoarding(eventPlayer, eventVehicle);
-                        } else if (PlayerVariables.getPlayerData(eventPlayer).spawned) {
+                        } else if (PlayerVariables.getPlayerData(eventPlayer).spawned || PlayerVariables.getPlayerData(eventPlayer).boarded) {
                             mod.SendErrorReport(mod.Message(mod.stringkeys.debugFreshSpawn));
                             mod.UndeployPlayer(eventPlayer);
                             mod.DisplayNotificationMessage(mod.Message(mod.stringkeys.regroup.undeploy), eventPlayer);
@@ -420,6 +440,14 @@ export class BFSupremacy {
                     mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson)
                 }
             }
+
+            if (PlayerVariables.getPlayerData(eventPlayer).inAirspace) {
+                if (PlayerVariables.getPlayerData(eventPlayer).area == 1) {
+                    BFSupremacyUI.outOfBoundsUI(eventPlayer);
+                }
+            } else if (!PlayerVariables.getPlayerData(eventPlayer).inAirspace && PlayerVariables.getPlayerData(eventPlayer).area < 1) {
+                BFSupremacyUI.outOfBoundsUI(eventPlayer);
+            }
         });
 
         Events.OnPlayerDamaged.subscribe((eventPlayer: mod.Player) => {
@@ -430,15 +458,35 @@ export class BFSupremacy {
 
         Events.OnMCOMArmed.subscribe((eventMCOM: mod.MCOM) => {
             GameConfig.gameConfig.overtime += 1;
+            MCOMVariables.getMCOMData(eventMCOM).isArmed = true;
+            BFSupremacyUI.MCOM_UI_Update();
+            BFSAudio.MCOMArmedVO(eventMCOM);
+            let player = mod.ClosestPlayerTo(mod.GetObjectPosition(eventMCOM), GameConfig.gameConfig.attacker)
+            MCOMVariables.getMCOMData(eventMCOM).armedBy = player;
+            BFSupremacyPlayer.MCOMScoring(player);
         });
 
         Events.OnMCOMDestroyed.subscribe((eventMCOM: mod.MCOM) => {
             BFSupremacyFinalAssault.MCOMDestroyed();
             GameConfig.gameConfig.overtime -= 1;
+            const data = MCOMVariables.getMCOMData(eventMCOM);
+            data.isDestroyed = true;
+            data.isArmed = false;
+            BFSupremacyUI.MCOM_UI_Update();
+            BFSAudio.MCOMDestroyedVO(eventMCOM);
+            let player = MCOMVariables.getMCOMData(eventMCOM).armedBy
+            if (player) {
+                BFSupremacyPlayer.MCOMScoring(player);
+            }
         });
 
         Events.OnMCOMDefused.subscribe((eventMCOM: mod.MCOM) => {
             GameConfig.gameConfig.overtime -= 1;
+            MCOMVariables.getMCOMData(eventMCOM).isArmed = false;
+            BFSupremacyUI.MCOM_UI_Update();
+            BFSAudio.MCOMDefuseVO(eventMCOM);
+            let player = mod.ClosestPlayerTo(mod.GetObjectPosition(eventMCOM), GameConfig.gameConfig.defender)
+            BFSupremacyPlayer.MCOMScoring(player);
         });
 
         BFSupremacy.subscribed = true;

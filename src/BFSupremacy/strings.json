@@ -21,7 +21,9 @@
             "defenderMessage": "DEFEND THE OBJECTIVE",
             "attacker": "PREPARE TO ASSAULT",
             "defender": "PREPARE TO DEFEND",
-            "overtime": "OVERTIME"
+            "overtime": "OVERTIME",
+            "secured": "SECTOR SECURED",
+            "lost": "SECTOR LOST"
         },
         "debug": {
             "name": "Debug"
@@ -52,8 +54,9 @@
         "kills": "K",
         "deaths": "D",
         "assists": "A",
-        "captures": "Captures"
+        "captures": "Objectives"
     },
+    "blank": " ",
     "value": "{}",
     "returnToCombat": "RETURN TO COMBAT",
     "debug1": "T1Score:{}",
