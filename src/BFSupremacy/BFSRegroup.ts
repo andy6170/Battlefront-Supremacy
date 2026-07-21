@@ -79,9 +79,9 @@ export class BFSupremacyRegroup {
         GameConfig.gameConfig.extractReady = true;
         GameConfig.gameConfig.heliTakeOff = false;
         mod.EnableVFX(GameConfig.gameConfig.extractionIcon, true);
-        mod.EnableGameModeObjective(mod.GetCapturePoint(904), true);
-        mod.SetCapturePointOwner(mod.GetCapturePoint(904), GameConfig.gameConfig.attacker);
-        mod.EnableCapturePointDeploying(mod.GetCapturePoint(904), false);
+        mod.EnableGameModeObjective(mod.GetCapturePoint(910), true);
+        mod.SetCapturePointOwner(mod.GetCapturePoint(910), GameConfig.gameConfig.attacker);
+        mod.EnableCapturePointDeploying(mod.GetCapturePoint(910), false);
         BFSAudio.regoupVO();
         while (GameConfig.gameConfig.stage === 1 && GameConfig.gameConfig.extractionRemainingTime > 0 && mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition)) {
             const currentPos = mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition);
@@ -106,7 +106,7 @@ export class BFSupremacyRegroup {
         GameConfig.gameConfig.roundOngoing = false;
         GameConfig.gameConfig.extractReady = false;
         mod.EnableVFX(GameConfig.gameConfig.extractionIcon, false);
-        mod.EnableGameModeObjective(mod.GetCapturePoint(904), false);
+        mod.EnableGameModeObjective(mod.GetCapturePoint(910), false);
         const heli = GameConfig.gameConfig.regroupVehicle;
         if (!heli) return;
 
