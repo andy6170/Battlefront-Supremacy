@@ -82,8 +82,8 @@ export class BFSupremacy {
                 GameConfig.gameConfig.finalCaptureTime = 4;
                 GameConfig.gameConfig.finalNeutralizeTime = 4;
             }
-            BFSupremacyConquest.init();
             BFSWeather.initWeather();
+            BFSupremacyConquest.init();
             BFSupremacyUI.UI_Setup();
             BFSAudio.init();
             //BFSAudio.testMusic();

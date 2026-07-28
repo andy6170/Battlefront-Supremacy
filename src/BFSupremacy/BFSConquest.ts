@@ -104,8 +104,8 @@ export class BFSupremacyConquest {
         if (s151) mod.EnableGameModeObjective(s151, true);
         let s152 = mod.GetSector(152);
         if (s152) mod.EnableGameModeObjective(s152, true);
-        let cp904 = mod.GetCapturePoint(904);
-        if (cp904) mod.EnableGameModeObjective(cp904, false);
+        let cp910 = mod.GetCapturePoint(910);
+        if (cp910) mod.EnableGameModeObjective(cp910, false);
         for (let i = 100; i < 110; i++) {
             let sector = mod.GetSector(i);
             if (sector) {

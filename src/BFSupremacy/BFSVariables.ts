@@ -54,7 +54,7 @@ export interface GameConfig {
 export class GameConfig {
     public static gameConfig: GameConfig = {
         gameStarted: false,
-        debug: true,
+        debug: false,
         capturePointNeutralizationTime: 15,
         capturePointCapturingTime: 15,
         capturePointMultiplier: 2,

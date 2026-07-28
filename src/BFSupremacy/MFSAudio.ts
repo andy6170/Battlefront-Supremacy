@@ -121,7 +121,7 @@ export class BFSAudio {
         mod.LoadMusic(mod.MusicPackages.Core);
         mod.SetMusicParam(mod.MusicParams.Core_IsWinning, 1);
         mod.PlayMusic(mod.MusicEvents.Core_EndOfRound_Loop);
-        await mod.Wait(4);
+        await mod.Wait(6);
         this.finalAssaultMusic();
     }
 
@@ -142,10 +142,10 @@ export class BFSAudio {
         }
 
         if (friendly > enemy) {
-            mod.PlaySound(BFSAudio.capturetickSoundTaking, 0.5, eventPlayer);
+            mod.PlaySound(BFSAudio.capturetickSoundTaking, 0.3, eventPlayer);
         }
         else if (friendly < enemy) {
-            mod.PlaySound(BFSAudio.capturetickSoundLosing, 0.5, eventPlayer);
+            mod.PlaySound(BFSAudio.capturetickSoundLosing, 0.3, eventPlayer);
         }
     }
 
@@ -170,11 +170,11 @@ export class BFSAudio {
     }
 
     public static playConquestEnd2(): void {
-        mod.PlaySound(BFSAudio.conquestEnd2, 0.6);
+        mod.PlaySound(BFSAudio.conquestEnd2, 0.7);
     }
 
     public static playNextObjective(): void {
-        mod.PlaySound(BFSAudio.nextObjective, 0.6);
+        mod.PlaySound(BFSAudio.nextObjective, 0.7);
     }
 
     public static playOutOfBounds(eventPlayer: mod.Player): void {

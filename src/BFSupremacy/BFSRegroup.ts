@@ -16,10 +16,11 @@ export class BFSupremacyRegroup {
         mod.ForceVehicleSpawnerSpawn(mod.GetVehicleSpawner(901));
     }
 
-    public static onBotSpawned(player: mod.Player, spawner: mod.Spawner): void {
+    public static async onBotSpawned(player: mod.Player, spawner: mod.Spawner): Promise<void> {
         if (GameConfig.gameConfig.regroupVehicleSelected) return;
         if (mod.GetObjId(spawner) === 900) {
             GameConfig.gameConfig.regroupBot = player;
+            await mod.Wait(0.1);
             this.checkAndSetup();
         }
     }

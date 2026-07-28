@@ -346,7 +346,7 @@ export class BFSupremacyFinalAssault {
 
         BFSAudio.defencesBreachedVO()
 
-        await mod.Wait(2)
+        await mod.Wait(4)
 
         mod.PauseGameModeTime(false);
 
