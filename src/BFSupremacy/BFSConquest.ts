@@ -167,7 +167,7 @@ export class BFSupremacyConquest {
 
         for (let i = 200; i < 220; i++) {
             let capturePoint = mod.GetCapturePoint(i);
-            if (capturePoint) {
+            if (mod.IsValid(capturePoint)) {
                 let owner = mod.GetCurrentOwnerTeam(capturePoint);
                 if (mod.Equals(owner, mod.GetTeam(1))) {
                     t1Control++;

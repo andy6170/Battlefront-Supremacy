@@ -121,7 +121,7 @@ export class BFSAudio {
         mod.LoadMusic(mod.MusicPackages.Core);
         mod.SetMusicParam(mod.MusicParams.Core_IsWinning, 1);
         mod.PlayMusic(mod.MusicEvents.Core_EndOfRound_Loop);
-        await mod.Wait(6);
+        await mod.Wait(8);
         this.finalAssaultMusic();
     }
 
@@ -261,9 +261,14 @@ export class BFSAudio {
         mod.PlayVO(BFSAudio.VO4, mod.VoiceOverEvents2D.RoundEndEnemyCapture, mod.VoiceOverFlags.Alpha, otherTeam);
     }
 
-    public static regoupVO() {
+    public static oneMinuteVO() {
         mod.PlayVO(BFSAudio.VO1, mod.VoiceOverEvents2D.Time60Left, mod.VoiceOverFlags.Alpha, mod.GetTeam(1));
         mod.PlayVO(BFSAudio.VO2, mod.VoiceOverEvents2D.Time60Left, mod.VoiceOverFlags.Alpha, mod.GetTeam(2));
+    }
+
+    public static thirtySecondsVO() {
+        mod.PlayVO(BFSAudio.VO1, mod.VoiceOverEvents2D.Time30Left, mod.VoiceOverFlags.Alpha, mod.GetTeam(1));
+        mod.PlayVO(BFSAudio.VO2, mod.VoiceOverEvents2D.Time30Left, mod.VoiceOverFlags.Alpha, mod.GetTeam(2));
     }
 
     public static lastAttemptVO() {

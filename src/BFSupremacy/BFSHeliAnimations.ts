@@ -5,20 +5,25 @@ export class BFSHeliAnimations {
         const dz = mod.ZComponentOf(target) - mod.ZComponentOf(origin);
 
         const distanceXZ = Math.sqrt(dx * dx + dz * dz);
-        const pitch = -Math.atan2(dy, distanceXZ);
-        const yaw = Math.atan2(dx, dz);
 
-        return mod.CreateVector(pitch, yaw, 0);
+        const yaw = Math.atan2(dx, dz);          // left/right
+        const pitch = -Math.atan2(dy, distanceXZ); // up/down
+        const roll = 0;
+
+        return mod.CreateVector(pitch, yaw, roll);
     }
-
     public static async animateHeliLanding(
         heli: mod.Vehicle,
         targetSpatialObjId: number,
-        isActive: () => boolean
+        isActive: () => boolean,
+        cameraObjId?: number,
+        startSpatialObjId?: number
     ): Promise<void> {
         const target = mod.GetSpatialObject(targetSpatialObjId);
         const targetPos = mod.GetObjectPosition(target);
-        const startPos = mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition);
+        const startPos = startSpatialObjId !== undefined
+            ? mod.GetObjectPosition(mod.GetSpatialObject(startSpatialObjId))
+            : mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition);
         if (!startPos) return;
 
         // Calculate direction to target horizontally
@@ -28,6 +33,20 @@ export class BFSHeliAnimations {
 
         // Stage 1: Horizontal move to a point above the target
         const hoverPos = mod.CreateVector(mod.XComponentOf(targetPos), mod.YComponentOf(startPos), mod.ZComponentOf(targetPos));
+
+        if (cameraObjId !== undefined) {
+            const cameraObject = mod.GetFixedCamera(cameraObjId);
+            const cameraPos = mod.GetObjectPosition(cameraObject);
+
+            const startRot = this.getLookAtRotation(cameraPos, startPos);
+            mod.SetObjectTransform(cameraObject, mod.CreateTransform(cameraPos, startRot));
+            await mod.Wait(1);
+
+            const dist1 = mod.DistanceBetween(startPos, hoverPos);
+            const time1 = (dist1 / 0.99) * 0.066;
+            const hoverRot = this.getLookAtRotation(cameraPos, hoverPos);
+            mod.SetObjectTransformOverTime(cameraObject, mod.CreateTransform(cameraPos, hoverRot), time1, false, false);
+        }
 
         while (mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition) && isActive()) {
             const currentPos = mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition);
@@ -46,6 +65,16 @@ export class BFSHeliAnimations {
         }
 
         // Stage 2: Landing (Vertical drop)
+        if (cameraObjId !== undefined) {
+            const cameraObject = mod.GetFixedCamera(cameraObjId);
+            const cameraPos = mod.GetObjectPosition(cameraObject);
+
+            const dist2 = mod.DistanceBetween(hoverPos, targetPos);
+            const time2 = (dist2 / 0.33) * 0.066;
+            const targetRot = this.getLookAtRotation(cameraPos, targetPos);
+            mod.SetObjectTransformOverTime(cameraObject, mod.CreateTransform(cameraPos, targetRot), time2, false, false);
+        }
+
         while (mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition) && isActive()) {
             const currentPos = mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition);
             if (!currentPos) break;

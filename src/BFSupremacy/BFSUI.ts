@@ -186,29 +186,38 @@ export class BFSupremacyUI {
             prefix = "finalflag_";
         }
 
+        if (prefix === "" || id > 20 || id < 0) return;
+
+        let bg1 = mod.FindUIWidgetWithName(prefix + "bg1_" + id);
+        let bg2 = mod.FindUIWidgetWithName(prefix + "bg2_" + id);
+        let text1 = mod.FindUIWidgetWithName(prefix + "text1_" + id);
+        let text2 = mod.FindUIWidgetWithName(prefix + "text2_" + id);
+
+        if (!bg1 || !bg2 || !text1 || !text2) return;
+
         if (mod.Equals(owner, mod.GetTeam(1))) {
-            mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName(prefix + "bg1_" + id), UIconfig.uiConfig.friendlyBGColour);
-            mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName(prefix + "bg2_" + id), UIconfig.uiConfig.enemyBGColour);
-            mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName(prefix + "text1_" + id), UIconfig.uiConfig.friendlyColour);
-            mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName(prefix + "text2_" + id), UIconfig.uiConfig.enemyColour);
-            mod.SetUITextColor(mod.FindUIWidgetWithName(prefix + "text1_" + id), UIconfig.uiConfig.friendlyColour);
-            mod.SetUITextColor(mod.FindUIWidgetWithName(prefix + "text2_" + id), UIconfig.uiConfig.enemyColour);
+            mod.SetUIWidgetBgColor(bg1, UIconfig.uiConfig.friendlyBGColour);
+            mod.SetUIWidgetBgColor(bg2, UIconfig.uiConfig.enemyBGColour);
+            mod.SetUIWidgetBgColor(text1, UIconfig.uiConfig.friendlyColour);
+            mod.SetUIWidgetBgColor(text2, UIconfig.uiConfig.enemyColour);
+            mod.SetUITextColor(text1, UIconfig.uiConfig.friendlyColour);
+            mod.SetUITextColor(text2, UIconfig.uiConfig.enemyColour);
         }
         else if (mod.Equals(owner, mod.GetTeam(2))) {
-            mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName(prefix + "bg1_" + id), UIconfig.uiConfig.enemyBGColour);
-            mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName(prefix + "bg2_" + id), UIconfig.uiConfig.friendlyBGColour);
-            mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName(prefix + "text1_" + id), UIconfig.uiConfig.enemyColour);
-            mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName(prefix + "text2_" + id), UIconfig.uiConfig.friendlyColour);
-            mod.SetUITextColor(mod.FindUIWidgetWithName(prefix + "text1_" + id), UIconfig.uiConfig.enemyColour);
-            mod.SetUITextColor(mod.FindUIWidgetWithName(prefix + "text2_" + id), UIconfig.uiConfig.friendlyColour);
+            mod.SetUIWidgetBgColor(bg1, UIconfig.uiConfig.enemyBGColour);
+            mod.SetUIWidgetBgColor(bg2, UIconfig.uiConfig.friendlyBGColour);
+            mod.SetUIWidgetBgColor(text1, UIconfig.uiConfig.enemyColour);
+            mod.SetUIWidgetBgColor(text2, UIconfig.uiConfig.friendlyColour);
+            mod.SetUITextColor(text1, UIconfig.uiConfig.enemyColour);
+            mod.SetUITextColor(text2, UIconfig.uiConfig.friendlyColour);
         }
         else {
-            mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName(prefix + "bg1_" + id), mod.CreateVector(0, 0, 0));
-            mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName(prefix + "bg2_" + id), mod.CreateVector(0, 0, 0));
-            mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName(prefix + "text1_" + id), mod.CreateVector(1, 1, 1));
-            mod.SetUIWidgetBgColor(mod.FindUIWidgetWithName(prefix + "text2_" + id), mod.CreateVector(1, 1, 1));
-            mod.SetUITextColor(mod.FindUIWidgetWithName(prefix + "text1_" + id), mod.CreateVector(1, 1, 1));
-            mod.SetUITextColor(mod.FindUIWidgetWithName(prefix + "text2_" + id), mod.CreateVector(1, 1, 1));
+            mod.SetUIWidgetBgColor(bg1, mod.CreateVector(0, 0, 0));
+            mod.SetUIWidgetBgColor(bg2, mod.CreateVector(0, 0, 0));
+            mod.SetUIWidgetBgColor(text1, mod.CreateVector(1, 1, 1));
+            mod.SetUIWidgetBgColor(text2, mod.CreateVector(1, 1, 1));
+            mod.SetUITextColor(text1, mod.CreateVector(1, 1, 1));
+            mod.SetUITextColor(text2, mod.CreateVector(1, 1, 1));
         }
 
     }
@@ -227,8 +236,15 @@ export class BFSupremacyUI {
             prefix = "finalflag_";
         }
 
-        if (id > 20 || id < 0)
+        if (prefix === "" || id > 20 || id < 0)
             return;
+
+        let bg1 = mod.FindUIWidgetWithName(prefix + "bg1_" + id);
+        let bg2 = mod.FindUIWidgetWithName(prefix + "bg2_" + id);
+        let text1 = mod.FindUIWidgetWithName(prefix + "text1_" + id);
+        let text2 = mod.FindUIWidgetWithName(prefix + "text2_" + id);
+
+        if (!bg1 || !bg2 || !text1 || !text2) return;
 
         if (mod.LessThan(mod.GetCaptureProgress(eventCapturePoint), 0.99) && mod.GreaterThan(mod.GetCaptureProgress(eventCapturePoint), 0.01)) {
             alpha = UIconfig.uiConfig.uiAlpha
@@ -237,12 +253,12 @@ export class BFSupremacyUI {
             }
         }
 
-        mod.SetUIWidgetBgAlpha(mod.FindUIWidgetWithName(prefix + "bg1_" + id), alpha2);
-        mod.SetUIWidgetBgAlpha(mod.FindUIWidgetWithName(prefix + "bg2_" + id), alpha2);
-        mod.SetUIWidgetBgAlpha(mod.FindUIWidgetWithName(prefix + "text1_" + id), alpha);
-        mod.SetUIWidgetBgAlpha(mod.FindUIWidgetWithName(prefix + "text2_" + id), alpha);
-        mod.SetUITextAlpha(mod.FindUIWidgetWithName(prefix + "text1_" + id), alpha);
-        mod.SetUITextAlpha(mod.FindUIWidgetWithName(prefix + "text2_" + id), alpha);
+        mod.SetUIWidgetBgAlpha(bg1, alpha2);
+        mod.SetUIWidgetBgAlpha(bg2, alpha2);
+        mod.SetUIWidgetBgAlpha(text1, alpha);
+        mod.SetUIWidgetBgAlpha(text2, alpha);
+        mod.SetUITextAlpha(text1, alpha);
+        mod.SetUITextAlpha(text2, alpha);
     }
 
     public static async conquest_End_UI() {

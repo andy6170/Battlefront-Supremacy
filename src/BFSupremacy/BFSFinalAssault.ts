@@ -15,7 +15,7 @@ export class BFSupremacyFinalAssault {
         if (s152) mod.EnableGameModeObjective(s152, false);
         GameConfig.gameConfig.remainingTime = GameConfig.gameConfig.baseAttackTime + GameConfig.gameConfig.bonusTime;
         if (GameConfig.gameConfig.debug) {
-            GameConfig.gameConfig.remainingTime = 300;
+            GameConfig.gameConfig.remainingTime = 30;
         }
         for (let i = 1; i < 10; i++) {
             let hq = mod.GetHQ(i);
@@ -409,8 +409,15 @@ export class BFSupremacyFinalAssault {
 
     public static async endGame(winningTeam: mod.Team, camera: number, vfxId: number): Promise<void> {
         BFSAudio.endMusic();
+        for (let i = 3000; i < 3100; i++) {
+            let sfx = mod.GetSFX(i);
+            if (sfx) {
+                mod.StopSound(sfx);
+            }
+        }
         GameConfig.gameConfig.roundOngoing = false;
         await mod.Wait(2)
+        GameConfig.gameConfig.cutscene = true;
         mod.SetCameraTypeForAll(mod.Cameras.Fixed, camera);
         mod.SetObjectTransformOverTime(mod.GetFixedCamera(camera), mod.CreateTransform(mod.GetObjectPosition(mod.GetSpatialObject(camera + 5)), mod.GetObjectRotation(mod.GetFixedCamera(camera))), 15, false, false);
         await mod.Wait(1);

@@ -54,7 +54,7 @@ export interface GameConfig {
 export class GameConfig {
     public static gameConfig: GameConfig = {
         gameStarted: false,
-        debug: false,
+        debug: true,
         capturePointNeutralizationTime: 15,
         capturePointCapturingTime: 15,
         capturePointMultiplier: 2,
@@ -193,7 +193,12 @@ export class UIconfig {
             mod.Weapons.Sniper_M2010_ESR,
             mod.Weapons.Sniper_Mini_Scout,
             mod.Weapons.Sniper_PSR,
-            mod.Weapons.Sniper_SV_98
+            mod.Weapons.Sniper_SV_98,
+            mod.Weapons.DMR_GRT_CPS,
+            mod.Weapons.DMR_LMR27,
+            mod.Weapons.DMR_M39_EMR,
+            mod.Weapons.DMR_SVDM,
+            mod.Weapons.DMR_SVK_86
         ],
         launchers: [
             mod.Gadgets.Launcher_Aim_Guided,
