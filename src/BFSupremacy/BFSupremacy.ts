@@ -64,7 +64,6 @@ export class BFSupremacy {
                         PlayerVariables.getPlayerData(eventPlayer).firstPerson = false;
                         PlayerVariables.getPlayerData(eventPlayer).thirdPerson = true;
                         PlayerVariables.getPlayerData(eventPlayer).stance = "3rdperson";
-                        //mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson);
                         if ((PlayerVariables.getPlayerData(eventPlayer).hasSniper && mod.IsInventorySlotActive(eventPlayer, mod.InventorySlots.PrimaryWeapon)) || (PlayerVariables.getPlayerData(eventPlayer).hasLauncher && (mod.IsInventorySlotActive(eventPlayer, mod.InventorySlots.GadgetOne) || mod.IsInventorySlotActive(eventPlayer, mod.InventorySlots.GadgetTwo)))) {
                             mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson);
                         }
@@ -88,9 +87,7 @@ export class BFSupremacy {
             BFSupremacyConquest.init();
             BFSupremacyUI.UI_Setup();
             BFSAudio.init();
-            //BFSAudio.testMusic();
             BFSupremacyCore.scoreboardInit()
-            //mod.SetCameraTypeForAll(mod.Cameras.ThirdPerson);
             GameConfig.gameConfig.extractionIcon = mod.SpawnObject(mod.RuntimeSpawn_Common.FX_Gadget_DeployableMortar_Target_Area, mod.Subtract(mod.GetObjectPosition(mod.GetSpatialObject(902)), mod.CreateVector(0, 20, 0)), mod.CreateVector(0, 0, 0))
             GameConfig.gameConfig.roundOngoing = true;
             GameConfig.gameConfig.gameStarted = true;
@@ -242,11 +239,17 @@ export class BFSupremacy {
                 PlayerVariables.getPlayerData(eventPlayer).hasSniper = false;
             }
 
-            if (!GameConfig.gameConfig.cutscene) {
+            if (!mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsInVehicle)) {
+                PlayerVariables.getPlayerData(eventPlayer).cameraEnabled = true;
+            }
+
+            if (!GameConfig.gameConfig.cutscene && !mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsInVehicle)) {
                 //Force Reset the Camera as height can bug out
                 mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.FirstPerson)
                 await mod.Wait(0.8);
-                mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson)
+                if (!GameConfig.gameConfig.cutscene && !mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsInVehicle)) {
+                    mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson)
+                }
             }
             BFSWeather.checkNight(eventPlayer);
 
@@ -288,6 +291,8 @@ export class BFSupremacy {
         });
 
         Events.OnRevived.subscribe((eventPlayer: mod.Player, eventOtherPlayer: mod.Player) => {
+            mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson);
+            PlayerVariables.getPlayerData(eventPlayer).cameraEnabled = true;
             if (PlayerVariables.getPlayerData(eventPlayer).onPoint) {
                 BFSupremacyCore.capturePointPlayers(PlayerVariables.getPlayerData(eventPlayer).currentObjective);
             }
@@ -308,6 +313,8 @@ export class BFSupremacy {
         });
 
         Events.OnPlayerDied.subscribe((eventPlayer: mod.Player, eventOtherPlayer: mod.Player) => {
+            mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.FirstPerson);
+            PlayerVariables.getPlayerData(eventPlayer).cameraEnabled = false;
             if (PlayerVariables.getPlayerData(eventPlayer).onPoint) {
                 BFSupremacyCore.capturePointPlayers(PlayerVariables.getPlayerData(eventPlayer).currentObjective);
             }
@@ -345,14 +352,11 @@ export class BFSupremacy {
                     PlayerVariables.getPlayerData(eventPlayer).outOfBounds = false;
                 }
             }
-
-            //mod.DisplayHighlightedWorldLogMessage(mod.Message(mod.stringkeys.playerTracking, PlayerVariables.getPlayerData(eventPlayer).area))
         });
 
         Events.OnPlayerExitAreaTrigger.subscribe((eventPlayer: mod.Player, eventAreaTrigger: mod.AreaTrigger) => {
             PlayerVariables.getPlayerData(eventPlayer).area--;
             let areaID = mod.GetObjId(eventAreaTrigger);
-
 
             if (areaID == 1400) {
                 PlayerVariables.getPlayerData(eventPlayer).inAirspace = false;
@@ -374,8 +378,6 @@ export class BFSupremacy {
             } else if (!PlayerVariables.getPlayerData(eventPlayer).inAirspace && PlayerVariables.getPlayerData(eventPlayer).area < 1) {
                 BFSupremacyUI.outOfBoundsUI(eventPlayer);
             }
-
-            //mod.DisplayHighlightedWorldLogMessage(mod.Message(mod.stringkeys.playerTracking, PlayerVariables.getPlayerData(eventPlayer).area))
         });
 
         Events.OnSpawnerSpawned.subscribe((eventPlayer: mod.Player, eventSpawner: mod.Spawner) => {
@@ -387,8 +389,7 @@ export class BFSupremacy {
         });
 
         Events.OnPlayerEnterVehicle.subscribe((eventPlayer: mod.Player, eventVehicle: mod.Vehicle) => {
-            //mod.SendErrorReport(mod.Message(mod.stringkeys.value, eventPlayer));
-            //mod.SendErrorReport(mod.Message(mod.stringkeys.selectedPlayer, GameConfig.gameConfig.regroupBot as mod.Player));
+            PlayerVariables.getPlayerData(eventPlayer).cameraEnabled = false;
 
             if (PlayerVariables.getPlayerData(eventPlayer).area > 0) {
                 if (GameConfig.gameConfig.airVehicles.some(vehicle => mod.CompareVehicleName(mod.GetVehicleFromPlayer(eventPlayer), vehicle))) {
@@ -396,39 +397,17 @@ export class BFSupremacy {
                 }
             }
 
-            let vehicle = mod.GetVehicleFromPlayer(eventPlayer);
-
-            if (mod.Equals(eventVehicle as mod.Vehicle, GameConfig.gameConfig.regroupVehicle as mod.Vehicle)) {
-                //mod.SendErrorReport(mod.Message(mod.stringkeys.eventVehicleMatchesRegroupVehicle));
-            } else {
-                //mod.SendErrorReport(mod.Message(mod.stringkeys.eventVehicleDoesNotMatch));
-            }
-
-            if (mod.Equals(vehicle as mod.Vehicle, GameConfig.gameConfig.regroupVehicle as mod.Vehicle)) {
-                //mod.SendErrorReport(mod.Message(mod.stringkeys.playerVehicleIsRegroupVehicle));
-            } else {
-                //mod.SendErrorReport(mod.Message(mod.stringkeys.playerVehicleIsNotRegroupVehicle));
-            }
-
-
-
             if (GameConfig.gameConfig.stage === 1) {
-                //mod.SendErrorReport(mod.Message(mod.stringkeys.debugEnterVehicle));
                 if (mod.Equals(eventVehicle as mod.Vehicle, GameConfig.gameConfig.regroupVehicle as mod.Vehicle)) {
-                    //mod.SendErrorReport(mod.Message(mod.stringkeys.debugRegroupVehicleConfirmed));
                     if (!mod.Equals(eventPlayer as mod.Player, GameConfig.gameConfig.regroupBot as mod.Player)) {
-                        //mod.SendErrorReport(mod.Message(mod.stringkeys.debugNotPilot));
                         if (GameConfig.gameConfig.extractReady && !PlayerVariables.getPlayerData(eventPlayer).spawned && !PlayerVariables.getPlayerData(eventPlayer).boarded) {
                             PlayerVariables.getPlayerData(eventPlayer).ingoreOOB = true;
                             PlayerVariables.getPlayerData(eventPlayer).boarded = true;
                             BFSupremacyRegroup.playerBoarding(eventPlayer, eventVehicle);
                         } else if (PlayerVariables.getPlayerData(eventPlayer).spawned || PlayerVariables.getPlayerData(eventPlayer).boarded) {
-                            //mod.SendErrorReport(mod.Message(mod.stringkeys.debugFreshSpawn));
                             mod.UndeployPlayer(eventPlayer);
-                            //mod.DisplayNotificationMessage(mod.Message(mod.stringkeys.regroup.undeploy), eventPlayer);
                         } else {
                             mod.ForcePlayerExitVehicle(eventPlayer, eventVehicle);
-                            //mod.SendErrorReport(mod.Message(mod.stringkeys.debugPlayerRejected));
                         }
                     }
                 }
@@ -442,6 +421,7 @@ export class BFSupremacy {
                     mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.FirstPerson)
                     mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.FirstPerson)
                     mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson)
+                    PlayerVariables.getPlayerData(eventPlayer).cameraEnabled = true;
                 }
             }
 

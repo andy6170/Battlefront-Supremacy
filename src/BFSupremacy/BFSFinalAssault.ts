@@ -330,13 +330,13 @@ export class BFSupremacyFinalAssault {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static async moveToFinalSectorLevel2(): Promise<void> {
-        GameConfig.gameConfig.flagStart = 0;
-        GameConfig.gameConfig.flagEnd = 0;
         //GameConfig.gameConfig.roundOngoing = false;
         let cpStart = mod.GetCapturePoint(GameConfig.gameConfig.flagStart);
         if (cpStart) mod.EnableGameModeObjective(cpStart, false);
         let cpEnd = mod.GetCapturePoint(GameConfig.gameConfig.flagEnd);
         if (cpEnd) mod.EnableGameModeObjective(cpEnd, false);
+        GameConfig.gameConfig.flagStart = 0;
+        GameConfig.gameConfig.flagEnd = 0;
 
         mod.PauseGameModeTime(true);
         mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("capturepoint_container_finalAssault"), false);
@@ -360,6 +360,7 @@ export class BFSupremacyFinalAssault {
             PlayerVariables.getPlayerData(player).area = 0;
         }
         BFSupremacyFinalAssault.manageFinalSector(true);
+        BFSupremacyUI.MCOMNotification();
 
         BFSAudio.playNextObjective();
         //GameConfig.gameConfig.roundOngoing = true;

@@ -37,6 +37,9 @@ export class BFSupremacyCore {
             }
 
         } else if (stage == 1) {
+            BFSupremacyConquest.endConquest();
+            GameConfig.gameConfig.flagStart = 0;
+            GameConfig.gameConfig.flagEnd = 0;
             TeamVariables.getTeamData(GameConfig.gameConfig.attacker).attempts++;
             await BFSupremacyUI.conquest_End_UI();
             GameConfig.gameConfig.extractionRemainingTime = GameConfig.gameConfig.extractionTime;
@@ -44,9 +47,6 @@ export class BFSupremacyCore {
                 GameConfig.gameConfig.extractionRemainingTime = 20;
             }
             GameConfig.gameConfig.extractReady = false;
-            BFSupremacyConquest.endConquest();
-            GameConfig.gameConfig.flagStart = 0;
-            GameConfig.gameConfig.flagEnd = 0;
             BFSupremacyUI.regroup_UI_Progress_Update();
             BFSupremacyRegroup.spawnHeli();
 

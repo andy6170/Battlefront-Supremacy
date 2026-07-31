@@ -262,45 +262,25 @@ export class BFSupremacyUI {
     }
 
     public static async conquest_End_UI() {
-        let width = 380
-        let height = 50
-        let font = 42
-        let animationTime = 15
-        let animationWidth = width / animationTime
-
-
-        mod.AddUIContainer("conquest_end_container", mod.CreateVector(0, 300, 0), mod.CreateVector(width, height, 0), mod.UIAnchor.TopCenter, mod.FindUIWidgetWithName("MainUI"), true, 0, mod.CreateVector(0.5, 0.5, 0.5), 1, mod.UIBgFill.None, mod.UIDepth.AboveGameUI);
-        let container = mod.FindUIWidgetWithName("conquest_end_container");
-
         let t1score = TeamVariables.getTeamData(1).score;
         let t2score = TeamVariables.getTeamData(2).score;
-        let t1colour = UIconfig.uiConfig.friendlyColour
-        let t2colour = UIconfig.uiConfig.enemyColour
-
         let t1message = mod.Message(mod.stringkeys.blank);
         let t2message = mod.Message(mod.stringkeys.blank);
 
         if (GameConfig.gameConfig.stage == 1) {
             t1message = mod.Message(mod.stringkeys.supremacy.regroup.secured)
             t2message = mod.Message(mod.stringkeys.supremacy.regroup.lost)
-
             if (t1score < t2score) {
                 t1message = mod.Message(mod.stringkeys.supremacy.regroup.lost);
                 t2message = mod.Message(mod.stringkeys.supremacy.regroup.secured);
-                t1colour = UIconfig.uiConfig.enemyColour
-                t2colour = UIconfig.uiConfig.friendlyColour
             }
-
         }
         else if (GameConfig.gameConfig.stage == 2) {
             t1message = mod.Message(mod.stringkeys.supremacy.finalassault.secured)
             t2message = mod.Message(mod.stringkeys.supremacy.finalassault.lost)
-
             if (t1score < t2score) {
                 t1message = mod.Message(mod.stringkeys.supremacy.finalassault.lost);
                 t2message = mod.Message(mod.stringkeys.supremacy.finalassault.secured);
-                t1colour = UIconfig.uiConfig.enemyColour
-                t2colour = UIconfig.uiConfig.friendlyColour
             }
         }
 
@@ -310,46 +290,89 @@ export class BFSupremacyUI {
             BFSAudio.lastAttemptVO();
         }
 
+        await BFSupremacyUI.notificationAnimation(t1message, t2message);
+    }
+
+    public static async MCOMNotification(): Promise<void> {
+        let t1score = TeamVariables.getTeamData(1).score;
+        let t2score = TeamVariables.getTeamData(2).score;
+        let t1message = mod.Message(mod.stringkeys.blank);
+        let t2message = mod.Message(mod.stringkeys.blank);
+        if (t1score > t2score) {
+            t1message = mod.Message(mod.stringkeys.supremacy.finalassault.attackMCOM)
+            t2message = mod.Message(mod.stringkeys.supremacy.finalassault.defendMCOM);
+        }
+        else if (t1score < t2score) {
+            t1message = mod.Message(mod.stringkeys.supremacy.finalassault.defendMCOM)
+            t2message = mod.Message(mod.stringkeys.supremacy.finalassault.attackMCOM);
+        }
+
+        await BFSupremacyUI.notificationAnimation(t1message, t2message);
+    }
+
+    public static async notificationAnimation(message1: mod.Message, message2: mod.Message) {
+        let width = 380
+        let height = 50
+        let font = 42
+        let animationTime = 15
+        let animationWidth = width / animationTime
+
+        mod.AddUIContainer("notification_container", mod.CreateVector(0, 300, 0), mod.CreateVector(width, height, 0), mod.UIAnchor.TopCenter, mod.FindUIWidgetWithName("MainUI"), true, 0, mod.CreateVector(0.5, 0.5, 0.5), 1, mod.UIBgFill.None, mod.UIDepth.AboveGameUI);
+        let container = mod.FindUIWidgetWithName("notification_container");
+
+        let t1score = TeamVariables.getTeamData(1).score;
+        let t2score = TeamVariables.getTeamData(2).score;
+        let t1colour = UIconfig.uiConfig.friendlyColour
+        let t2colour = UIconfig.uiConfig.enemyColour
+        let t1message = message1
+        let t2message = message2
+
+        if (t1score < t2score) {
+            t1message = message2;
+            t2message = message1;
+            t1colour = UIconfig.uiConfig.enemyColour
+            t2colour = UIconfig.uiConfig.friendlyColour
+        }
 
         BFSAudio.playConquestEnd();
 
-        mod.AddUIText("conquest_end_header_t1", mod.CreateVector(0, 0, 0), mod.CreateVector(width, height, 0), mod.UIAnchor.Center, container, true, 0, UIconfig.uiConfig.whiteColour, 1, mod.UIBgFill.Blur, mod.Message(mod.stringkeys.blank), font, t1colour, 1, mod.UIAnchor.Center, mod.GetTeam(1));
-        mod.AddUIText("conquest_end_header_t2", mod.CreateVector(0, 0, 0), mod.CreateVector(width, height, 0), mod.UIAnchor.Center, container, true, 0, UIconfig.uiConfig.whiteColour, 1, mod.UIBgFill.Blur, mod.Message(mod.stringkeys.blank), font, t2colour, 1, mod.UIAnchor.Center, mod.GetTeam(2));
-        mod.AddUIContainer("top_bar1", mod.CreateVector(0, 0, 0), mod.CreateVector(width, 3, 0), mod.UIAnchor.TopCenter, container, true, 0, t1colour, 1, mod.UIBgFill.Solid, mod.GetTeam(1));
-        mod.AddUIContainer("top_bar2", mod.CreateVector(0, 0, 0), mod.CreateVector(width, 3, 0), mod.UIAnchor.TopCenter, container, true, 0, t2colour, 1, mod.UIBgFill.Solid, mod.GetTeam(2));
-        mod.AddUIContainer("bottombar1", mod.CreateVector(0, 0, 0), mod.CreateVector(width, 3, 0), mod.UIAnchor.BottomCenter, container, true, 0, t1colour, 1, mod.UIBgFill.Solid, mod.GetTeam(1));
-        mod.AddUIContainer("bottombar2", mod.CreateVector(0, 0, 0), mod.CreateVector(width, 3, 0), mod.UIAnchor.BottomCenter, container, true, 0, t2colour, 1, mod.UIBgFill.Solid, mod.GetTeam(2));
+        mod.AddUIText("notification_t1", mod.CreateVector(0, 0, 0), mod.CreateVector(width, height, 0), mod.UIAnchor.Center, container, true, 0, UIconfig.uiConfig.whiteColour, 1, mod.UIBgFill.Blur, mod.Message(mod.stringkeys.blank), font, t1colour, 1, mod.UIAnchor.Center, mod.GetTeam(1));
+        mod.AddUIText("notification_t2", mod.CreateVector(0, 0, 0), mod.CreateVector(width, height, 0), mod.UIAnchor.Center, container, true, 0, UIconfig.uiConfig.whiteColour, 1, mod.UIBgFill.Blur, mod.Message(mod.stringkeys.blank), font, t2colour, 1, mod.UIAnchor.Center, mod.GetTeam(2));
+        mod.AddUIContainer("notification_top_bar1", mod.CreateVector(0, 0, 0), mod.CreateVector(width, 3, 0), mod.UIAnchor.TopCenter, container, true, 0, t1colour, 1, mod.UIBgFill.Solid, mod.GetTeam(1));
+        mod.AddUIContainer("notification_top_bar2", mod.CreateVector(0, 0, 0), mod.CreateVector(width, 3, 0), mod.UIAnchor.TopCenter, container, true, 0, t2colour, 1, mod.UIBgFill.Solid, mod.GetTeam(2));
+        mod.AddUIContainer("notification_bottom_bar1", mod.CreateVector(0, 0, 0), mod.CreateVector(width, 3, 0), mod.UIAnchor.BottomCenter, container, true, 0, t1colour, 1, mod.UIBgFill.Solid, mod.GetTeam(1));
+        mod.AddUIContainer("notification_bottom_bar2", mod.CreateVector(0, 0, 0), mod.CreateVector(width, 3, 0), mod.UIAnchor.BottomCenter, container, true, 0, t2colour, 1, mod.UIBgFill.Solid, mod.GetTeam(2));
 
 
         for (let i = 1; i < animationTime; i++) {
-            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("conquest_end_header_t1"), mod.CreateVector(i * animationWidth, height, 0));
-            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("conquest_end_header_t2"), mod.CreateVector(i * animationWidth, height, 0));
-            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("top_bar1"), mod.CreateVector(i * animationWidth, 2, 0));
-            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("top_bar2"), mod.CreateVector(i * animationWidth, 2, 0));
-            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("bottombar1"), mod.CreateVector(i * animationWidth, 2, 0));
-            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("bottombar2"), mod.CreateVector(i * animationWidth, 2, 0));
+            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_t1"), mod.CreateVector(i * animationWidth, height, 0));
+            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_t2"), mod.CreateVector(i * animationWidth, height, 0));
+            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_top_bar1"), mod.CreateVector(i * animationWidth, 2, 0));
+            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_top_bar2"), mod.CreateVector(i * animationWidth, 2, 0));
+            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_bottom_bar1"), mod.CreateVector(i * animationWidth, 2, 0));
+            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_bottom_bar2"), mod.CreateVector(i * animationWidth, 2, 0));
             await mod.Wait(0.033);
         }
 
-        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("conquest_end_header_t1"), mod.CreateVector(width, height, 0));
-        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("conquest_end_header_t2"), mod.CreateVector(width, height, 0));
-        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("top_bar1"), mod.CreateVector(width, 2, 0));
-        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("top_bar2"), mod.CreateVector(width, 2, 0));
-        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("bottombar1"), mod.CreateVector(width, 2, 0));
-        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("bottombar2"), mod.CreateVector(width, 2, 0));
+        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_t1"), mod.CreateVector(width, height, 0));
+        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_t2"), mod.CreateVector(width, height, 0));
+        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_top_bar1"), mod.CreateVector(width, 2, 0));
+        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_top_bar2"), mod.CreateVector(width, 2, 0));
+        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_bottom_bar1"), mod.CreateVector(width, 2, 0));
+        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_bottom_bar2"), mod.CreateVector(width, 2, 0));
 
         await mod.Wait(0.1);
 
 
-        mod.AddUIContainer("conquest_end_flash", mod.CreateVector(0, 0, 0), mod.CreateVector(width, height, 0), mod.UIAnchor.Center, container, true, 0, mod.CreateVector(1, 1, 1), 0.1, mod.UIBgFill.Solid, mod.UIDepth.AboveGameUI);
-        let flash = mod.FindUIWidgetWithName("conquest_end_flash");
+        mod.AddUIContainer("notification_flash", mod.CreateVector(0, 0, 0), mod.CreateVector(width, height, 0), mod.UIAnchor.Center, container, true, 0, mod.CreateVector(1, 1, 1), 0.1, mod.UIBgFill.Solid, mod.UIDepth.AboveGameUI);
+        let flash = mod.FindUIWidgetWithName("notification_flash");
         for (let i = 1; i < 10; i++) {
             mod.SetUIWidgetBgAlpha(flash, 0.1 * i);
             await mod.Wait(0.033);
         }
 
-        mod.SetUITextLabel(mod.FindUIWidgetWithName("conquest_end_header_t1"), t1message);
-        mod.SetUITextLabel(mod.FindUIWidgetWithName("conquest_end_header_t2"), t2message);
+        mod.SetUITextLabel(mod.FindUIWidgetWithName("notification_t1"), t1message);
+        mod.SetUITextLabel(mod.FindUIWidgetWithName("notification_t2"), t2message);
 
         for (let i = 9; i > 0; i--) {
             mod.SetUIWidgetBgAlpha(flash, 0.1 * i);
@@ -362,30 +385,32 @@ export class BFSupremacyUI {
 
         BFSAudio.playConquestEnd2();
 
-        mod.SetUITextLabel(mod.FindUIWidgetWithName("conquest_end_header_t1"), mod.Message(mod.stringkeys.blank));
-        mod.SetUITextLabel(mod.FindUIWidgetWithName("conquest_end_header_t2"), mod.Message(mod.stringkeys.blank));
+
+        mod.SetUITextLabel(mod.FindUIWidgetWithName("notification_t1"), mod.Message(mod.stringkeys.blank));
+        mod.SetUITextLabel(mod.FindUIWidgetWithName("notification_t2"), mod.Message(mod.stringkeys.blank));
 
         for (let i = animationTime; i > 1; i--) {
-            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("conquest_end_header_t1"), mod.CreateVector(i * animationWidth, height, 0));
-            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("conquest_end_header_t2"), mod.CreateVector(i * animationWidth, height, 0));
-            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("top_bar1"), mod.CreateVector(i * animationWidth, 2, 0));
-            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("top_bar2"), mod.CreateVector(i * animationWidth, 2, 0));
-            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("bottombar1"), mod.CreateVector(i * animationWidth, 2, 0));
-            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("bottombar2"), mod.CreateVector(i * animationWidth, 2, 0));
+            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_t1"), mod.CreateVector(i * animationWidth, height, 0));
+            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_t2"), mod.CreateVector(i * animationWidth, height, 0));
+            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_top_bar1"), mod.CreateVector(i * animationWidth, 2, 0));
+            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_top_bar2"), mod.CreateVector(i * animationWidth, 2, 0));
+            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_bottom_bar1"), mod.CreateVector(i * animationWidth, 2, 0));
+            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_bottom_bar2"), mod.CreateVector(i * animationWidth, 2, 0));
             await mod.Wait(0.033);
         }
 
-        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("conquest_end_header_t1"), mod.CreateVector(animationWidth, height, 0));
-        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("conquest_end_header_t2"), mod.CreateVector(animationWidth, height, 0));
-        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("top_bar1"), mod.CreateVector(animationWidth, 2, 0));
-        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("top_bar2"), mod.CreateVector(animationWidth, 2, 0));
-        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("bottombar1"), mod.CreateVector(animationWidth, 2, 0));
-        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("bottombar2"), mod.CreateVector(animationWidth, 2, 0));
+        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_t1"), mod.CreateVector(animationWidth, height, 0));
+        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_t2"), mod.CreateVector(animationWidth, height, 0));
+        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_top_bar1"), mod.CreateVector(animationWidth, 2, 0));
+        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_top_bar2"), mod.CreateVector(animationWidth, 2, 0));
+        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_bottom_bar1"), mod.CreateVector(animationWidth, 2, 0));
+        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_bottom_bar2"), mod.CreateVector(animationWidth, 2, 0));
 
         await mod.Wait(0.033);
 
         mod.DeleteUIWidget(container);
     }
+
 
     //-------------------------------------------------------------------------
     //MCOM UI

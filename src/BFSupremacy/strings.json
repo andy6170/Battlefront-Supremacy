@@ -23,7 +23,9 @@
             "defender": "PREPARE TO DEFEND",
             "overtime": "OVERTIME",
             "secured": "SECTOR SECURED",
-            "lost": "SECTOR LOST"
+            "lost": "SECTOR LOST",
+            "attackMCOM": "DESTROY THE M-COMS",
+            "defendMCOM": "DEFEND THE M-COMS"
         },
         "debug": {
             "name": "Debug"
