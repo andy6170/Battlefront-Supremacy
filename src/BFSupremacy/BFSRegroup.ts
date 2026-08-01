@@ -95,6 +95,7 @@ export class BFSupremacyRegroup {
         mod.SetCapturePointOwner(mod.GetCapturePoint(910), GameConfig.gameConfig.attacker);
         mod.EnableCapturePointDeploying(mod.GetCapturePoint(910), false);
         BFSAudio.oneMinuteVO();
+        BFSupremacyUI.extractNotification();
         while (GameConfig.gameConfig.stage === 1 && GameConfig.gameConfig.extractionRemainingTime > 0 && mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition)) {
             const currentPos = mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition);
             if (currentPos && mod.DistanceBetween(currentPos, targetPos) > 0.5) {

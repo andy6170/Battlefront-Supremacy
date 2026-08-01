@@ -13,7 +13,9 @@
             "extract": "EXTRACT",
             "undeploy": "CANNOT SPAWN ON OBJECTIVE",
             "secured": "BATTLEFIELD SECURED",
-            "lost": "BATTLEFIELD LOST"
+            "lost": "BATTLEFIELD LOST",
+            "extractAttacker": "GET TO THE EXTRACT",
+            "extractDefender": "STOP THE EXTRACT"
         },
         "finalassault": {
             "name": "FINAL ATTACK",

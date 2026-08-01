@@ -309,6 +309,22 @@ export class BFSupremacyUI {
         await BFSupremacyUI.notificationAnimation(t1message, t2message);
     }
 
+    public static async extractNotification(): Promise<void> {
+        let t1message = mod.Message(mod.stringkeys.blank);
+        let t2message = mod.Message(mod.stringkeys.blank);
+
+        if (mod.Equals(GameConfig.gameConfig.attacker, mod.GetTeam(1))) {
+            t1message = mod.Message(mod.stringkeys.supremacy.regroup.extractAttacker)
+            t2message = mod.Message(mod.stringkeys.supremacy.regroup.extractDefender);
+        }
+        else if (mod.Equals(GameConfig.gameConfig.attacker, mod.GetTeam(2))) {
+            t1message = mod.Message(mod.stringkeys.supremacy.regroup.extractDefender)
+            t2message = mod.Message(mod.stringkeys.supremacy.regroup.extractAttacker);
+        }
+
+        await BFSupremacyUI.notificationAnimation(t1message, t2message);
+    }
+
     public static async notificationAnimation(message1: mod.Message, message2: mod.Message) {
         let width = 380
         let height = 50
