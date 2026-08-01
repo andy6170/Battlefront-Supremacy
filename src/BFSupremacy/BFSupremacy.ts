@@ -37,12 +37,15 @@ export class BFSupremacy {
         Events.OngoingPlayer.subscribe((eventPlayer: mod.Player) => {
             if (GameConfig.gameConfig.gameStarted as boolean && PlayerVariables.getPlayerData(eventPlayer).cameraEnabled) {
                 if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsAlive) && !GameConfig.gameConfig.cutscene) {
+                    let aimWidget = mod.FindUIWidgetWithName("player_aim" + mod.GetObjId(eventPlayer));
+                    const specialWeaponActive = (PlayerVariables.getPlayerData(eventPlayer).hasSniper && mod.IsInventorySlotActive(eventPlayer, mod.InventorySlots.PrimaryWeapon)) || (PlayerVariables.getPlayerData(eventPlayer).hasLauncher && (mod.IsInventorySlotActive(eventPlayer, mod.InventorySlots.GadgetOne) || mod.IsInventorySlotActive(eventPlayer, mod.InventorySlots.GadgetTwo)));
+
                     if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsZooming)) {
-                        if ((PlayerVariables.getPlayerData(eventPlayer).hasSniper && mod.IsInventorySlotActive(eventPlayer, mod.InventorySlots.PrimaryWeapon)) || (PlayerVariables.getPlayerData(eventPlayer).hasLauncher && (mod.IsInventorySlotActive(eventPlayer, mod.InventorySlots.GadgetOne) || mod.IsInventorySlotActive(eventPlayer, mod.InventorySlots.GadgetTwo)) && !PlayerVariables.getPlayerData(eventPlayer).firstPerson)) {
+                        if (!PlayerVariables.getPlayerData(eventPlayer).firstPerson && specialWeaponActive) {
+                            if (aimWidget) mod.SetUIWidgetVisible(aimWidget, false)
                             mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.FirstPerson);
                             PlayerVariables.getPlayerData(eventPlayer).firstPerson = true;
-                        } else {
-                            let aimWidget = mod.FindUIWidgetWithName("player_aim" + mod.GetObjId(eventPlayer));
+                        } else if (!PlayerVariables.getPlayerData(eventPlayer).firstPerson && !specialWeaponActive) {
                             if (!(PlayerVariables.getPlayerData(eventPlayer).stance == "standing") && mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsStanding)) {
                                 mod.SetThirdPersonCameraPositionForPlayer(eventPlayer, 1, 0, 0.25)
                                 PlayerVariables.getPlayerData(eventPlayer).stance = "standing"
@@ -68,7 +71,6 @@ export class BFSupremacy {
                             mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson);
                         }
                         mod.SetThirdPersonCameraPositionForPlayer(eventPlayer, 2.5, 0, 0.4)
-                        let aimWidget = mod.FindUIWidgetWithName("player_aim" + mod.GetObjId(eventPlayer));
                         if (aimWidget) mod.SetUIWidgetVisible(aimWidget, false)
                     }
                 }
@@ -245,8 +247,9 @@ export class BFSupremacy {
 
             if (!GameConfig.gameConfig.cutscene && !mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsInVehicle)) {
                 //Force Reset the Camera as height can bug out
+                await mod.Wait(0.7);
                 mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.FirstPerson)
-                await mod.Wait(0.8);
+                await mod.Wait(0.1);
                 if (!GameConfig.gameConfig.cutscene && !mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsInVehicle)) {
                     mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson)
                 }
@@ -388,7 +391,8 @@ export class BFSupremacy {
             BFSupremacyRegroup.onVehicleSpawned(eventVehicle);
         });
 
-        Events.OnPlayerEnterVehicle.subscribe((eventPlayer: mod.Player, eventVehicle: mod.Vehicle) => {
+        Events.OnPlayerEnterVehicle.subscribe(async (eventPlayer: mod.Player, eventVehicle: mod.Vehicle) => {
+            await mod.Wait(0.1);
             PlayerVariables.getPlayerData(eventPlayer).cameraEnabled = false;
 
             if (PlayerVariables.getPlayerData(eventPlayer).area > 0) {

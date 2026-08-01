@@ -294,15 +294,14 @@ export class BFSupremacyUI {
     }
 
     public static async MCOMNotification(): Promise<void> {
-        let t1score = TeamVariables.getTeamData(1).score;
-        let t2score = TeamVariables.getTeamData(2).score;
         let t1message = mod.Message(mod.stringkeys.blank);
         let t2message = mod.Message(mod.stringkeys.blank);
-        if (t1score > t2score) {
+
+        if (mod.Equals(GameConfig.gameConfig.attacker, mod.GetTeam(1))) {
             t1message = mod.Message(mod.stringkeys.supremacy.finalassault.attackMCOM)
             t2message = mod.Message(mod.stringkeys.supremacy.finalassault.defendMCOM);
         }
-        else if (t1score < t2score) {
+        else if (mod.Equals(GameConfig.gameConfig.attacker, mod.GetTeam(2))) {
             t1message = mod.Message(mod.stringkeys.supremacy.finalassault.defendMCOM)
             t2message = mod.Message(mod.stringkeys.supremacy.finalassault.attackMCOM);
         }
