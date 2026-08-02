@@ -7,8 +7,8 @@
         },
         "regroup": {
             "name": "Regroup",
-            "attackerMessage": "GET TO THE EXTRACT",
-            "defenderMessage": "STOP THE EXTRACT",
+            "attackerMessage": "BOARD THE EXTRACT FOR BONUS TIME",
+            "defenderMessage": "STOP THE ENEMY EXTRACTING",
             "bonustime": "0{}:{}{}",
             "extract": "EXTRACT",
             "undeploy": "CANNOT SPAWN ON OBJECTIVE",
@@ -92,5 +92,6 @@
     "eventVehicleDoesNotMatch": "Event Vehicles DOES NOT Match",
     "playerVehicleIsRegroupVehicle": "Player Vehicle IS Regroup Vehicle",
     "playerVehicleIsNotRegroupVehicle": "Player Vehicle IS NOT Regroup Vehicle",
-    "playerTracking": "Area:{}"
+    "playerTracking": "Area:{}",
+    "credits": "andy6170 | ViperStudiosAndy | Capital Supremacy"
 }

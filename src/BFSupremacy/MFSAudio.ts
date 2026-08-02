@@ -65,8 +65,8 @@ export class BFSAudio {
 
 
     public static async regroupMusic(): Promise<void> {
-        //this.stopRegroupMusic();
-        //await mod.Wait(1);
+        this.stopRegroupMusic();
+        await mod.Wait(1);
         mod.LoadMusic(mod.MusicPackages.Radio);
         mod.SetMusicParam(mod.MusicParams.Radio_Channel, 2); //2 BF Themes 1 Rock
         mod.SetMusicParam(mod.MusicParams.Radio_QueueTrackNumber, 7); //7 for BF themse or 17 (rock cinematic) and 15 for rock intense

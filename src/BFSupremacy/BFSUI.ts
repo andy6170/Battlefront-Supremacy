@@ -22,6 +22,7 @@ export class BFSupremacyUI {
         BFSupremacyUI.capturePoint_UI_Setup_FinalAssault();
         BFSupremacyUI.changingSector_UI_Setup();
         BFSupremacyUI.MCOM_UI_Setup();
+        mod.AddUIText("credits", mod.CreateVector(10, 2, 0), mod.CreateVector(300, 30, 0), mod.UIAnchor.BottomLeft, mod.GetUIRoot(), true, 0, mod.CreateVector(0, 0, 0), 0.8, mod.UIBgFill.None, mod.Message(mod.stringkeys.credits), 14, UIconfig.uiConfig.whiteColour, 0.6, mod.UIAnchor.Center, mod.UIDepth.AboveGameUI);
     }
 
     public static UI_Update() {
@@ -294,34 +295,14 @@ export class BFSupremacyUI {
     }
 
     public static async MCOMNotification(): Promise<void> {
-        let t1message = mod.Message(mod.stringkeys.blank);
-        let t2message = mod.Message(mod.stringkeys.blank);
-
-        if (mod.Equals(GameConfig.gameConfig.attacker, mod.GetTeam(1))) {
-            t1message = mod.Message(mod.stringkeys.supremacy.finalassault.attackMCOM)
-            t2message = mod.Message(mod.stringkeys.supremacy.finalassault.defendMCOM);
-        }
-        else if (mod.Equals(GameConfig.gameConfig.attacker, mod.GetTeam(2))) {
-            t1message = mod.Message(mod.stringkeys.supremacy.finalassault.defendMCOM)
-            t2message = mod.Message(mod.stringkeys.supremacy.finalassault.attackMCOM);
-        }
-
+        let t1message = mod.Message(mod.stringkeys.supremacy.finalassault.attackMCOM);
+        let t2message = mod.Message(mod.stringkeys.supremacy.finalassault.defendMCOM);
         await BFSupremacyUI.notificationAnimation(t1message, t2message);
     }
 
     public static async extractNotification(): Promise<void> {
-        let t1message = mod.Message(mod.stringkeys.blank);
-        let t2message = mod.Message(mod.stringkeys.blank);
-
-        if (mod.Equals(GameConfig.gameConfig.attacker, mod.GetTeam(1))) {
-            t1message = mod.Message(mod.stringkeys.supremacy.regroup.extractAttacker)
-            t2message = mod.Message(mod.stringkeys.supremacy.regroup.extractDefender);
-        }
-        else if (mod.Equals(GameConfig.gameConfig.attacker, mod.GetTeam(2))) {
-            t1message = mod.Message(mod.stringkeys.supremacy.regroup.extractDefender)
-            t2message = mod.Message(mod.stringkeys.supremacy.regroup.extractAttacker);
-        }
-
+        let t1message = mod.Message(mod.stringkeys.supremacy.regroup.extractAttacker)
+        let t2message = mod.Message(mod.stringkeys.supremacy.regroup.extractDefender);
         await BFSupremacyUI.notificationAnimation(t1message, t2message);
     }
 

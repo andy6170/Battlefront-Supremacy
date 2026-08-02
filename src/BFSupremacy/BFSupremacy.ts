@@ -77,7 +77,7 @@ export class BFSupremacy {
             }
         });
 
-        Events.OnGameModeStarted.subscribe(() => {
+        Events.OnGameModeStarted.subscribe(async () => {
             mod.SetGameModeTimeLimit(99999);
             if (GameConfig.gameConfig.debug) {
                 GameConfig.gameConfig.ticketSpeed = 2;
@@ -86,11 +86,17 @@ export class BFSupremacy {
                 GameConfig.gameConfig.finalNeutralizeTime = 4;
             }
             BFSWeather.initWeather();
+            await mod.Wait(0.1);
             BFSupremacyConquest.init();
+            await mod.Wait(0.1);
             BFSupremacyUI.UI_Setup();
+            await mod.Wait(0.1);
             BFSAudio.init();
+            await mod.Wait(0.1);
             BFSupremacyCore.scoreboardInit()
+            await mod.Wait(0.1);
             GameConfig.gameConfig.extractionIcon = mod.SpawnObject(mod.RuntimeSpawn_Common.FX_Gadget_DeployableMortar_Target_Area, mod.Subtract(mod.GetObjectPosition(mod.GetSpatialObject(902)), mod.CreateVector(0, 20, 0)), mod.CreateVector(0, 0, 0))
+            await mod.Wait(0.1);
             GameConfig.gameConfig.roundOngoing = true;
             GameConfig.gameConfig.gameStarted = true;
         });
@@ -247,7 +253,7 @@ export class BFSupremacy {
 
             if (!GameConfig.gameConfig.cutscene && !mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsInVehicle)) {
                 //Force Reset the Camera as height can bug out
-                await mod.Wait(0.7);
+                await mod.Wait(0.4);
                 mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.FirstPerson)
                 await mod.Wait(0.1);
                 if (!GameConfig.gameConfig.cutscene && !mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsInVehicle)) {
