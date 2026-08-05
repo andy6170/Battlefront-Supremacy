@@ -15,7 +15,8 @@
             "secured": "BATTLEFIELD SECURED",
             "lost": "BATTLEFIELD LOST",
             "extractAttacker": "GET TO THE EXTRACT",
-            "extractDefender": "STOP THE EXTRACT"
+            "extractDefender": "STOP THE EXTRACT",
+            "landing": "EXTRACT INCOMING"
         },
         "finalassault": {
             "name": "FINAL ATTACK",
@@ -93,5 +94,13 @@
     "playerVehicleIsRegroupVehicle": "Player Vehicle IS Regroup Vehicle",
     "playerVehicleIsNotRegroupVehicle": "Player Vehicle IS NOT Regroup Vehicle",
     "playerTracking": "Area:{}",
-    "credits": "andy6170 | ViperStudiosAndy | Capital Supremacy"
+    "credits": "andy6170 | ViperStudiosAndy | Capital Supremacy",
+    "inVehicle": "IN VEHICLE",
+    "inAircraft": "IN AIRCRAFT",
+    "checkingOOB": "CHECKING OOB",
+    "outOfBounds": "OUT OF BOUNDS",
+    "inAirSpace": "In Airspace",
+    "notInAirSpace": "Not In Airspace",
+    "valid": "Valid",
+    "invalid": "Invalid"
 }

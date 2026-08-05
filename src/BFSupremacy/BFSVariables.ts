@@ -49,12 +49,18 @@ export interface GameConfig {
     MCOMStart: number;
     winning: number;
     night: boolean;
+    shoulderLeftCam: number;
+    shoulderRightCam: number;
+    shoulderLeftCamZoom: number;
+    shoulderRightCamZoom: number;
+    shoulderLeftUI: mod.Vector;
+    shoulderRightUI: mod.Vector;
 }
 
 export class GameConfig {
     public static gameConfig: GameConfig = {
         gameStarted: false,
-        debug: false,
+        debug: true,
         capturePointNeutralizationTime: 15,
         capturePointCapturingTime: 15,
         capturePointMultiplier: 2,
@@ -122,7 +128,13 @@ export class GameConfig {
         ],
         MCOMStart: 0,
         winning: 0,
-        night: false
+        night: false,
+        shoulderLeftCam: -0.45,
+        shoulderRightCam: 0.35,
+        shoulderLeftCamZoom: -0.4,
+        shoulderRightCamZoom: 0.4,
+        shoulderLeftUI: mod.CreateVector(12, 5, 0),
+        shoulderRightUI: mod.CreateVector(-12, 5, 0),
     };
 }
 
@@ -227,6 +239,7 @@ export interface SupremacyPlayerData {
     spawned: boolean;
     firstPerson: boolean;
     thirdPerson: boolean;
+    thirdPersonZoom: boolean;
     hasSniper: boolean;
     hasLauncher: boolean;
     flagTick: number;
@@ -238,6 +251,8 @@ export interface SupremacyPlayerData {
     area: number;
     ingoreOOB: boolean;
     boarded: boolean;
+    shoulder: string;
+    interacting: boolean;
 
 }
 
@@ -262,6 +277,7 @@ export class PlayerVariables {
                 spawned: false,
                 firstPerson: false,
                 thirdPerson: false,
+                thirdPersonZoom: false,
                 hasSniper: false,
                 hasLauncher: false,
                 flagTick: 0,
@@ -273,6 +289,8 @@ export class PlayerVariables {
                 area: 0,
                 ingoreOOB: false,
                 boarded: false,
+                shoulder: "right",
+                interacting: false,
             });
         }
         return PlayerVariables.playerData.get(playerId)!;

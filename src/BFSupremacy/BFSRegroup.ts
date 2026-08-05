@@ -96,6 +96,7 @@ export class BFSupremacyRegroup {
         mod.EnableCapturePointDeploying(mod.GetCapturePoint(910), false);
         BFSAudio.oneMinuteVO();
         BFSupremacyUI.extractNotification();
+        BFSupremacyUI.regroup_UIMessage_Enable(true);
         while (GameConfig.gameConfig.stage === 1 && GameConfig.gameConfig.extractionRemainingTime > 0 && mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition)) {
             const currentPos = mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition);
             if (currentPos && mod.DistanceBetween(currentPos, targetPos) > 0.5) {
@@ -214,13 +215,14 @@ export class BFSupremacyRegroup {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static ongoingRegroup(): void {
+        const elapsed = mod.GetMatchTimeElapsed();
         if (!GameConfig.gameConfig.heliTakeOff && GameConfig.gameConfig.extractionRemainingTime <= 0) {
-            if (mod.RoundToInteger(mod.GetMatchTimeElapsed()) % 2 == 0) {
+            if (mod.RoundToInteger(elapsed) % 2 == 0) {
                 //this.pilotReset();
             }
             return;
         }
-        if (mod.RoundToInteger(mod.GetMatchTimeElapsed()) % 2 == 0) {
+        if (mod.RoundToInteger(elapsed) % 2 == 0) {
             if (GameConfig.gameConfig.timeEven) {
                 return;
             }
@@ -233,7 +235,7 @@ export class BFSupremacyRegroup {
                 BFSAudio.thirtySecondsVO();
             }
         }
-        else if (mod.RoundToInteger(mod.GetMatchTimeElapsed()) % 2 != 0) {
+        else if (mod.RoundToInteger(elapsed) % 2 != 0) {
             if (GameConfig.gameConfig.timeOdd) {
                 return;
             }

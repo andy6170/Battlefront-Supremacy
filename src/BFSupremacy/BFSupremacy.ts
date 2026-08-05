@@ -34,47 +34,83 @@ export class BFSupremacy {
                 }
         });
 
-        Events.OngoingPlayer.subscribe((eventPlayer: mod.Player) => {
+        Events.OngoingPlayer.subscribe(async (eventPlayer: mod.Player) => {
             if (GameConfig.gameConfig.gameStarted as boolean && PlayerVariables.getPlayerData(eventPlayer).cameraEnabled) {
                 if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsAlive) && !GameConfig.gameConfig.cutscene) {
-                    let aimWidget = mod.FindUIWidgetWithName("player_aim" + mod.GetObjId(eventPlayer));
-                    const specialWeaponActive = (PlayerVariables.getPlayerData(eventPlayer).hasSniper && mod.IsInventorySlotActive(eventPlayer, mod.InventorySlots.PrimaryWeapon)) || (PlayerVariables.getPlayerData(eventPlayer).hasLauncher && (mod.IsInventorySlotActive(eventPlayer, mod.InventorySlots.GadgetOne) || mod.IsInventorySlotActive(eventPlayer, mod.InventorySlots.GadgetTwo)));
+                    const pd = PlayerVariables.getPlayerData(eventPlayer);
+                    if (pd.interacting) return;
+                    const aimWidget = mod.FindUIWidgetWithName("player_aim" + mod.GetObjId(eventPlayer));
+                    if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsInteracting)) {
+                        pd.interacting = true;
+                        await mod.Wait(0.1);
+                        if (!mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsReviving) && !mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsInVehicle) && !mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsReloading)) {
+                            //pd.interacting = true;
+                            pd.stance = "changing";
+                            pd.thirdPerson = false;
+                            if (pd.shoulder === "left") {
+                                pd.shoulder = "right";
+                                if (aimWidget) {
+                                    mod.SetUIWidgetPosition(aimWidget, GameConfig.gameConfig.shoulderRightUI);
+                                }
+                            } else if (pd.shoulder === "right") {
+                                pd.shoulder = "left";
+                                if (aimWidget) {
+                                    mod.SetUIWidgetPosition(aimWidget, GameConfig.gameConfig.shoulderLeftUI);
+                                }
+                            }
+                        }
+                    }
 
-                    if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsZooming)) {
-                        if (!PlayerVariables.getPlayerData(eventPlayer).firstPerson && specialWeaponActive) {
+                    const isZooming = mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsZooming);
+                    const specialWeaponActive = (pd.hasSniper && mod.IsInventorySlotActive(eventPlayer, mod.InventorySlots.PrimaryWeapon)) || (pd.hasLauncher && (mod.IsInventorySlotActive(eventPlayer, mod.InventorySlots.GadgetOne) || mod.IsInventorySlotActive(eventPlayer, mod.InventorySlots.GadgetTwo)));
+                    const cameraPos = pd.shoulder === "left" ? GameConfig.gameConfig.shoulderLeftCam : GameConfig.gameConfig.shoulderRightCam;
+                    const cameraZoom = pd.shoulder === "left" ? GameConfig.gameConfig.shoulderLeftCamZoom : GameConfig.gameConfig.shoulderRightCamZoom;
+
+                    if (isZooming) {
+                        if (!pd.firstPerson && specialWeaponActive) {
                             if (aimWidget) mod.SetUIWidgetVisible(aimWidget, false)
                             mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.FirstPerson);
-                            PlayerVariables.getPlayerData(eventPlayer).firstPerson = true;
-                        } else if (!PlayerVariables.getPlayerData(eventPlayer).firstPerson && !specialWeaponActive) {
-                            if (!(PlayerVariables.getPlayerData(eventPlayer).stance == "standing") && mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsStanding)) {
-                                mod.SetThirdPersonCameraPositionForPlayer(eventPlayer, 1, 0, 0.25)
-                                PlayerVariables.getPlayerData(eventPlayer).stance = "standing"
+                            pd.firstPerson = true;
+                            pd.stance = "ADS"
+                        } else {
+                            if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsStanding) && (pd.stance != "standing" || pd.interacting)) {
+                                mod.SetThirdPersonCameraPositionForPlayer(eventPlayer, 1, 0, cameraZoom)
+                                pd.stance = "standing"
                                 if (aimWidget) mod.SetUIWidgetVisible(aimWidget, true)
-                            } else if (!(PlayerVariables.getPlayerData(eventPlayer).stance == "crouching") && mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsCrouching)) {
-                                mod.SetThirdPersonCameraPositionForPlayer(eventPlayer, 0.9, -0.15, 0.25)
-                                PlayerVariables.getPlayerData(eventPlayer).stance = "crouching"
+                            } else if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsCrouching) && (pd.stance != "crouching" || pd.interacting)) {
+                                mod.SetThirdPersonCameraPositionForPlayer(eventPlayer, 0.9, -0.15, cameraZoom)
+                                pd.stance = "crouching"
                                 if (aimWidget) mod.SetUIWidgetVisible(aimWidget, true)
-                            } else if (!(PlayerVariables.getPlayerData(eventPlayer).stance == "prone") && mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsProne)) {
-                                mod.SetThirdPersonCameraPositionForPlayer(eventPlayer, 0.8, -0.25, 0.25)
-                                PlayerVariables.getPlayerData(eventPlayer).stance = "prone"
+                            } else if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsProne) && (pd.stance != "prone" || pd.interacting)) {
+                                mod.SetThirdPersonCameraPositionForPlayer(eventPlayer, 0.8, -0.25, cameraZoom)
+                                pd.stance = "prone"
                                 if (aimWidget) mod.SetUIWidgetVisible(aimWidget, true)
                             }
                         }
-                        PlayerVariables.getPlayerData(eventPlayer).firstPerson = true;
-                        PlayerVariables.getPlayerData(eventPlayer).thirdPerson = false;
+                        pd.firstPerson = true;
+                        pd.thirdPerson = false;
 
-                    } else if (!mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsZooming) && !PlayerVariables.getPlayerData(eventPlayer).thirdPerson) {
-                        PlayerVariables.getPlayerData(eventPlayer).firstPerson = false;
-                        PlayerVariables.getPlayerData(eventPlayer).thirdPerson = true;
-                        PlayerVariables.getPlayerData(eventPlayer).stance = "3rdperson";
-                        if ((PlayerVariables.getPlayerData(eventPlayer).hasSniper && mod.IsInventorySlotActive(eventPlayer, mod.InventorySlots.PrimaryWeapon)) || (PlayerVariables.getPlayerData(eventPlayer).hasLauncher && (mod.IsInventorySlotActive(eventPlayer, mod.InventorySlots.GadgetOne) || mod.IsInventorySlotActive(eventPlayer, mod.InventorySlots.GadgetTwo)))) {
+                    } else if (!isZooming && (!pd.thirdPerson || pd.interacting)) {
+                        pd.firstPerson = false;
+                        pd.thirdPerson = true;
+                        pd.stance = "3rdperson";
+                        if (specialWeaponActive) {
                             mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson);
                         }
-                        mod.SetThirdPersonCameraPositionForPlayer(eventPlayer, 2.5, 0, 0.4)
+                        mod.SetThirdPersonCameraPositionForPlayer(eventPlayer, 2.5, 0, cameraPos)
                         if (aimWidget) mod.SetUIWidgetVisible(aimWidget, false)
+                    }
+
+                    if (pd.interacting) {
+                        await mod.Wait(0.033);
+                        pd.interacting = false;
                     }
                 }
             }
+        });
+
+        Events.OnPlayerInteract.subscribe((eventPlayer: mod.Player, interactPoint: mod.InteractPoint) => {
+
         });
 
         Events.OnGameModeStarted.subscribe(async () => {
@@ -333,13 +369,27 @@ export class BFSupremacy {
         });
 
         Events.OnPlayerEnterAreaTrigger.subscribe(async (eventPlayer: mod.Player, eventAreaTrigger: mod.AreaTrigger) => {
-            PlayerVariables.getPlayerData(eventPlayer).area++;
+            const pd = PlayerVariables.getPlayerData(eventPlayer);
+            await mod.Wait(0.033);
+
+            pd.area++;
+            mod.DisplayHighlightedWorldLogMessage(mod.Message(mod.stringkeys.value, pd.area), eventPlayer);
             if (!mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsAlive)) {
                 return;
             }
-            PlayerVariables.getPlayerData(eventPlayer).area++;
+
             let areaID = mod.GetObjId(eventAreaTrigger);
             let team = mod.GetTeam(eventPlayer);
+
+            mod.DisplayHighlightedWorldLogMessage(mod.Message(mod.stringkeys.playerTracking, areaID), eventPlayer);
+
+            if (mod.IsValid(eventAreaTrigger)) {
+                mod.DisplayHighlightedWorldLogMessage(mod.Message(mod.stringkeys.valid), eventPlayer);
+            } else {
+                mod.DisplayHighlightedWorldLogMessage(mod.Message(mod.stringkeys.invalid), eventPlayer);
+            }
+
+
 
             if (areaID == 1400) {
                 PlayerVariables.getPlayerData(eventPlayer).inAirspace = true;
@@ -363,28 +413,39 @@ export class BFSupremacy {
             }
         });
 
-        Events.OnPlayerExitAreaTrigger.subscribe((eventPlayer: mod.Player, eventAreaTrigger: mod.AreaTrigger) => {
+        Events.OnPlayerExitAreaTrigger.subscribe(async (eventPlayer: mod.Player, eventAreaTrigger: mod.AreaTrigger) => {
+            await mod.Wait(0.066);
             PlayerVariables.getPlayerData(eventPlayer).area--;
             let areaID = mod.GetObjId(eventAreaTrigger);
+            const pd = PlayerVariables.getPlayerData(eventPlayer);
+            mod.DisplayHighlightedWorldLogMessage(mod.Message(mod.stringkeys.value, pd.area), eventPlayer);
 
             if (areaID == 1400) {
-                PlayerVariables.getPlayerData(eventPlayer).inAirspace = false;
+                pd.inAirspace = false;
                 BFSupremacyUI.outOfBoundsUI(eventPlayer);
             }
 
-            if (PlayerVariables.getPlayerData(eventPlayer).inAirspace) {
-                if (PlayerVariables.getPlayerData(eventPlayer).area == 1) {
-                    if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsInVehicle)) {
-                        if (GameConfig.gameConfig.airVehicles.some(vehicle => mod.CompareVehicleName(mod.GetVehicleFromPlayer(eventPlayer), vehicle))) {
-                            PlayerVariables.getPlayerData(eventPlayer).outOfBounds = false;
-                        } else {
-                            BFSupremacyUI.outOfBoundsUI(eventPlayer);
-                        }
+            if (pd.inAirspace) {
+                mod.DisplayHighlightedWorldLogMessage(mod.Message(mod.stringkeys.inAirSpace), eventPlayer);
+            } else {
+                mod.DisplayHighlightedWorldLogMessage(mod.Message(mod.stringkeys.notInAirSpace), eventPlayer);
+            }
+
+            if (pd.area == 1 && pd.inAirspace) {
+                mod.DisplayHighlightedWorldLogMessage(mod.Message(mod.stringkeys.checkingOOB), eventPlayer);
+                if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsInVehicle)) {
+                    mod.DisplayHighlightedWorldLogMessage(mod.Message(mod.stringkeys.inVehicle), eventPlayer);
+                    if (GameConfig.gameConfig.airVehicles.some(vehicle => mod.CompareVehicleName(mod.GetVehicleFromPlayer(eventPlayer), vehicle))) {
+                        mod.DisplayHighlightedWorldLogMessage(mod.Message(mod.stringkeys.inAircraft), eventPlayer);
+                        pd.outOfBounds = false;
                     } else {
                         BFSupremacyUI.outOfBoundsUI(eventPlayer);
                     }
+                } else {
+                    mod.DisplayHighlightedWorldLogMessage(mod.Message(mod.stringkeys.outOfBounds), eventPlayer);
+                    BFSupremacyUI.outOfBoundsUI(eventPlayer);
                 }
-            } else if (!PlayerVariables.getPlayerData(eventPlayer).inAirspace && PlayerVariables.getPlayerData(eventPlayer).area < 1) {
+            } else if (pd.area < 1) {
                 BFSupremacyUI.outOfBoundsUI(eventPlayer);
             }
         });

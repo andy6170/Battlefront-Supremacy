@@ -44,6 +44,7 @@ export class BFSupremacyUI {
             BFSupremacyUI.conquest_UI_Change(false);
             BFSupremacyUI.regroup_UI_Change(true);
             BFSupremacyUI.regroup_UI_Team_Update();
+            BFSupremacyUI.regroup_UIMessage_Enable(false);
         } else if (GameConfig.gameConfig.stage == 2) {
             BFSupremacyUI.regroup_UI_Change(false);
             BFSupremacyUI.finalAssault_UI_Change(true);
@@ -476,8 +477,9 @@ export class BFSupremacyUI {
         mod.AddUIContainer("bonustime_bar1", mod.CreateVector(0, 0, 0), mod.CreateVector(180, 40, 0), mod.UIAnchor.TopCenter, UIconfig.uiConfig.regroupUI, true, 0, UIconfig.uiConfig.friendlyColour, 1, mod.UIBgFill.Solid, mod.GetTeam(1));
         mod.AddUIContainer("bonustime_bar2", mod.CreateVector(0, 0, 0), mod.CreateVector(180, 40, 0), mod.UIAnchor.TopCenter, UIconfig.uiConfig.regroupUI, true, 0, UIconfig.uiConfig.enemyColour, 1, mod.UIBgFill.Solid, mod.GetTeam(2));
         mod.AddUIText("bonustime_regroup_Text", mod.CreateVector(0, 0, 0), mod.CreateVector(180, 40, 0), mod.UIAnchor.TopCenter, UIconfig.uiConfig.regroupUI, true, 0, UIconfig.uiConfig.friendlyColour, 1, mod.UIBgFill.None, mod.Message(mod.stringkeys.supremacy.regroup.bonustime, 0, 0, 0), 36, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center);
-        mod.AddUIText("regoup_message1", mod.CreateVector(0, 0, 0), mod.CreateVector(180, 30, 0), mod.UIAnchor.BottomCenter, UIconfig.uiConfig.regroupUI, true, 0, mod.CreateVector(1, 1, 1), 1, mod.UIBgFill.None, mod.Message(mod.stringkeys.supremacy.regroup.attackerMessage), 18, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(1));
-        mod.AddUIText("regoup_message2", mod.CreateVector(0, 0, 0), mod.CreateVector(180, 30, 0), mod.UIAnchor.BottomCenter, UIconfig.uiConfig.regroupUI, true, 0, mod.CreateVector(1, 1, 1), 1, mod.UIBgFill.None, mod.Message(mod.stringkeys.supremacy.regroup.defenderMessage), 18, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(2));
+        mod.AddUIText("regoup_message1", mod.CreateVector(0, -10, 0), mod.CreateVector(300, 30, 0), mod.UIAnchor.BottomCenter, UIconfig.uiConfig.regroupUI, false, 0, mod.CreateVector(1, 1, 1), 1, mod.UIBgFill.None, mod.Message(mod.stringkeys.supremacy.regroup.attackerMessage), 18, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(1));
+        mod.AddUIText("regoup_message2", mod.CreateVector(0, -10, 0), mod.CreateVector(300, 30, 0), mod.UIAnchor.BottomCenter, UIconfig.uiConfig.regroupUI, false, 0, mod.CreateVector(1, 1, 1), 1, mod.UIBgFill.None, mod.Message(mod.stringkeys.supremacy.regroup.defenderMessage), 18, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center, mod.GetTeam(2));
+        mod.AddUIText("regoup_landing_message", mod.CreateVector(0, -10, 0), mod.CreateVector(300, 30, 0), mod.UIAnchor.BottomCenter, UIconfig.uiConfig.regroupUI, true, 0, mod.CreateVector(1, 1, 1), 1, mod.UIBgFill.None, mod.Message(mod.stringkeys.supremacy.regroup.landing), 18, UIconfig.uiConfig.whiteColour, 1, mod.UIAnchor.Center);
     }
 
     public static regroup_UI_Text_Update() {
@@ -547,6 +549,12 @@ export class BFSupremacyUI {
             mod.SetUITextLabel(mod.FindUIWidgetWithName("regoup_message1"), mod.Message(mod.stringkeys.supremacy.regroup.defenderMessage));
             mod.SetUITextLabel(mod.FindUIWidgetWithName("regoup_message2"), mod.Message(mod.stringkeys.supremacy.regroup.attackerMessage));
         }
+    }
+
+    public static regroup_UIMessage_Enable(enable: boolean) {
+        mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("regoup_message1"), enable);
+        mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("regoup_message2"), enable);
+        mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("regoup_landing_message"), !enable);
     }
 
     //-------------------------------------------------------------------------

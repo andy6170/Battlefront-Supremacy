@@ -81,17 +81,17 @@ export class BFSupremacyCore {
 
         let progress = mod.GetCaptureProgress(eventCapturePoint);
         let data = ObjectiveVariables.getObjectiveVariables(eventCapturePoint);
-        let previousProgress = data.progress;
 
-        if (!mod.Equals(progress, previousProgress)) {
-            BFSupremacyCore.updateFlagData(eventCapturePoint);
+        if (!mod.Equals(progress, data.progress)) {
+            BFSupremacyCore.updateFlagData(eventCapturePoint, progress);
         }
     }
 
 
-    public static updateFlagData(eventCapturePoint: mod.CapturePoint) {
-
-        let progress = mod.GetCaptureProgress(eventCapturePoint);
+    public static updateFlagData(eventCapturePoint: mod.CapturePoint, progress?: number) {
+        if (progress === undefined) {
+            progress = mod.GetCaptureProgress(eventCapturePoint);
+        }
         let data = ObjectiveVariables.getObjectiveVariables(eventCapturePoint);
         let previousProgress = data.progress;
         let owner = mod.GetCurrentOwnerTeam(eventCapturePoint);

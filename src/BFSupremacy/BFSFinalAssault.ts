@@ -15,7 +15,7 @@ export class BFSupremacyFinalAssault {
         if (s152) mod.EnableGameModeObjective(s152, false);
         GameConfig.gameConfig.remainingTime = GameConfig.gameConfig.baseAttackTime + GameConfig.gameConfig.bonusTime;
         if (GameConfig.gameConfig.debug) {
-            GameConfig.gameConfig.remainingTime = 30;
+            GameConfig.gameConfig.remainingTime = 300;
         }
         for (let i = 1; i < 10; i++) {
             let hq = mod.GetHQ(i);
@@ -210,7 +210,8 @@ export class BFSupremacyFinalAssault {
     public static ongoingFinalAssault(): void {
         if (!GameConfig.gameConfig.roundOngoing) return;
 
-        if (mod.RoundToInteger(mod.GetMatchTimeElapsed()) % 2 == 0) {
+        const elapsed = mod.GetMatchTimeElapsed();
+        if (mod.RoundToInteger(elapsed) % 2 == 0) {
             if (GameConfig.gameConfig.timeEven) {
                 return;
             }
@@ -220,7 +221,7 @@ export class BFSupremacyFinalAssault {
             BFSupremacyFinalAssault.updateRemainingTime();
             BFSupremacyUI.finalAssault_UI_Update();
 
-        } else if (mod.RoundToInteger(mod.GetMatchTimeElapsed()) % 2 != 0) {
+        } else if (mod.RoundToInteger(elapsed) % 2 != 0) {
             if (GameConfig.gameConfig.timeOdd) {
                 return;
             }
