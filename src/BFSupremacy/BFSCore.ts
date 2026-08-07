@@ -156,6 +156,10 @@ export class BFSupremacyCore {
             ownerTeam: owner,
             team1Players: data.team1Players,
             team2Players: data.team2Players,
+            flagBg1Widget: data.flagBg1Widget,
+            flagBg2Widget: data.flagBg2Widget,
+            flagText1Widget: data.flagText1Widget,
+            flagText2Widget: data.flagText2Widget,
         });
     }
 

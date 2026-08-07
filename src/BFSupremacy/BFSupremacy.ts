@@ -39,7 +39,7 @@ export class BFSupremacy {
                 if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsAlive) && !GameConfig.gameConfig.cutscene) {
                     const pd = PlayerVariables.getPlayerData(eventPlayer);
                     if (pd.interacting) return;
-                    const aimWidget = mod.FindUIWidgetWithName("player_aim" + mod.GetObjId(eventPlayer));
+                    const aimWidget = pd.aimWidget;
                     if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsInteracting)) {
                         pd.interacting = true;
                         await mod.Wait(0.1);
@@ -72,7 +72,10 @@ export class BFSupremacy {
                             mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.FirstPerson);
                             pd.firstPerson = true;
                             pd.stance = "ADS"
-                        } else {
+                        } else if (!specialWeaponActive) {
+                            if (pd.stance == "ADS") {
+                                mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson)
+                            }
                             if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsStanding) && (pd.stance != "standing" || pd.interacting)) {
                                 mod.SetThirdPersonCameraPositionForPlayer(eventPlayer, 1, 0, cameraZoom)
                                 pd.stance = "standing"
@@ -366,6 +369,11 @@ export class BFSupremacy {
         });
 
         Events.OnPlayerLeaveGame.subscribe((playerId: number) => {
+            const pd = PlayerVariables.playerData.get(playerId);
+            if (pd && pd.uiCreated) {
+                mod.DeleteUIWidget(pd.containerWidget);
+            }
+            PlayerVariables.playerData.delete(playerId);
         });
 
         Events.OnPlayerEnterAreaTrigger.subscribe(async (eventPlayer: mod.Player, eventAreaTrigger: mod.AreaTrigger) => {

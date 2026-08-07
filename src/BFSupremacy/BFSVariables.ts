@@ -234,6 +234,12 @@ export interface SupremacyPlayerData {
     onPoint: boolean;
     uniqueUI: string;
     containerWidget: mod.UIWidget
+    aimWidget: mod.UIWidget | undefined
+    objTextWidget: mod.UIWidget | undefined
+    objCounterWidget: mod.UIWidget | undefined
+    objProgressBGWidget: mod.UIWidget | undefined
+    objProgressWidget: mod.UIWidget | undefined
+    uiCreated: boolean;
     firstDeploy: boolean;
     currentObjective: mod.CapturePoint;
     spawned: boolean;
@@ -272,6 +278,12 @@ export class PlayerVariables {
                 onPoint: false,
                 uniqueUI: "",
                 containerWidget: mod.GetUIRoot(),
+                aimWidget: undefined,
+                objTextWidget: undefined,
+                objCounterWidget: undefined,
+                objProgressBGWidget: undefined,
+                objProgressWidget: undefined,
+                uiCreated: false,
                 firstDeploy: true,
                 currentObjective: mod.GetCapturePoint(0),
                 spawned: false,
@@ -345,6 +357,10 @@ export interface CapturePointData {
     ownerTeam: mod.Team;
     team1Players: number;
     team2Players: number;
+    flagBg1Widget: mod.UIWidget | undefined;
+    flagBg2Widget: mod.UIWidget | undefined;
+    flagText1Widget: mod.UIWidget | undefined;
+    flagText2Widget: mod.UIWidget | undefined;
 }
 
 export class ObjectiveVariables {
@@ -367,6 +383,10 @@ export class ObjectiveVariables {
                 ownerTeam: mod.GetTeam(0),
                 team1Players: 0,
                 team2Players: 0,
+                flagBg1Widget: undefined,
+                flagBg2Widget: undefined,
+                flagText1Widget: undefined,
+                flagText2Widget: undefined,
             });
         }
         return ObjectiveVariables.objectiveVariables.get(objectiveId)!;

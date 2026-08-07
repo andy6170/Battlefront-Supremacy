@@ -1,5 +1,5 @@
 import { GameConfig } from "./BFSVariables.ts";
-import { TeamVariables, PlayerVariables, UIconfig, MCOMVariables } from "./BFSVariables.ts";
+import { TeamVariables, PlayerVariables, UIconfig, MCOMVariables, ObjectiveVariables } from "./BFSVariables.ts";
 import { BFSAudio } from "./MFSAudio.ts";
 
 
@@ -190,10 +190,18 @@ export class BFSupremacyUI {
 
         if (prefix === "" || id > 20 || id < 0) return;
 
-        let bg1 = mod.FindUIWidgetWithName(prefix + "bg1_" + id);
-        let bg2 = mod.FindUIWidgetWithName(prefix + "bg2_" + id);
-        let text1 = mod.FindUIWidgetWithName(prefix + "text1_" + id);
-        let text2 = mod.FindUIWidgetWithName(prefix + "text2_" + id);
+        const data = ObjectiveVariables.getObjectiveVariables(eventCapturePoint);
+        if (!data.flagBg1Widget) {
+            data.flagBg1Widget = mod.FindUIWidgetWithName(prefix + "bg1_" + id);
+            data.flagBg2Widget = mod.FindUIWidgetWithName(prefix + "bg2_" + id);
+            data.flagText1Widget = mod.FindUIWidgetWithName(prefix + "text1_" + id);
+            data.flagText2Widget = mod.FindUIWidgetWithName(prefix + "text2_" + id);
+        }
+
+        let bg1 = data.flagBg1Widget;
+        let bg2 = data.flagBg2Widget;
+        let text1 = data.flagText1Widget;
+        let text2 = data.flagText2Widget;
 
         if (!bg1 || !bg2 || !text1 || !text2) return;
 
@@ -241,10 +249,18 @@ export class BFSupremacyUI {
         if (prefix === "" || id > 20 || id < 0)
             return;
 
-        let bg1 = mod.FindUIWidgetWithName(prefix + "bg1_" + id);
-        let bg2 = mod.FindUIWidgetWithName(prefix + "bg2_" + id);
-        let text1 = mod.FindUIWidgetWithName(prefix + "text1_" + id);
-        let text2 = mod.FindUIWidgetWithName(prefix + "text2_" + id);
+        const data = ObjectiveVariables.getObjectiveVariables(eventCapturePoint);
+        if (!data.flagBg1Widget) {
+            data.flagBg1Widget = mod.FindUIWidgetWithName(prefix + "bg1_" + id);
+            data.flagBg2Widget = mod.FindUIWidgetWithName(prefix + "bg2_" + id);
+            data.flagText1Widget = mod.FindUIWidgetWithName(prefix + "text1_" + id);
+            data.flagText2Widget = mod.FindUIWidgetWithName(prefix + "text2_" + id);
+        }
+
+        let bg1 = data.flagBg1Widget;
+        let bg2 = data.flagBg2Widget;
+        let text1 = data.flagText1Widget;
+        let text2 = data.flagText2Widget;
 
         if (!bg1 || !bg2 || !text1 || !text2) return;
 
