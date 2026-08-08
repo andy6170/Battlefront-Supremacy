@@ -5,6 +5,7 @@ import { BFSAudio } from "./MFSAudio.ts";
 
 export class BFSupremacyUI {
     private static flashId = 0;
+    private static cq = new Map<string, mod.UIWidget>();
     public static UI_Setup() {
         mod.AddUIContainer("MainUI", mod.CreateVector(0, 0, 0), mod.CreateVector(10000, 10000, 0), mod.UIAnchor.TopCenter);
         mod.SetUIWidgetBgFill(mod.FindUIWidgetWithName("MainUI"), mod.UIBgFill.None);
@@ -96,6 +97,21 @@ export class BFSupremacyUI {
         mod.AddUIContainer("LeftProgress2_Underline_Conquest", mod.CreateVector(0, -2, 0), mod.CreateVector(160, 2, 0), mod.UIAnchor.BottomLeft, UIconfig.uiConfig.conquestUI, true, 2, UIconfig.uiConfig.friendlyColour, 1, mod.UIBgFill.Solid, mod.UIDepth.AboveGameUI, mod.GetTeam(2));
         mod.AddUIContainer("RightProgress1_Underline_Conquest", mod.CreateVector(0, -2, 0), mod.CreateVector(160, 2, 0), mod.UIAnchor.BottomRight, UIconfig.uiConfig.conquestUI, true, 2, UIconfig.uiConfig.enemyColour, 1, mod.UIBgFill.Solid, mod.UIDepth.AboveGameUI, mod.GetTeam(1));
         mod.AddUIContainer("RightProgress2_Underline_Conquest", mod.CreateVector(0, -2, 0), mod.CreateVector(160, 2, 0), mod.UIAnchor.BottomRight, UIconfig.uiConfig.conquestUI, true, 2, UIconfig.uiConfig.enemyColour, 1, mod.UIBgFill.Solid, mod.UIDepth.AboveGameUI, mod.GetTeam(2));
+
+        const c = BFSupremacyUI.cq;
+        c.set("LeftProgress1_Conquest", mod.FindUIWidgetWithName("LeftProgress1_Conquest"));
+        c.set("LeftProgress2_Conquest", mod.FindUIWidgetWithName("LeftProgress2_Conquest"));
+        c.set("RightProgress1_Conquest", mod.FindUIWidgetWithName("RightProgress1_Conquest"));
+        c.set("RightProgress2_Conquest", mod.FindUIWidgetWithName("RightProgress2_Conquest"));
+        c.set("LeftText1_Conquest", mod.FindUIWidgetWithName("LeftText1_Conquest"));
+        c.set("LeftText2_Conquest", mod.FindUIWidgetWithName("LeftText2_Conquest"));
+        c.set("RightText1_Conquest", mod.FindUIWidgetWithName("RightText1_Conquest"));
+        c.set("RightText2_Conquest", mod.FindUIWidgetWithName("RightText2_Conquest"));
+        c.set("LeftProgress1_Underline_Conquest", mod.FindUIWidgetWithName("LeftProgress1_Underline_Conquest"));
+        c.set("LeftProgress2_Underline_Conquest", mod.FindUIWidgetWithName("LeftProgress2_Underline_Conquest"));
+        c.set("RightProgress1_Underline_Conquest", mod.FindUIWidgetWithName("RightProgress1_Underline_Conquest"));
+        c.set("RightProgress2_Underline_Conquest", mod.FindUIWidgetWithName("RightProgress2_Underline_Conquest"));
+        c.set("conquest_container", UIconfig.uiConfig.conquestUI);
     }
 
     public static conquest_UI_Update() {
@@ -109,44 +125,47 @@ export class BFSupremacyUI {
         }
         const team1Progress = mod.CreateVector(mod.RoundToInteger((160 / 100) * team1score), 30, 0);
         const team2Progress = mod.CreateVector(mod.RoundToInteger((160 / 100) * team2score), 30, 0);
+        const w = BFSupremacyUI.cq;
 
-        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("LeftProgress1_Conquest"), team1Progress);
-        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("LeftProgress2_Conquest"), team2Progress);
-        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("RightProgress1_Conquest"), team2Progress);
-        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("RightProgress2_Conquest"), team1Progress);
-        mod.SetUITextLabel(mod.FindUIWidgetWithName("LeftText1_Conquest"), mod.Message(mod.stringkeys.supremacy.conquest.percentage, team1score));
-        mod.SetUITextLabel(mod.FindUIWidgetWithName("LeftText2_Conquest"), mod.Message(mod.stringkeys.supremacy.conquest.percentage, team2score));
-        mod.SetUITextLabel(mod.FindUIWidgetWithName("RightText1_Conquest"), mod.Message(mod.stringkeys.supremacy.conquest.percentage, team2score));
-        mod.SetUITextLabel(mod.FindUIWidgetWithName("RightText2_Conquest"), mod.Message(mod.stringkeys.supremacy.conquest.percentage, team1score));
+        mod.SetUIWidgetSize(w.get("LeftProgress1_Conquest")!, team1Progress);
+        mod.SetUIWidgetSize(w.get("LeftProgress2_Conquest")!, team2Progress);
+        mod.SetUIWidgetSize(w.get("RightProgress1_Conquest")!, team2Progress);
+        mod.SetUIWidgetSize(w.get("RightProgress2_Conquest")!, team1Progress);
+        mod.SetUITextLabel(w.get("LeftText1_Conquest")!, mod.Message(mod.stringkeys.supremacy.conquest.percentage, team1score));
+        mod.SetUITextLabel(w.get("LeftText2_Conquest")!, mod.Message(mod.stringkeys.supremacy.conquest.percentage, team2score));
+        mod.SetUITextLabel(w.get("RightText1_Conquest")!, mod.Message(mod.stringkeys.supremacy.conquest.percentage, team2score));
+        mod.SetUITextLabel(w.get("RightText2_Conquest")!, mod.Message(mod.stringkeys.supremacy.conquest.percentage, team1score));
     }
 
     public static conquest_UI_Change(enable: boolean) {
-        mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("conquest_container"), enable);
+        const w = BFSupremacyUI.cq;
+        mod.SetUIWidgetVisible(w.get("conquest_container")!, enable);
         mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("capturepoint_container_conquest"), enable);
     }
 
     public static conquest_UI_Flash() {
         let alpha = UIconfig.uiConfig.uiAlpha
+        const w = BFSupremacyUI.cq;
 
         if (UIconfig.uiConfig.ProgressFlashT1) {
-            mod.SetUIWidgetBgAlpha(mod.FindUIWidgetWithName("LeftProgress1_Conquest"), alpha);
-            mod.SetUIWidgetBgAlpha(mod.FindUIWidgetWithName("RightProgress2_Conquest"), alpha);
-            mod.SetUIWidgetBgAlpha(mod.FindUIWidgetWithName("LeftProgress1_Underline_Conquest"), alpha);
-            mod.SetUIWidgetBgAlpha(mod.FindUIWidgetWithName("RightProgress2_Underline_Conquest"), alpha);
-            mod.SetUIWidgetBgAlpha(mod.FindUIWidgetWithName("LeftProgress2_Conquest"), 1);
-            mod.SetUIWidgetBgAlpha(mod.FindUIWidgetWithName("RightProgress1_Conquest"), 1);
-            mod.SetUIWidgetBgAlpha(mod.FindUIWidgetWithName("LeftProgress2_Underline_Conquest"), 1);
-            mod.SetUIWidgetBgAlpha(mod.FindUIWidgetWithName("RightProgress1_Underline_Conquest"), 1);
+            mod.SetUIWidgetBgAlpha(w.get("LeftProgress1_Conquest")!, alpha);
+            mod.SetUIWidgetBgAlpha(w.get("RightProgress2_Conquest")!, alpha);
+            mod.SetUIWidgetBgAlpha(w.get("LeftProgress1_Underline_Conquest")!, alpha);
+            mod.SetUIWidgetBgAlpha(w.get("RightProgress2_Underline_Conquest")!, alpha);
+            mod.SetUIWidgetBgAlpha(w.get("LeftProgress2_Conquest")!, 1);
+            mod.SetUIWidgetBgAlpha(w.get("RightProgress1_Conquest")!, 1);
+            mod.SetUIWidgetBgAlpha(w.get("LeftProgress2_Underline_Conquest")!, 1);
+            mod.SetUIWidgetBgAlpha(w.get("RightProgress1_Underline_Conquest")!, 1);
         }
         if (UIconfig.uiConfig.ProgressFlashT2) {
-            mod.SetUIWidgetBgAlpha(mod.FindUIWidgetWithName("LeftProgress2_Conquest"), alpha);
-            mod.SetUIWidgetBgAlpha(mod.FindUIWidgetWithName("RightProgress1_Conquest"), alpha);
-            mod.SetUIWidgetBgAlpha(mod.FindUIWidgetWithName("LeftProgress2_Underline_Conquest"), alpha);
-            mod.SetUIWidgetBgAlpha(mod.FindUIWidgetWithName("RightProgress1_Underline_Conquest"), alpha);
-            mod.SetUIWidgetBgAlpha(mod.FindUIWidgetWithName("LeftProgress1_Conquest"), 1);
-            mod.SetUIWidgetBgAlpha(mod.FindUIWidgetWithName("RightProgress2_Conquest"), 1);
-            mod.SetUIWidgetBgAlpha(mod.FindUIWidgetWithName("LeftProgress1_Underline_Conquest"), 1);
-            mod.SetUIWidgetBgAlpha(mod.FindUIWidgetWithName("RightProgress2_Underline_Conquest"), 1);
+            mod.SetUIWidgetBgAlpha(w.get("LeftProgress2_Conquest")!, alpha);
+            mod.SetUIWidgetBgAlpha(w.get("RightProgress1_Conquest")!, alpha);
+            mod.SetUIWidgetBgAlpha(w.get("LeftProgress2_Underline_Conquest")!, alpha);
+            mod.SetUIWidgetBgAlpha(w.get("RightProgress1_Underline_Conquest")!, alpha);
+            mod.SetUIWidgetBgAlpha(w.get("LeftProgress1_Conquest")!, 1);
+            mod.SetUIWidgetBgAlpha(w.get("RightProgress2_Conquest")!, 1);
+            mod.SetUIWidgetBgAlpha(w.get("LeftProgress1_Underline_Conquest")!, 1);
+            mod.SetUIWidgetBgAlpha(w.get("RightProgress2_Underline_Conquest")!, 1);
         }
     }
 
@@ -288,18 +307,10 @@ export class BFSupremacyUI {
         if (GameConfig.gameConfig.stage == 1) {
             t1message = mod.Message(mod.stringkeys.supremacy.regroup.secured)
             t2message = mod.Message(mod.stringkeys.supremacy.regroup.lost)
-            if (t1score < t2score) {
-                t1message = mod.Message(mod.stringkeys.supremacy.regroup.lost);
-                t2message = mod.Message(mod.stringkeys.supremacy.regroup.secured);
-            }
         }
         else if (GameConfig.gameConfig.stage == 2) {
             t1message = mod.Message(mod.stringkeys.supremacy.finalassault.secured)
             t2message = mod.Message(mod.stringkeys.supremacy.finalassault.lost)
-            if (t1score < t2score) {
-                t1message = mod.Message(mod.stringkeys.supremacy.finalassault.lost);
-                t2message = mod.Message(mod.stringkeys.supremacy.finalassault.secured);
-            }
         }
 
         if (TeamVariables.getTeamData(GameConfig.gameConfig.attacker).attempts < 3) {

@@ -6,7 +6,7 @@ import { UIconfig } from "./BFSVariables.ts";
 import { BFSAudio } from "./MFSAudio.ts";
 
 export class BFSupremacyConquest {
-    public static init(): void {
+    public static async init(): Promise<void> {
         if (GameConfig.gameConfig.nightMap) {
             GameConfig.gameConfig.night = true;
         } else {
@@ -66,6 +66,7 @@ export class BFSupremacyConquest {
             let vfx = mod.GetVFX(i);
             if (vfx) {
                 mod.EnableVFX(vfx, true);
+                if (i % 50 === 0) await mod.Wait(0);
             }
         }
 
@@ -73,6 +74,7 @@ export class BFSupremacyConquest {
             let sfx = mod.GetSFX(i);
             if (sfx) {
                 mod.PlaySound(sfx, 1, mod.GetObjectPosition(sfx), 100);
+                if (i % 50 === 0) await mod.Wait(0);
             }
         }
 
