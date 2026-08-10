@@ -132,8 +132,9 @@ export class BFSupremacyConquest {
         if (!GameConfig.gameConfig.roundOngoing) return;
 
         const elapsed = mod.GetMatchTimeElapsed();
+        const rounded = mod.RoundToInteger(elapsed);
         BFSupremacyUI.conquest_UI_Flash();
-        if (mod.RoundToInteger(elapsed) % 2 == 0) {
+        if (rounded % 2 == 0) {
             if (GameConfig.gameConfig.timeEven) {
                 return;
             }
@@ -141,7 +142,7 @@ export class BFSupremacyConquest {
             GameConfig.gameConfig.timeOdd = false;
             UIconfig.uiConfig.flashStart = true;
         }
-        else if (mod.RoundToInteger(elapsed) % 2 != 0) {
+        else if (rounded % 2 != 0) {
             if (GameConfig.gameConfig.timeOdd) {
                 return;
             }
@@ -150,11 +151,11 @@ export class BFSupremacyConquest {
             UIconfig.uiConfig.flashStart = true;
         }
 
-        if (mod.RoundToInteger(elapsed) % GameConfig.gameConfig.ticketSpeed == 0 && !GameConfig.gameConfig.ticketDrained) {
+        if (rounded % GameConfig.gameConfig.ticketSpeed == 0 && !GameConfig.gameConfig.ticketDrained) {
             GameConfig.gameConfig.ticketDrained = true
             this.scoreUpdate();
 
-        } else if (mod.RoundToInteger(elapsed) % GameConfig.gameConfig.ticketSpeed != 0 && GameConfig.gameConfig.ticketDrained) {
+        } else if (rounded % GameConfig.gameConfig.ticketSpeed != 0 && GameConfig.gameConfig.ticketDrained) {
             GameConfig.gameConfig.ticketDrained = false
         }
     }

@@ -216,13 +216,14 @@ export class BFSupremacyRegroup {
 
     public static ongoingRegroup(): void {
         const elapsed = mod.GetMatchTimeElapsed();
+        const rounded = mod.RoundToInteger(elapsed);
         if (!GameConfig.gameConfig.heliTakeOff && GameConfig.gameConfig.extractionRemainingTime <= 0) {
-            if (mod.RoundToInteger(elapsed) % 2 == 0) {
+            if (rounded % 2 == 0) {
                 //this.pilotReset();
             }
             return;
         }
-        if (mod.RoundToInteger(elapsed) % 2 == 0) {
+        if (rounded % 2 == 0) {
             if (GameConfig.gameConfig.timeEven) {
                 return;
             }
@@ -235,7 +236,7 @@ export class BFSupremacyRegroup {
                 BFSAudio.thirtySecondsVO();
             }
         }
-        else if (mod.RoundToInteger(elapsed) % 2 != 0) {
+        else if (rounded % 2 != 0) {
             if (GameConfig.gameConfig.timeOdd) {
                 return;
             }

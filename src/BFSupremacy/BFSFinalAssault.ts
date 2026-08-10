@@ -211,7 +211,8 @@ export class BFSupremacyFinalAssault {
         if (!GameConfig.gameConfig.roundOngoing) return;
 
         const elapsed = mod.GetMatchTimeElapsed();
-        if (mod.RoundToInteger(elapsed) % 2 == 0) {
+        const rounded = mod.RoundToInteger(elapsed);
+        if (rounded % 2 == 0) {
             if (GameConfig.gameConfig.timeEven) {
                 return;
             }
@@ -221,7 +222,7 @@ export class BFSupremacyFinalAssault {
             BFSupremacyFinalAssault.updateRemainingTime();
             BFSupremacyUI.finalAssault_UI_Update();
 
-        } else if (mod.RoundToInteger(elapsed) % 2 != 0) {
+        } else if (rounded % 2 != 0) {
             if (GameConfig.gameConfig.timeOdd) {
                 return;
             }
