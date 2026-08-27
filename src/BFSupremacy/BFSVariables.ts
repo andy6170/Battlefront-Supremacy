@@ -38,12 +38,29 @@ export interface GameConfig {
     extractReady: boolean;
     heliTakeOff: boolean;
     extractionIcon: mod.VFX;
+    nightMap: boolean;
+    nightFinalArea: boolean;
+    overtime: number;
+    snow: boolean;
+    cutscene: boolean;
+    uniqueID: number;
+    airVehicles: mod.VehicleList[];
+    flagsVO: mod.VoiceOverFlags[];
+    MCOMStart: number;
+    winning: number;
+    night: boolean;
+    shoulderLeftCam: number;
+    shoulderRightCam: number;
+    shoulderLeftCamZoom: number;
+    shoulderRightCamZoom: number;
+    shoulderLeftUI: mod.Vector;
+    shoulderRightUI: mod.Vector;
 }
 
 export class GameConfig {
     public static gameConfig: GameConfig = {
         gameStarted: false,
-        debug: false,
+        debug: true,
         capturePointNeutralizationTime: 15,
         capturePointCapturingTime: 15,
         capturePointMultiplier: 2,
@@ -80,7 +97,44 @@ export class GameConfig {
         regroupVehicleSelected: false,
         extractReady: false,
         heliTakeOff: false,
-        extractionIcon: mod.GetVFX(0)
+        extractionIcon: mod.GetVFX(0),
+        nightMap: false,
+        nightFinalArea: false,
+        overtime: 0,
+        snow: false,
+        cutscene: false,
+        uniqueID: 0,
+        airVehicles: [
+            mod.VehicleList.F16,
+            mod.VehicleList.F22,
+            mod.VehicleList.AH64,
+            mod.VehicleList.AH6M,
+            mod.VehicleList.AH6M_Pax,
+            mod.VehicleList.JAS39,
+            mod.VehicleList.SU57,
+            mod.VehicleList.UH60,
+            mod.VehicleList.UH60_Pax
+        ],
+        flagsVO: [
+            mod.VoiceOverFlags.Alpha,
+            mod.VoiceOverFlags.Bravo,
+            mod.VoiceOverFlags.Charlie,
+            mod.VoiceOverFlags.Delta,
+            mod.VoiceOverFlags.Echo,
+            mod.VoiceOverFlags.Foxtrot,
+            mod.VoiceOverFlags.Golf,
+            mod.VoiceOverFlags.Hotel,
+            mod.VoiceOverFlags.India
+        ],
+        MCOMStart: 0,
+        winning: 0,
+        night: false,
+        shoulderLeftCam: -0.45,
+        shoulderRightCam: 0.35,
+        shoulderLeftCamZoom: -0.4,
+        shoulderRightCamZoom: 0.4,
+        shoulderLeftUI: mod.CreateVector(12, 5, 0),
+        shoulderRightUI: mod.CreateVector(-12, 5, 0),
     };
 }
 
@@ -99,6 +153,7 @@ export interface UIconfig {
     finalAssaultUI: mod.UIWidget;
     capturePointUI: mod.UIWidget;
     capturepointUIFinalAssault: mod.UIWidget;
+    changingSectorUI: mod.UIWidget;
     mcomUI: mod.UIWidget;
     uiAlpha: number;
     uiAlphaUp: boolean;
@@ -106,6 +161,9 @@ export interface UIconfig {
     ProgressFlashT1: boolean;
     ProgressFlashT2: boolean;
     flagLetters: string[];
+    snipers: mod.Weapons[];
+    launchers: mod.Gadgets[];
+    conquestEndUI: mod.UIWidget;
 }
 
 export class UIconfig {
@@ -124,6 +182,7 @@ export class UIconfig {
         finalAssaultUI: mod.GetUIRoot(),
         capturePointUI: mod.GetUIRoot(),
         capturepointUIFinalAssault: mod.GetUIRoot(),
+        changingSectorUI: mod.GetUIRoot(),
         mcomUI: mod.GetUIRoot(),
         uiAlpha: 1,
         uiAlphaUp: false,
@@ -142,19 +201,66 @@ export class UIconfig {
             mod.stringkeys.objective.i,
             mod.stringkeys.objective.j
         ],
+        snipers: [
+            mod.Weapons.Sniper_M2010_ESR,
+            mod.Weapons.Sniper_Mini_Scout,
+            mod.Weapons.Sniper_PSR,
+            mod.Weapons.Sniper_SV_98,
+            //mod.Weapons.DMR_GRT_CPS,
+            //mod.Weapons.DMR_LMR27,
+            //mod.Weapons.DMR_M39_EMR,
+            //mod.Weapons.DMR_SVDM,
+            //mod.Weapons.DMR_SVK_86
+        ],
+        launchers: [
+            mod.Gadgets.Launcher_Aim_Guided,
+            mod.Gadgets.Launcher_Air_Defense,
+            mod.Gadgets.Launcher_Auto_Guided,
+            mod.Gadgets.Launcher_IGLA,
+            mod.Gadgets.Launcher_Unguided_Rocket,
+            mod.Gadgets.Launcher_Long_Range,
+        ],
+        conquestEndUI: mod.GetUIRoot(),
     };
 }
 
 export interface SupremacyPlayerData {
+    score: number;
     kills: number;
     deaths: number;
+    assists: number;
+    captures: number;
     status: number;
     onPoint: boolean;
     uniqueUI: string;
     containerWidget: mod.UIWidget
+    aimWidget: mod.UIWidget | undefined
+    objTextWidget: mod.UIWidget | undefined
+    objCounterWidget: mod.UIWidget | undefined
+    objProgressBGWidget: mod.UIWidget | undefined
+    objProgressWidget: mod.UIWidget | undefined
+    uiCreated: boolean;
     firstDeploy: boolean;
     currentObjective: mod.CapturePoint;
     spawned: boolean;
+    firstPerson: boolean;
+    thirdPerson: boolean;
+    thirdPersonZoom: boolean;
+    hasSniper: boolean;
+    hasLauncher: boolean;
+    flagTick: number;
+    stance: string;
+    cameraEnabled: boolean;
+    outOfBounds: boolean;
+    oobTimer: number;
+    inAirspace: boolean;
+    area: number;
+    ingoreOOB: boolean;
+    boarded: boolean;
+    shoulder: string;
+    interacting: boolean;
+    reloading: boolean;
+
 }
 
 export class PlayerVariables {
@@ -164,15 +270,41 @@ export class PlayerVariables {
         const playerId = typeof player === 'number' ? player : mod.GetObjId(player);
         if (!PlayerVariables.playerData.has(playerId)) {
             PlayerVariables.playerData.set(playerId, {
+                score: 0,
                 kills: 0,
                 deaths: 0,
+                assists: 0,
+                captures: 0,
                 status: 0,
                 onPoint: false,
                 uniqueUI: "",
                 containerWidget: mod.GetUIRoot(),
+                aimWidget: undefined,
+                objTextWidget: undefined,
+                objCounterWidget: undefined,
+                objProgressBGWidget: undefined,
+                objProgressWidget: undefined,
+                uiCreated: false,
                 firstDeploy: true,
                 currentObjective: mod.GetCapturePoint(0),
-                spawned: false
+                spawned: false,
+                firstPerson: false,
+                thirdPerson: false,
+                thirdPersonZoom: false,
+                hasSniper: false,
+                hasLauncher: false,
+                flagTick: 0,
+                stance: "standing",
+                cameraEnabled: true,
+                outOfBounds: false,
+                oobTimer: 0,
+                inAirspace: false,
+                area: 0,
+                ingoreOOB: false,
+                boarded: false,
+                shoulder: "right",
+                interacting: false,
+                reloading: false,
             });
         }
         return PlayerVariables.playerData.get(playerId)!;
@@ -186,9 +318,9 @@ export class PlayerVariables {
 
 export interface TeamData {
     score: number;
-    hqHealth: number;
     mcomCount: number;
     finalSectorBreached: number;
+    attempts: number;
 }
 
 export class TeamVariables {
@@ -199,9 +331,9 @@ export class TeamVariables {
         if (!TeamVariables.teamData.has(teamId)) {
             TeamVariables.teamData.set(teamId, {
                 score: 0,
-                hqHealth: 100000,
-                mcomCount: 2,
-                finalSectorBreached: 1
+                mcomCount: 3,
+                finalSectorBreached: 1,
+                attempts: 0,
             });
         }
         return TeamVariables.teamData.get(teamId)!;
@@ -227,6 +359,10 @@ export interface CapturePointData {
     ownerTeam: mod.Team;
     team1Players: number;
     team2Players: number;
+    flagBg1Widget: mod.UIWidget | undefined;
+    flagBg2Widget: mod.UIWidget | undefined;
+    flagText1Widget: mod.UIWidget | undefined;
+    flagText2Widget: mod.UIWidget | undefined;
 }
 
 export class ObjectiveVariables {
@@ -249,6 +385,10 @@ export class ObjectiveVariables {
                 ownerTeam: mod.GetTeam(0),
                 team1Players: 0,
                 team2Players: 0,
+                flagBg1Widget: undefined,
+                flagBg2Widget: undefined,
+                flagText1Widget: undefined,
+                flagText2Widget: undefined,
             });
         }
         return ObjectiveVariables.objectiveVariables.get(objectiveId)!;
@@ -257,6 +397,35 @@ export class ObjectiveVariables {
     public static setObjectiveVariables(objective: mod.CapturePoint | number, value: CapturePointData): void {
         const objectiveId = typeof objective === 'number' ? objective : mod.GetObjId(objective);
         ObjectiveVariables.objectiveVariables.set(objectiveId, value);
+    }
+}
+
+export interface MCOMData {
+    isDestroyed: boolean;
+    isArmed: boolean;
+    armedBy: mod.Player | null;
+
+
+}
+
+export class MCOMVariables {
+    public static mcomVariables: Map<number, MCOMData> = new Map<number, MCOMData>();
+
+    public static getMCOMData(mcom: mod.MCOM | number): MCOMData {
+        const mcomId = typeof mcom === 'number' ? mcom : mod.GetObjId(mcom);
+        if (!MCOMVariables.mcomVariables.has(mcomId)) {
+            MCOMVariables.mcomVariables.set(mcomId, {
+                isDestroyed: false,
+                isArmed: false,
+                armedBy: null
+            });
+        }
+        return MCOMVariables.mcomVariables.get(mcomId)!;
+    }
+
+    public static setMCOMData(mcom: mod.MCOM | number, value: MCOMData): void {
+        const mcomId = typeof mcom === 'number' ? mcom : mod.GetObjId(mcom);
+        MCOMVariables.mcomVariables.set(mcomId, value);
     }
 }
 

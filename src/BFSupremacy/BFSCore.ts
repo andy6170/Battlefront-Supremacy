@@ -1,8 +1,10 @@
-import { GameConfig, ObjectiveVariables, UIconfig } from "./BFSVariables.ts";
+import { GameConfig, ObjectiveVariables, PlayerVariables, UIconfig, TeamVariables } from "./BFSVariables.ts";
 import { BFSupremacyUI } from "./BFSUI.ts";
 import { BFSupremacyConquest } from "./BFSConquest.ts";
 import { BFSupremacyRegroup } from "./BFSRegroup.ts";
 import { BFSupremacyFinalAssault } from "./BFSFinalAssault.ts";
+import { BFSAudio } from "./MFSAudio.ts";
+import { BFSWeather } from "./BFSWeather.ts";
 
 
 export class BFSupremacyCore {
@@ -12,6 +14,7 @@ export class BFSupremacyCore {
 
     public static async changeStage(): Promise<void> {
         GameConfig.gameConfig.roundOngoing = false;
+        const previousStage = GameConfig.gameConfig.stage;
         GameConfig.gameConfig.stage++;
         if (GameConfig.gameConfig.stage >= 3) {
             GameConfig.gameConfig.stage = 0;
@@ -20,31 +23,57 @@ export class BFSupremacyCore {
         let stage = GameConfig.gameConfig.stage;
 
         if (stage == 0) {
+            if (GameConfig.gameConfig.nightMap) {
+                GameConfig.gameConfig.night = true;
+            } else {
+                GameConfig.gameConfig.night = false;
+            }
             BFSupremacyConquest.resetConquest();
             GameConfig.gameConfig.flagStart = 200;
             GameConfig.gameConfig.flagEnd = 220;
             GameConfig.gameConfig.bonusTime = 0;
+            if (previousStage === 2) {
+                await BFSupremacyUI.changingLocation(true);
+            }
 
         } else if (stage == 1) {
-            await mod.Wait(3);
+            BFSupremacyConquest.endConquest();
+            GameConfig.gameConfig.flagStart = 0;
+            GameConfig.gameConfig.flagEnd = 0;
+            TeamVariables.getTeamData(GameConfig.gameConfig.attacker).attempts++;
+            await BFSupremacyUI.conquest_End_UI();
             GameConfig.gameConfig.extractionRemainingTime = GameConfig.gameConfig.extractionTime;
             if (GameConfig.gameConfig.debug) {
                 GameConfig.gameConfig.extractionRemainingTime = 20;
             }
             GameConfig.gameConfig.extractReady = false;
-            BFSupremacyConquest.endConquest();
-            GameConfig.gameConfig.flagStart = 0;
-            GameConfig.gameConfig.flagEnd = 0;
             BFSupremacyUI.regroup_UI_Progress_Update();
             BFSupremacyRegroup.spawnHeli();
 
         } else if (stage == 2) {
+            BFSupremacyUI.UI_Update();
+            BFSupremacyUI.UI_Change();
+            BFSAudio.finalAssaultMusic();
+            const players = mod.AllPlayers() as mod.Array;
             GameConfig.gameConfig.remainingTime = GameConfig.gameConfig.baseAttackTime + GameConfig.gameConfig.bonusTime;
             BFSupremacyFinalAssault.init();
+            if (GameConfig.gameConfig.nightFinalArea) {
+                GameConfig.gameConfig.night = true;
+            } else {
+                GameConfig.gameConfig.night = false;
+            }
+            for (let i = 0; i < mod.CountOf(players); i++) {
+                const player = mod.ValueInArray(players, i);
+                BFSWeather.checkNight(player);
+                mod.EnableAllInputRestrictions(player, false);
+                PlayerVariables.getPlayerData(player).cameraEnabled = true;
+                PlayerVariables.getPlayerData(player).onPoint = false;
+                PlayerVariables.getPlayerData(player).boarded = false;
+                await mod.Wait(0.033)
+            }
         }
-        await mod.Wait(0.1);
-        BFSupremacyUI.UI_Change();
         BFSupremacyUI.UI_Update();
+        BFSupremacyUI.UI_Change()
     }
 
     public static ongoingFlagData(eventCapturePoint: mod.CapturePoint): void {
@@ -52,20 +81,22 @@ export class BFSupremacyCore {
 
         let progress = mod.GetCaptureProgress(eventCapturePoint);
         let data = ObjectiveVariables.getObjectiveVariables(eventCapturePoint);
-        let previousProgress = data.progress;
 
-        if (!mod.Equals(progress, previousProgress)) {
-            BFSupremacyCore.updateFlagData(eventCapturePoint);
+        if (!mod.Equals(progress, data.progress)) {
+            BFSupremacyCore.updateFlagData(eventCapturePoint, progress);
         }
     }
 
 
-    public static updateFlagData(eventCapturePoint: mod.CapturePoint) {
-
-        let progress = mod.GetCaptureProgress(eventCapturePoint);
+    public static updateFlagData(eventCapturePoint: mod.CapturePoint, progress?: number) {
+        if (progress === undefined) {
+            progress = mod.GetCaptureProgress(eventCapturePoint);
+        }
         let data = ObjectiveVariables.getObjectiveVariables(eventCapturePoint);
         let previousProgress = data.progress;
         let owner = mod.GetCurrentOwnerTeam(eventCapturePoint);
+        let t1 = data.team1Players;
+        let t2 = data.team2Players;
 
         let colour1 = data.uiTextColour1;
         let colour2 = data.uiTextColour2;
@@ -91,28 +122,15 @@ export class BFSupremacyCore {
         }
 
         if (mod.LessThan(progress, 1)) {
-            if (mod.Equals(mod.GetOwnerProgressTeam(eventCapturePoint), mod.GetTeam(1))) {
-                if (mod.GreaterThan(progress, previousProgress)) {
-                    message1 = mod.stringkeys.captureProgress.capturing;
-                    message2 = mod.stringkeys.captureProgress.losing;
-                } else if (mod.LessThan(progress, previousProgress)) {
-                    message1 = mod.stringkeys.captureProgress.losing;
-                    message2 = mod.stringkeys.captureProgress.capturing;
-                } else {
-                    message1 = mod.stringkeys.captureProgress.contested;
-                    message2 = mod.stringkeys.captureProgress.contested;
-                }
+            if (t1 > t2) {
+                message1 = mod.stringkeys.captureProgress.capturing;
+                message2 = mod.stringkeys.captureProgress.losing;
+            } else if (t2 > t1) {
+                message1 = mod.stringkeys.captureProgress.losing;
+                message2 = mod.stringkeys.captureProgress.capturing;
             } else {
-                if (mod.GreaterThan(progress, previousProgress)) {
-                    message1 = mod.stringkeys.captureProgress.losing;
-                    message2 = mod.stringkeys.captureProgress.capturing;
-                } else if (mod.LessThan(progress, previousProgress)) {
-                    message1 = mod.stringkeys.captureProgress.capturing;
-                    message2 = mod.stringkeys.captureProgress.losing;
-                } else {
-                    message1 = mod.stringkeys.captureProgress.contested;
-                    message2 = mod.stringkeys.captureProgress.contested;
-                }
+                message1 = mod.stringkeys.captureProgress.contested;
+                message2 = mod.stringkeys.captureProgress.contested;
             }
         } else {
             if (mod.Equals(owner, mod.GetTeam(1))) {
@@ -134,10 +152,14 @@ export class BFSupremacyCore {
             previousProgress: previousProgress,
             progress: progress,
             progressSize: mod.CreateVector(220 * progress, 7, 0),
-            position: mod.CreateVector(-110 + ((220 * progress) / 2), 200, 0),
+            position: mod.CreateVector(-110 + ((220 * progress) / 2), 220, 0),
             ownerTeam: owner,
             team1Players: data.team1Players,
             team2Players: data.team2Players,
+            flagBg1Widget: data.flagBg1Widget,
+            flagBg2Widget: data.flagBg2Widget,
+            flagText1Widget: data.flagText1Widget,
+            flagText2Widget: data.flagText2Widget,
         });
     }
 
@@ -166,4 +188,33 @@ export class BFSupremacyCore {
         ObjectiveVariables.objectiveVariables.get(mod.GetObjId(eventCapturePoint))!.team1Players = team1Count;
         ObjectiveVariables.objectiveVariables.get(mod.GetObjId(eventCapturePoint))!.team2Players = team2Count;
     }
+
+    public static isSpatialValid(spatial: number | mod.SpatialObject): boolean {
+        const obj = typeof spatial === 'number' ? mod.GetSpatialObject(spatial) : spatial;
+        if (!obj) return false;
+        const pos = mod.GetObjectPosition(obj);
+        return !(
+            Math.abs(mod.XComponentOf(pos)) < 1 ||
+            Math.abs(mod.YComponentOf(pos)) < 1 ||
+            Math.abs(mod.ZComponentOf(pos)) < 1
+        );
+    }
+
+    public static scoreboardInit() {
+        mod.SetScoreboardType(mod.ScoreboardType.CustomTwoTeams);
+        mod.SetScoreboardColumnNames(mod.Message(mod.stringkeys.scoreboard.score), mod.Message(mod.stringkeys.scoreboard.kills), mod.Message(mod.stringkeys.scoreboard.deaths), mod.Message(mod.stringkeys.scoreboard.assists), mod.Message(mod.stringkeys.scoreboard.captures));
+        mod.SetScoreboardColumnWidths(1, 0.5, 0.5, 0.5, 0.7)
+
+    }
+
+    public static scoreboardUpdate(eventPlayer: mod.Player) {
+        let score = PlayerVariables.getPlayerData(eventPlayer).score;
+        let kills = PlayerVariables.getPlayerData(eventPlayer).kills;
+        let deaths = PlayerVariables.getPlayerData(eventPlayer).deaths;
+        let assists = PlayerVariables.getPlayerData(eventPlayer).assists;
+        let captures = PlayerVariables.getPlayerData(eventPlayer).captures;
+        mod.SetScoreboardPlayerValues(eventPlayer, score, kills, deaths, assists, captures);
+
+    }
+
 }

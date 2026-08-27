@@ -1,26 +1,46 @@
-import { GameConfig } from "./BFSVariables.ts";
+import { GameConfig, PlayerVariables } from "./BFSVariables.ts";
 import { BFSupremacyUI } from "./BFSUI.ts";
 import { BFSupremacyCore } from "./BFSCore.ts";
+import { BFSWeather } from "./BFSWeather.ts";
+import { BFSAudio } from "./MFSAudio.ts";
+import { BFSHeliAnimations } from "./BFSHeliAnimations.ts";
 
 export class BFSupremacyRegroup {
+    private static lastPilotReset: number = -2;
+
     public static spawnHeli(): void {
+        GameConfig.gameConfig.extractReady = false;
         GameConfig.gameConfig.regroupVehicleSelected = false;
         GameConfig.gameConfig.regroupBot = undefined;
         GameConfig.gameConfig.regroupVehicle = undefined;
+        BFSAudio.regroupMusic();
         mod.SpawnAIFromAISpawner(mod.GetSpawner(900), mod.Message(mod.stringkeys.supremacy.regroup.extract), GameConfig.gameConfig.attacker);
         mod.ForceVehicleSpawnerSpawn(mod.GetVehicleSpawner(901));
     }
 
-    public static onBotSpawned(player: mod.Player, spawner: mod.Spawner): void {
-        if (GameConfig.gameConfig.regroupVehicleSelected || GameConfig.gameConfig.stage !== 1) return;
+    public static async onBotSpawned(player: mod.Player, spawner: mod.Spawner): Promise<void> {
         if (mod.GetObjId(spawner) === 900) {
             GameConfig.gameConfig.regroupBot = player;
-            this.checkAndSetup();
+            await mod.Wait(0.1);
+            if (!GameConfig.gameConfig.regroupVehicleSelected) {
+                this.checkAndSetup();
+                mod.SetPlayerIncomingDamageFactor(player, 0);
+                mod.SetPlayerMaxHealth(player, 500);
+                mod.EnableAllInputRestrictions(player, true);
+            } else {
+                const heli = GameConfig.gameConfig.regroupVehicle;
+                if (heli) {
+                    mod.ForcePlayerToSeat(player, heli, -1);
+                    mod.SetPlayerIncomingDamageFactor(player, 0);
+                    mod.SetPlayerMaxHealth(player, 500);
+                    mod.EnableAllInputRestrictions(player, true);
+                }
+            }
         }
     }
 
     public static onVehicleSpawned(vehicle: mod.Vehicle): void {
-        if (GameConfig.gameConfig.regroupVehicleSelected || GameConfig.gameConfig.stage !== 1) return;
+        if (GameConfig.gameConfig.regroupVehicleSelected) return;
         GameConfig.gameConfig.regroupVehicle = vehicle;
         this.checkAndSetup();
     }
@@ -32,13 +52,12 @@ export class BFSupremacyRegroup {
         if (bot && heli && !GameConfig.gameConfig.regroupVehicleSelected) {
             GameConfig.gameConfig.regroupVehicleSelected = true;
             await mod.Wait(0.033);
-            mod.EnableAllInputRestrictions(bot, true);
             mod.ForcePlayerToSeat(bot, heli, -1);
-            mod.SetPlayerMaxHealth(bot, 500);
-            mod.Heal(bot, 500);
             mod.SetVehicleMaxHealthMultiplier(heli, 4);
             mod.Heal(heli, 10000);
-            this.animateHeli();
+            if (GameConfig.gameConfig.stage === 1) {
+                this.animateHeli();
+            }
         }
     }
 
@@ -50,62 +69,52 @@ export class BFSupremacyRegroup {
         const heli = GameConfig.gameConfig.regroupVehicle;
         if (!heli) return;
 
+        await BFSHeliAnimations.animateHeliLanding(
+            heli,
+            902,
+            () => GameConfig.gameConfig.stage === 1
+        );
+
+        if (!mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition)) return;
+
         const target = mod.GetSpatialObject(902);
         const targetPos = mod.GetObjectPosition(target);
         const startPos = mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition);
         if (!startPos) return;
 
-        // Stage 1: Horizontal move to a point above the target
-        const hoverPos = mod.CreateVector(mod.XComponentOf(targetPos), mod.YComponentOf(startPos), mod.ZComponentOf(targetPos));
+        // Calculate direction to target horizontally
+        const dx = mod.XComponentOf(targetPos) - mod.XComponentOf(startPos);
+        const dz = mod.ZComponentOf(targetPos) - mod.ZComponentOf(startPos);
+        const yaw = Math.atan2(dx, dz);
 
-        while (mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition) && GameConfig.gameConfig.stage === 1) {
-            const currentPos = mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition);
-            if (!currentPos) break;
-            mod.Heal(heli, 10000);
-            const distHorizontal = mod.DistanceBetween(
-                mod.CreateVector(mod.XComponentOf(currentPos), 0, mod.ZComponentOf(currentPos)),
-                mod.CreateVector(mod.XComponentOf(targetPos), 0, mod.ZComponentOf(targetPos))
-            );
-
-            if (distHorizontal < 5) break;
-
-            const direction = mod.DirectionTowards(currentPos, hoverPos);
-            mod.Teleport(heli, mod.Add(currentPos, mod.Multiply(direction, 0.99)), 0);
-            await mod.Wait(0.066);
-        }
-
-        // Stage 2: Landing (Vertical drop)
-        while (mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition) && GameConfig.gameConfig.stage === 1) {
-            const currentPos = mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition);
-            if (!currentPos) break;
-            mod.Heal(heli, 10000);
-            const dist = mod.DistanceBetween(currentPos, targetPos);
-
-            if (dist < 1) break;
-
-            const direction = mod.DirectionTowards(currentPos, targetPos);
-            mod.Teleport(heli, mod.Add(currentPos, mod.Multiply(direction, 0.33)), 0); // Slower descent
-            await mod.Wait(0.066);
-        }
-        if (!mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition)) return;
         GameConfig.gameConfig.roundOngoing = true;
         GameConfig.gameConfig.extractReady = true;
         GameConfig.gameConfig.heliTakeOff = false;
         mod.EnableVFX(GameConfig.gameConfig.extractionIcon, true);
-        mod.EnableGameModeObjective(mod.GetCapturePoint(904), true);
-        mod.SetCapturePointOwner(mod.GetCapturePoint(904), GameConfig.gameConfig.attacker);
-        mod.EnableCapturePointDeploying(mod.GetCapturePoint(904), false);
+        mod.EnableGameModeObjective(mod.GetCapturePoint(910), true);
+        mod.SetCapturePointOwner(mod.GetCapturePoint(910), GameConfig.gameConfig.attacker);
+        mod.EnableCapturePointDeploying(mod.GetCapturePoint(910), false);
+        BFSAudio.oneMinuteVO();
+        BFSupremacyUI.extractNotification();
+        BFSupremacyUI.regroup_UIMessage_Enable(true);
         while (GameConfig.gameConfig.stage === 1 && GameConfig.gameConfig.extractionRemainingTime > 0 && mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition)) {
             const currentPos = mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition);
             if (currentPos && mod.DistanceBetween(currentPos, targetPos) > 0.5) {
-                mod.Teleport(heli, targetPos, 0);
+                mod.Teleport(heli, targetPos, yaw);
             }
             mod.Heal(heli, 10000);
-            if (GameConfig.gameConfig.regroupBot) {
-                mod.Heal(GameConfig.gameConfig.regroupBot, 500);
-            }
+            //if (GameConfig.gameConfig.regroupBot) {
+            //    mod.Heal(GameConfig.gameConfig.regroupBot, 500);
+            //}
             await mod.Wait(0.2);
         }
+        const bot = GameConfig.gameConfig.regroupBot;
+        if (bot) {
+            mod.SetPlayerIncomingDamageFactor(bot, 0);
+            mod.SetPlayerMaxHealth(bot, 500);
+            mod.EnableAllInputRestrictions(bot, true);
+        }
+        this.pilotReset();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -116,82 +125,73 @@ export class BFSupremacyRegroup {
         if (GameConfig.gameConfig.heliTakeOff) return;
         GameConfig.gameConfig.heliTakeOff = true;
         GameConfig.gameConfig.roundOngoing = false;
+        GameConfig.gameConfig.extractReady = false;
         mod.EnableVFX(GameConfig.gameConfig.extractionIcon, false);
-        mod.EnableGameModeObjective(mod.GetCapturePoint(904), false);
+        mod.EnableGameModeObjective(mod.GetCapturePoint(910), false);
         const heli = GameConfig.gameConfig.regroupVehicle;
         if (!heli) return;
 
-        const departureTarget = mod.GetSpatialObject(903);
-        const departurePos = mod.Add(mod.GetObjectPosition(departureTarget), mod.CreateVector(0, 0.3, 0));
-        const startPos = mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition);
-        if (!startPos) return;
+        await BFSHeliAnimations.animateHeliTakeOff(
+            heli,
+            51,
+            903,
+            () => GameConfig.gameConfig.stage === 1,
+            //() => this.pilotReset()
+        );
 
-
-
-        // Stage 1: Vertical Lift
-        const liftTargetY = mod.YComponentOf(startPos) + 40;
-        const cameraObject = mod.GetFixedCamera(51);
-        const cameraPos = mod.GetObjectPosition(cameraObject);
-
-        const startRot = this.getLookAtRotation(cameraPos, startPos);
-        mod.SetObjectTransform(cameraObject, mod.CreateTransform(cameraPos, startRot));
-
-        await mod.Wait(1);
-
-        const liftPos = mod.Add(startPos, mod.CreateVector(0, 40, 0));
-        const time1 = (40 / 0.5) * 0.066;
-        const liftRot = this.getLookAtRotation(cameraPos, liftPos);
-        mod.SetObjectTransformOverTime(cameraObject, mod.CreateTransform(cameraPos, liftRot), time1, false, false);
-
-        while (mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition)) {
-            const currentPos = mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition);
-            if (!currentPos || mod.YComponentOf(currentPos) >= liftTargetY) break;
-
-            const nextPos = mod.Add(currentPos, mod.CreateVector(0, 0.5, 0));
-            mod.Teleport(heli, nextPos, 0);
-
-            await mod.Wait(0.066);
+        if (GameConfig.gameConfig.nightFinalArea) {
+            GameConfig.gameConfig.night = true;
+        } else {
+            GameConfig.gameConfig.night = false;
         }
 
-        // Stage 2: Fly to Target
-        const time2 = (mod.DistanceBetween(liftPos, departurePos) / 1.2) * 0.066;
-        const finalRot = this.getLookAtRotation(cameraPos, departurePos);
-        mod.SetObjectTransformOverTime(cameraObject, mod.CreateTransform(cameraPos, finalRot), time2, false, false);
-
-        while (GameConfig.gameConfig.stage == 1 && mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition)) {
-            const currentPos = mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition);
-            if (!currentPos) break;
-            const dist = mod.DistanceBetween(currentPos, departurePos);
-            if (dist < 5) break;
-
-            const direction = mod.DirectionTowards(currentPos, departurePos);
-            const movePos = mod.Add(currentPos, mod.Multiply(direction, 1.2));
-            mod.Teleport(heli, movePos, 0);
-
-            await mod.Wait(0.066);
+        const players = mod.AllPlayers() as mod.Array;
+        for (let i = 0; i < mod.CountOf(players); i++) {
+            const player = mod.ValueInArray(players, i);
+            BFSWeather.checkNight(player);
         }
-        mod.SetCameraTypeForAll(mod.Cameras.FirstPerson, 0);
 
-        const players = mod.AllPlayers();
-        for (let i = 1; i < mod.CountOf(players); i++) {
-            mod.EnableAllInputRestrictions(mod.ValueInArray(players, i), false);
-        }
+        // Determine destination camera and landing points based on attacker team
+        const isTeam1Attacking = mod.Equals(GameConfig.gameConfig.attacker, mod.GetTeam(1));
+        const landingCameraId = isTeam1Attacking ? 70 : 71;
+        const landingTargetId = isTeam1Attacking ? 904 : 906;
+        const landingStartId = isTeam1Attacking ? 905 : 907;
+
+        // Switch camera to landing view
+        mod.SetCameraTypeForAll(mod.Cameras.Fixed, landingCameraId);
+
+        // Teleport heli to sky position above landing location
+        const landingStartPos = mod.GetObjectPosition(mod.GetSpatialObject(landingStartId));
+        const landingTargetPos = mod.GetObjectPosition(mod.GetSpatialObject(landingTargetId));
+        const dx = mod.XComponentOf(landingTargetPos) - mod.XComponentOf(landingStartPos);
+        const dz = mod.ZComponentOf(landingTargetPos) - mod.ZComponentOf(landingStartPos);
+        const landingYaw = Math.atan2(dx, dz);
+
+        mod.Teleport(heli, landingStartPos, landingYaw);
+        await mod.Wait(0.033);
+        mod.Teleport(heli, landingStartPos, landingYaw);
+
+        // Run landing animation at destination (reversed takeoff / landing)
+        await BFSHeliAnimations.animateHeliLanding(
+            heli,
+            landingTargetId,
+            () => GameConfig.gameConfig.stage === 1,
+            landingCameraId,
+            landingStartId
+        );
+
+        BFSupremacyUI.playSwipeTransition();
 
         mod.UndeployAllPlayers();
-        mod.Kill(heli);
+        mod.EnableAllPlayerDeploy(false);
+        await mod.Wait(0.2);
+        mod.Teleport(heli, mod.CreateVector(0, 0, 0), landingYaw);
         BFSupremacyCore.changeStage();
-    }
+        await mod.Wait(1);
+        mod.Kill(heli);
 
-    private static getLookAtRotation(origin: mod.Vector, target: mod.Vector): mod.Vector {
-        const dx = mod.XComponentOf(target) - mod.XComponentOf(origin);
-        const dy = mod.YComponentOf(target) - mod.YComponentOf(origin);
-        const dz = mod.ZComponentOf(target) - mod.ZComponentOf(origin);
-
-        const distanceXZ = Math.sqrt(dx * dx + dz * dz);
-        const pitch = -Math.atan2(dy, distanceXZ);
-        const yaw = Math.atan2(dx, dz);
-
-        return mod.CreateVector(pitch, yaw, 0);
+        mod.SetCameraTypeForAll(mod.Cameras.ThirdPerson);
+        GameConfig.gameConfig.cutscene = false;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -199,12 +199,15 @@ export class BFSupremacyRegroup {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static playerBoarding(player: mod.Player, vehicle: mod.Vehicle): void {
+        PlayerVariables.getPlayerData(player).cameraEnabled = false;
         GameConfig.gameConfig.bonusTime += GameConfig.gameConfig.bonusTimeAddition;
         BFSupremacyUI.regroup_UI_Text_Update();
+        BFSupremacyUI.regroup_UI_Text_Flash();
         mod.ForcePlayerExitVehicle(player, vehicle);
         BFSupremacyCore.waitingArea(player);
         mod.EnableAllInputRestrictions(player, true);
         mod.SetCameraTypeForPlayer(player, mod.Cameras.Fixed, 50);
+        this.pilotReset();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -212,10 +215,15 @@ export class BFSupremacyRegroup {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static ongoingRegroup(): void {
+        const elapsed = mod.GetMatchTimeElapsed();
+        const rounded = mod.RoundToInteger(elapsed);
         if (!GameConfig.gameConfig.heliTakeOff && GameConfig.gameConfig.extractionRemainingTime <= 0) {
+            if (rounded % 2 == 0) {
+                //this.pilotReset();
+            }
             return;
         }
-        if (mod.RoundToInteger(mod.GetMatchTimeElapsed()) % 2 == 0) {
+        if (rounded % 2 == 0) {
             if (GameConfig.gameConfig.timeEven) {
                 return;
             }
@@ -223,9 +231,12 @@ export class BFSupremacyRegroup {
             GameConfig.gameConfig.timeOdd = false;
             GameConfig.gameConfig.extractionRemainingTime -= 1;
             this.endRegroupCheck();
-            this.pilotReset();
+            //this.pilotReset();
+            if (GameConfig.gameConfig.extractionRemainingTime === 30) {
+                BFSAudio.thirtySecondsVO();
+            }
         }
-        else if (mod.RoundToInteger(mod.GetMatchTimeElapsed()) % 2 != 0) {
+        else if (rounded % 2 != 0) {
             if (GameConfig.gameConfig.timeOdd) {
                 return;
             }
@@ -233,22 +244,50 @@ export class BFSupremacyRegroup {
             GameConfig.gameConfig.timeOdd = true;
             GameConfig.gameConfig.extractionRemainingTime -= 1;
             this.endRegroupCheck();
+            if (GameConfig.gameConfig.extractionRemainingTime === 30) {
+                BFSAudio.thirtySecondsVO();
+            }
         }
         BFSupremacyUI.regroup_UI_Progress_Update();
     }
 
     public static async pilotReset(): Promise<void> {
-        if (GameConfig.gameConfig.heliTakeOff) return;
-        if (GameConfig.gameConfig.regroupBot && GameConfig.gameConfig.regroupVehicle) {
-            mod.ForcePlayerExitVehicle(GameConfig.gameConfig.regroupBot, GameConfig.gameConfig.regroupVehicle);
-            await mod.Wait(0.1);
-            mod.ForcePlayerToSeat(GameConfig.gameConfig.regroupBot, GameConfig.gameConfig.regroupVehicle, -1);
+        const now = mod.GetMatchTimeElapsed();
+        if (now - BFSupremacyRegroup.lastPilotReset < 2) return;
+        BFSupremacyRegroup.lastPilotReset = now;
+
+        const heli = GameConfig.gameConfig.regroupVehicle;
+        if (!heli) return;
+
+        const bot = GameConfig.gameConfig.regroupBot as mod.Player;
+
+        if (!mod.IsPlayerValid(bot)) {
+            GameConfig.gameConfig.regroupBot = undefined;
+            mod.SpawnAIFromAISpawner(
+                mod.GetSpawner(900),
+                mod.Message(mod.stringkeys.supremacy.regroup.extract),
+                GameConfig.gameConfig.attacker
+            );
+            return;
+        }
+
+        if (bot && heli) {
+            if (mod.IsPlayerValid(bot)) {
+                if (mod.GetSoldierState(bot, mod.SoldierStateBool.IsInVehicle)) {
+                    mod.ForcePlayerExitVehicle(bot, heli);
+                    await mod.Wait(0.1);
+                    if (mod.IsPlayerValid(bot)) {
+                        mod.ForcePlayerToSeat(bot, heli, -1);
+                    }
+                }
+            }
         }
     }
 
     public static endRegroupCheck(): void {
         if (GameConfig.gameConfig.extractionRemainingTime <= 0) {
             GameConfig.gameConfig.roundOngoing = false;
+            GameConfig.gameConfig.cutscene = true;
             mod.SetCameraTypeForAll(mod.Cameras.Fixed, 51);
             this.animateHeliTakeOff();
         }
