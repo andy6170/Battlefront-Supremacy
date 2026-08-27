@@ -206,11 +206,11 @@ export class UIconfig {
             mod.Weapons.Sniper_Mini_Scout,
             mod.Weapons.Sniper_PSR,
             mod.Weapons.Sniper_SV_98,
-            mod.Weapons.DMR_GRT_CPS,
-            mod.Weapons.DMR_LMR27,
-            mod.Weapons.DMR_M39_EMR,
-            mod.Weapons.DMR_SVDM,
-            mod.Weapons.DMR_SVK_86
+            //mod.Weapons.DMR_GRT_CPS,
+            //mod.Weapons.DMR_LMR27,
+            //mod.Weapons.DMR_M39_EMR,
+            //mod.Weapons.DMR_SVDM,
+            //mod.Weapons.DMR_SVK_86
         ],
         launchers: [
             mod.Gadgets.Launcher_Aim_Guided,
@@ -259,6 +259,7 @@ export interface SupremacyPlayerData {
     boarded: boolean;
     shoulder: string;
     interacting: boolean;
+    reloading: boolean;
 
 }
 
@@ -303,6 +304,7 @@ export class PlayerVariables {
                 boarded: false,
                 shoulder: "right",
                 interacting: false,
+                reloading: false,
             });
         }
         return PlayerVariables.playerData.get(playerId)!;

@@ -43,7 +43,13 @@ export class BFSupremacy {
                     if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsInteracting)) {
                         pd.interacting = true;
                         await mod.Wait(0.1);
-                        if (!mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsReviving) && !mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsInVehicle) && !mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsReloading) && pd.stance != "ADS") {
+                        if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsReloading) && !pd.reloading) {
+                            pd.interacting = false;
+                            pd.reloading = true;
+                            await mod.Wait(3);
+                            pd.reloading = false;
+                            return;
+                        } else if (!mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsReviving) && !mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsInVehicle) && pd.stance != "ADS") {
                             //pd.interacting = true;
                             pd.stance = "changing";
                             pd.thirdPerson = false;
@@ -356,6 +362,10 @@ export class BFSupremacy {
                 BFSupremacyCore.scoreboardUpdate(eventPlayer);
             }
             await mod.Wait(1);
+            const widget = PlayerVariables.getPlayerData(eventPlayer).aimWidget
+            if (widget) {
+                mod.SetUIWidgetVisible(widget, false);
+            }
             PlayerVariables.getPlayerData(eventPlayer).onPoint = false;
             PlayerVariables.getPlayerData(eventPlayer).area = 0;
             PlayerVariables.getPlayerData(eventPlayer).ingoreOOB = false;
