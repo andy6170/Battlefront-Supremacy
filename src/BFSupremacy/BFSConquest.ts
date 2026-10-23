@@ -126,6 +126,7 @@ export class BFSupremacyConquest {
                 mod.EnableGameModeObjective(sector, false);
             }
         }
+        BFSupremacyUI.ObjectiveUI_Enable(true);
     }
 
     public static ongoingConquest(): void {
@@ -164,6 +165,7 @@ export class BFSupremacyConquest {
         let t1Control = 0;
         let t2Control = 0;
         let multiplier = 1;
+        let score = 0
 
         if (GameConfig.gameConfig.debug) {
             multiplier = 5;
@@ -181,11 +183,17 @@ export class BFSupremacyConquest {
             }
         }
         if (t1Control > t2Control) {
-            TeamVariables.getTeamData(1).score += (t1Control - t2Control) * multiplier;
+            score = t1Control - t2Control;
+            if (score > 3) score = 3;
+
+            TeamVariables.getTeamData(1).score += score * multiplier;
             UIconfig.uiConfig.ProgressFlashT1 = true;
             UIconfig.uiConfig.ProgressFlashT2 = false;
         } else if (t2Control > t1Control) {
-            TeamVariables.getTeamData(2).score += (t2Control - t1Control) * multiplier;
+            score = t2Control - t1Control;
+            if (score > 3) score = 3;
+
+            TeamVariables.getTeamData(2).score += score * multiplier;
             UIconfig.uiConfig.ProgressFlashT2 = true;
             UIconfig.uiConfig.ProgressFlashT1 = false;
         } else {
@@ -235,6 +243,8 @@ export class BFSupremacyConquest {
                 mod.SetCapturePointNeutralizationTime(capturePoint, GameConfig.gameConfig.capturePointNeutralizationTime);
                 mod.SetCapturePointCapturingTime(capturePoint, GameConfig.gameConfig.capturePointCapturingTime);
             }
+
+            BFSupremacyConquest.toggleVehicles(true);
         }
 
         await mod.Wait(1)
@@ -253,11 +263,30 @@ export class BFSupremacyConquest {
         //mod.EnableAllPlayerDeploy(true);
     }
 
-    public static endConquest(): void {
+    public static endConquest(enable: boolean): void {
         for (let i = 200; i < 220; i++) {
             let capturePoint = mod.GetCapturePoint(i);
             if (capturePoint) {
-                mod.EnableGameModeObjective(capturePoint, false);
+                mod.EnableGameModeObjective(capturePoint, enable);
+            }
+        }
+    }
+
+    public static toggleVehicles(enable: boolean): void {
+        let vehiclespawners = mod.GetAllVehicleSpawners();
+        let count = mod.CountOf(vehiclespawners);
+        for (let i = 0; i < count; i++) {
+            let vehicleSpawner = mod.ValueInArray(vehiclespawners, i);
+            mod.SetVehicleSpawnerAutoSpawn(vehicleSpawner, enable);
+        }
+
+        mod.SetVehicleSpawnerAutoSpawn(mod.GetVehicleSpawner(901), false);
+
+        if (!enable) {
+            let vehicles = mod.GetAllVehicles();
+            count = mod.CountOf(vehicles);
+            for (let i = 0; i < count; i++) {
+                mod.Kill(mod.ValueInArray(vehicles, i));
             }
         }
     }

@@ -2,6 +2,7 @@
 import { BFSupremacy } from './BFSupremacy/BFSupremacy.ts';
 import { Events } from 'bf6-portal-utils/events';
 import { GameConfig, ObjectiveVariables, PlayerVariables, UIconfig } from './BFSupremacy/BFSVariables.ts';
+import { BFSupremacyCore } from './BFSupremacy/BFSCore.ts';
 
 enum GameModes {
     BFSupremacy = 1
@@ -15,6 +16,8 @@ Events.OnGameModeStarted.subscribe(async () => {
 
     if (currentGameMode === GameModes.BFSupremacy) {
         BFSupremacy.init();
+        mod.EnableAllPlayerDeploy(true);
+        await BFSupremacyCore.GameModeStarted();
     }
     await mod.Wait(2);
     mod.EnableAllPlayerDeploy(true);

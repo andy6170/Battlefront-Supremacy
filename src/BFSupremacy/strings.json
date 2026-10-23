@@ -6,7 +6,7 @@
             "percentage": "{}%"
         },
         "regroup": {
-            "name": "Regroup",
+            "name": "REGROUP",
             "attackerMessage": "BOARD THE EXTRACT FOR BONUS TIME",
             "defenderMessage": "STOP THE ENEMY EXTRACTING",
             "bonustime": "0{}:{}{}",
@@ -19,9 +19,11 @@
             "landing": "EXTRACT INCOMING"
         },
         "finalassault": {
-            "name": "FINAL ATTACK",
-            "attackerMessage": "ATTACK THE OBJECTIVE",
-            "defenderMessage": "DEFEND THE OBJECTIVE",
+            "name": "FINAL ASSAULT",
+            "attackerMessage1": "ATTACK THE OBJECTIVE",
+            "defenderMessage1": "DEFEND THE OBJECTIVE",
+            "attackerMessage2": "DESTROY THE M-COMS",
+            "defenderMessage2": "DEFEND THE M-COMS",
             "attacker": "PREPARE TO ASSAULT",
             "defender": "PREPARE TO DEFEND",
             "overtime": "OVERTIME",

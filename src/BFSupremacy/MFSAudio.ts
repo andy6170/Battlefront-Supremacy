@@ -66,27 +66,33 @@ export class BFSAudio {
 
     public static async regroupMusic(): Promise<void> {
         this.stopRegroupMusic();
-        await mod.Wait(1);
+        await mod.Wait(0.5);
         mod.LoadMusic(mod.MusicPackages.Radio);
+        await mod.Wait(0.1);
         mod.SetMusicParam(mod.MusicParams.Radio_Channel, 2); //2 BF Themes 1 Rock
-        mod.SetMusicParam(mod.MusicParams.Radio_QueueTrackNumber, 7); //7 for BF themse or 17 (rock cinematic) and 15 for rock intense
-        await mod.Wait(1);
+        await mod.Wait(0.1);
+        mod.SetMusicParam(mod.MusicParams.Radio_QueueTrackNumber, 12); //7 for BF1 intense theme (new 12 for Hardline) or 17 (rock cinematic) and 15 for rock intense
+        await mod.Wait(0.1);
         mod.PlayMusic(mod.MusicEvents.Radio_Play);
     }
 
     public static async stopRegroupMusic(): Promise<void> {
         mod.PlayMusic(mod.MusicEvents.Radio_Stop);
+        mod.SetMusicParam(mod.MusicParams.Radio_LoopQueuedTracks, 0)
         //mod.PlayMusic(mod.MusicEvents.Radio_NextQueuedTrack);
         mod.PlayMusic(mod.MusicEvents.Radio_ClearQueue);
     }
 
     public static async finalAssaultMusic(): Promise<void> {
         this.stopRegroupMusic();
-        await mod.Wait(1);
+        await mod.Wait(0.5);
         mod.LoadMusic(mod.MusicPackages.Radio);
+        await mod.Wait(0.1);
         mod.SetMusicParam(mod.MusicParams.Radio_Channel, 2);
-        mod.SetMusicParam(mod.MusicParams.Radio_QueueTrackNumber, 4);
-        await mod.Wait(1);
+        await mod.Wait(0.1);
+        mod.SetMusicParam(mod.MusicParams.Radio_QueueTrackNumber, 8); //BF6 menu theme 4 (old) 8 (new)
+        mod.SetMusicParam(mod.MusicParams.Radio_LoopQueuedTracks, 1)
+        await mod.Wait(0.1);
         mod.PlayMusic(mod.MusicEvents.Radio_Play);
     }
 
@@ -123,30 +129,6 @@ export class BFSAudio {
         mod.PlayMusic(mod.MusicEvents.Core_EndOfRound_Loop);
         await mod.Wait(8);
         this.finalAssaultMusic();
-    }
-
-    public static playTickSound(eventPlayer: mod.Player, flagID: number, team: mod.Team): void {
-        let data = ObjectiveVariables.getObjectiveVariables(flagID);
-        let friendly: number;
-        let enemy: number;
-        let captureProgress = data.progress;
-
-        if ((captureProgress == 1) || (captureProgress == 0)) return;
-
-        if (mod.Equals(team, mod.GetTeam(1))) {
-            friendly = data.team1Players;
-            enemy = data.team2Players;
-        } else {
-            friendly = data.team2Players;
-            enemy = data.team1Players;
-        }
-
-        if (friendly > enemy) {
-            mod.PlaySound(BFSAudio.capturetickSoundTaking, 0.3, eventPlayer);
-        }
-        else if (friendly < enemy) {
-            mod.PlaySound(BFSAudio.capturetickSoundLosing, 0.3, eventPlayer);
-        }
     }
 
     public static playTimerShortTick(): void {

@@ -99,16 +99,32 @@ export class BFSupremacy {
                         pd.firstPerson = true;
                         pd.thirdPerson = false;
 
-                    } else if (!isZooming && (!pd.thirdPerson || pd.interacting)) {
+                    } else if (!isZooming) {
+                        const isSprinting = mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsSprinting);
                         pd.firstPerson = false;
                         pd.thirdPerson = true;
 
-                        if (specialWeaponActive && pd.stance == "ADS") {
-                            mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson);
+                        if (isSprinting) {
+                            if (pd.stance !== "sprinting" || pd.interacting) {
+                                if (pd.stance === "ADS") {
+                                    mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson);
+                                }
+                                pd.sprinting = true;
+                                pd.stance = "sprinting";
+                                mod.SetThirdPersonCameraPositionForPlayer(eventPlayer, 2.2, 0, cameraPos);
+                                if (aimWidget) mod.SetUIWidgetVisible(aimWidget, false);
+                            }
+                        } else {
+                            if (pd.stance !== "3rdperson" || pd.interacting) {
+                                if (pd.stance === "ADS") {
+                                    mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson);
+                                }
+                                pd.sprinting = false;
+                                pd.stance = "3rdperson";
+                                mod.SetThirdPersonCameraPositionForPlayer(eventPlayer, 2.5, 0, cameraPos);
+                                if (aimWidget) mod.SetUIWidgetVisible(aimWidget, false);
+                            }
                         }
-                        pd.stance = "3rdperson";
-                        mod.SetThirdPersonCameraPositionForPlayer(eventPlayer, 2.5, 0, cameraPos)
-                        if (aimWidget) mod.SetUIWidgetVisible(aimWidget, false)
                     }
 
                     if (pd.interacting) {
@@ -123,66 +139,11 @@ export class BFSupremacy {
 
         });
 
-        Events.OnGameModeStarted.subscribe(async () => {
-            mod.SetGameModeTimeLimit(99999);
-            if (GameConfig.gameConfig.debug) {
-                GameConfig.gameConfig.ticketSpeed = 2;
-                GameConfig.gameConfig.capturePointCapturingTime = 4;
-                GameConfig.gameConfig.finalCaptureTime = 4;
-                GameConfig.gameConfig.finalNeutralizeTime = 4;
-            }
-            BFSWeather.initWeather();
-            await mod.Wait(0.1);
-            await BFSupremacyConquest.init();
-            await mod.Wait(0.1);
-            BFSupremacyUI.UI_Setup();
-            await mod.Wait(0.1);
-            BFSAudio.init();
-            await mod.Wait(0.1);
-            BFSupremacyCore.scoreboardInit()
-            await mod.Wait(0.1);
-            GameConfig.gameConfig.extractionIcon = mod.SpawnObject(mod.RuntimeSpawn_Common.FX_Gadget_DeployableMortar_Target_Area, mod.Subtract(mod.GetObjectPosition(mod.GetSpatialObject(902)), mod.CreateVector(0, 20, 0)), mod.CreateVector(0, 0, 0))
-            await mod.Wait(0.1);
-            GameConfig.gameConfig.roundOngoing = true;
-            GameConfig.gameConfig.gameStarted = true;
-        });
 
-        Events.OnPlayerEnterCapturePoint.subscribe(async (eventPlayer: mod.Player, eventCapturePoint: mod.CapturePoint) => {
-            PlayerVariables.getPlayerData(eventPlayer).currentObjective = eventCapturePoint;
-            let flagID = mod.GetObjId(eventCapturePoint);
-            if (PlayerVariables.getPlayerData(eventPlayer).onPoint) {
-                return;
-            }
-            PlayerVariables.getPlayerData(eventPlayer).onPoint = true;
-            await mod.Wait(0.05);
 
-            BFSupremacyCore.capturePointPlayers(eventCapturePoint);
-
-            PlayerVariables.getPlayerData(eventPlayer).flagTick = 10;
-
-            await BFSupremacyCore.updateFlagData(eventCapturePoint);
-
-            while (PlayerVariables.getPlayerData(eventPlayer).onPoint && GameConfig.gameConfig.roundOngoing) {
-                if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsAlive) && (flagID >= GameConfig.gameConfig.flagStart && flagID <= GameConfig.gameConfig.flagEnd)) {
-                    BFSupremacyPlayer.updatePlayerCaptureUI(eventPlayer, eventCapturePoint);
-                    BFSupremacyPlayer.enableCaptureUI(eventPlayer, true);
-                    if (PlayerVariables.getPlayerData(eventPlayer).flagTick == 10) {
-                        BFSAudio.playTickSound(eventPlayer, flagID, mod.GetTeam(eventPlayer));
-                        PlayerVariables.getPlayerData(eventPlayer).flagTick = 0;
-                    }
-                } else {
-                    BFSupremacyPlayer.enableCaptureUI(eventPlayer, false);
-                }
-                await mod.Wait(0.1);
-                PlayerVariables.getPlayerData(eventPlayer).flagTick++;
-            }
-            BFSupremacyPlayer.enableCaptureUI(eventPlayer, false);
-        });
 
         Events.OnPlayerExitCapturePoint.subscribe((eventPlayer: mod.Player, eventCapturePoint: mod.CapturePoint) => {
             PlayerVariables.getPlayerData(eventPlayer).onPoint = false;
-            BFSupremacyCore.capturePointPlayers(eventCapturePoint);
-            BFSupremacyCore.updateFlagData(eventCapturePoint);
         });
 
         Events.OnCapturePointCaptured.subscribe(async (eventCapturePoint: mod.CapturePoint) => {
@@ -191,9 +152,6 @@ export class BFSupremacy {
             let flagID = mod.GetObjId(eventCapturePoint);
             mod.SetMaxCaptureMultiplier(eventCapturePoint, 1);
             if (GameConfig.gameConfig.gameStarted) {
-                BFSupremacyUI.capturePoint_UI_Colour_Update(eventCapturePoint);
-                BFSupremacyCore.updateFlagData(eventCapturePoint);
-                BFSupremacyUI.capturePoint_UI_Alpha_Update(eventCapturePoint);
 
                 let ownerTeam = mod.GetCurrentOwnerTeam(eventCapturePoint);
                 let playersOnPoint = mod.GetPlayersOnPoint(eventCapturePoint) as mod.Array;
@@ -247,8 +205,6 @@ export class BFSupremacy {
                 mod.SetCapturePointCapturingTime(eventCapturePoint, 0);
             }
             await mod.Wait(0.1)
-            BFSupremacyUI.capturePoint_UI_Colour_Update(eventCapturePoint);
-            BFSupremacyCore.updateFlagData(eventCapturePoint);
             let ownerTeam = mod.GetOwnerProgressTeam(eventCapturePoint);
             let playersOnPoint = mod.GetPlayersOnPoint(eventCapturePoint) as mod.Array;
             for (let i = 0; i < mod.CountOf(playersOnPoint); i++) {
@@ -258,19 +214,6 @@ export class BFSupremacy {
                     PlayerVariables.getPlayerData(p).captures++;
                     BFSupremacyCore.scoreboardUpdate(p);
                 }
-            }
-        });
-
-        Events.OngoingCapturePoint.subscribe((eventCapturePoint: mod.CapturePoint) => {
-            if (mod.GetMatchTimeElapsed() < 5) {
-                return;
-            }
-            if (!GameConfig.gameConfig.gameStarted || !GameConfig.gameConfig.roundOngoing) {
-                return;
-            }
-            if (mod.GetObjId(eventCapturePoint) >= GameConfig.gameConfig.flagStart && mod.GetObjId(eventCapturePoint) <= GameConfig.gameConfig.flagEnd) {
-                BFSupremacyCore.ongoingFlagData(eventCapturePoint);
-                BFSupremacyUI.capturePoint_UI_Alpha_Update(eventCapturePoint);
             }
         });
 
@@ -348,15 +291,9 @@ export class BFSupremacy {
         Events.OnRevived.subscribe((eventPlayer: mod.Player, eventOtherPlayer: mod.Player) => {
             mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson);
             PlayerVariables.getPlayerData(eventPlayer).cameraEnabled = true;
-            if (PlayerVariables.getPlayerData(eventPlayer).onPoint) {
-                BFSupremacyCore.capturePointPlayers(PlayerVariables.getPlayerData(eventPlayer).currentObjective);
-            }
         });
 
         Events.OnPlayerUndeploy.subscribe(async (eventPlayer: mod.Player) => {
-            if (PlayerVariables.getPlayerData(eventPlayer).onPoint) {
-                BFSupremacyCore.capturePointPlayers(PlayerVariables.getPlayerData(eventPlayer).currentObjective);
-            }
             if (GameConfig.gameConfig.roundOngoing) {
                 PlayerVariables.getPlayerData(eventPlayer).deaths++;
                 BFSupremacyCore.scoreboardUpdate(eventPlayer);
@@ -376,9 +313,6 @@ export class BFSupremacy {
 
             mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.FirstPerson);
             PlayerVariables.getPlayerData(eventPlayer).cameraEnabled = false;
-            if (PlayerVariables.getPlayerData(eventPlayer).onPoint) {
-                BFSupremacyCore.capturePointPlayers(PlayerVariables.getPlayerData(eventPlayer).currentObjective);
-            }
         });
 
         Events.OnPlayerLeaveGame.subscribe((playerId: number) => {
@@ -507,7 +441,6 @@ export class BFSupremacy {
         Events.OnMCOMArmed.subscribe((eventMCOM: mod.MCOM) => {
             GameConfig.gameConfig.overtime += 1;
             MCOMVariables.getMCOMData(eventMCOM).isArmed = true;
-            BFSupremacyUI.MCOM_UI_Update();
             BFSAudio.MCOMArmedVO(eventMCOM);
             let player = mod.ClosestPlayerTo(mod.GetObjectPosition(eventMCOM), GameConfig.gameConfig.attacker)
             MCOMVariables.getMCOMData(eventMCOM).armedBy = player;
@@ -520,7 +453,6 @@ export class BFSupremacy {
             const data = MCOMVariables.getMCOMData(eventMCOM);
             data.isDestroyed = true;
             data.isArmed = false;
-            BFSupremacyUI.MCOM_UI_Update();
             BFSAudio.MCOMDestroyedVO(eventMCOM);
             let player = MCOMVariables.getMCOMData(eventMCOM).armedBy
             if (player) {
@@ -531,7 +463,6 @@ export class BFSupremacy {
         Events.OnMCOMDefused.subscribe((eventMCOM: mod.MCOM) => {
             GameConfig.gameConfig.overtime -= 1;
             MCOMVariables.getMCOMData(eventMCOM).isArmed = false;
-            BFSupremacyUI.MCOM_UI_Update();
             BFSAudio.MCOMDefuseVO(eventMCOM);
             let player = mod.ClosestPlayerTo(mod.GetObjectPosition(eventMCOM), GameConfig.gameConfig.defender)
             BFSupremacyPlayer.MCOMScoring(player);

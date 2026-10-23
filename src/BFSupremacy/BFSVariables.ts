@@ -60,7 +60,7 @@ export interface GameConfig {
 export class GameConfig {
     public static gameConfig: GameConfig = {
         gameStarted: false,
-        debug: true,
+        debug: false,
         capturePointNeutralizationTime: 15,
         capturePointCapturingTime: 15,
         capturePointMultiplier: 2,
@@ -113,7 +113,11 @@ export class GameConfig {
             mod.VehicleList.JAS39,
             mod.VehicleList.SU57,
             mod.VehicleList.UH60,
-            mod.VehicleList.UH60_Pax
+            mod.VehicleList.UH60_Pax,
+            mod.VehicleList.F_74A_Seacat,
+            mod.VehicleList.F_74A_Seacat_Pax,
+            mod.VehicleList.FA_81F_Super_Spectre,
+            mod.VehicleList.FA_81F_Super_Spectre_Pax,
         ],
         flagsVO: [
             mod.VoiceOverFlags.Alpha,
@@ -235,10 +239,6 @@ export interface SupremacyPlayerData {
     uniqueUI: string;
     containerWidget: mod.UIWidget
     aimWidget: mod.UIWidget | undefined
-    objTextWidget: mod.UIWidget | undefined
-    objCounterWidget: mod.UIWidget | undefined
-    objProgressBGWidget: mod.UIWidget | undefined
-    objProgressWidget: mod.UIWidget | undefined
     uiCreated: boolean;
     firstDeploy: boolean;
     currentObjective: mod.CapturePoint;
@@ -246,6 +246,7 @@ export interface SupremacyPlayerData {
     firstPerson: boolean;
     thirdPerson: boolean;
     thirdPersonZoom: boolean;
+    sprinting: boolean;
     hasSniper: boolean;
     hasLauncher: boolean;
     flagTick: number;
@@ -280,10 +281,6 @@ export class PlayerVariables {
                 uniqueUI: "",
                 containerWidget: mod.GetUIRoot(),
                 aimWidget: undefined,
-                objTextWidget: undefined,
-                objCounterWidget: undefined,
-                objProgressBGWidget: undefined,
-                objProgressWidget: undefined,
                 uiCreated: false,
                 firstDeploy: true,
                 currentObjective: mod.GetCapturePoint(0),
@@ -291,6 +288,7 @@ export class PlayerVariables {
                 firstPerson: false,
                 thirdPerson: false,
                 thirdPersonZoom: false,
+                sprinting: false,
                 hasSniper: false,
                 hasLauncher: false,
                 flagTick: 0,

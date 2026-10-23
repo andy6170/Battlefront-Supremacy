@@ -4,6 +4,7 @@ import { BFSupremacyCore } from "./BFSCore.ts";
 import { BFSWeather } from "./BFSWeather.ts";
 import { BFSAudio } from "./MFSAudio.ts";
 import { BFSHeliAnimations } from "./BFSHeliAnimations.ts";
+import { BFSupremacyConquest } from "./BFSConquest.ts";
 
 export class BFSupremacyRegroup {
     private static lastPilotReset: number = -2;
@@ -145,7 +146,7 @@ export class BFSupremacyRegroup {
             GameConfig.gameConfig.night = false;
         }
 
-        const players = mod.AllPlayers() as mod.Array;
+        const players = mod.GetAllPlayers() as mod.Array;
         for (let i = 0; i < mod.CountOf(players); i++) {
             const player = mod.ValueInArray(players, i);
             BFSWeather.checkNight(player);
@@ -189,6 +190,7 @@ export class BFSupremacyRegroup {
         BFSupremacyCore.changeStage();
         await mod.Wait(1);
         mod.Kill(heli);
+        BFSupremacyConquest.toggleVehicles(false);
 
         mod.SetCameraTypeForAll(mod.Cameras.ThirdPerson);
         GameConfig.gameConfig.cutscene = false;
@@ -289,6 +291,7 @@ export class BFSupremacyRegroup {
             GameConfig.gameConfig.roundOngoing = false;
             GameConfig.gameConfig.cutscene = true;
             mod.SetCameraTypeForAll(mod.Cameras.Fixed, 51);
+            BFSupremacyUI.regroup_UI_Change(false);
             this.animateHeliTakeOff();
         }
     }
