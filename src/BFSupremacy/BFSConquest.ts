@@ -243,9 +243,8 @@ export class BFSupremacyConquest {
                 mod.SetCapturePointNeutralizationTime(capturePoint, GameConfig.gameConfig.capturePointNeutralizationTime);
                 mod.SetCapturePointCapturingTime(capturePoint, GameConfig.gameConfig.capturePointCapturingTime);
             }
-
-            BFSupremacyConquest.toggleVehicles(true);
         }
+        BFSupremacyConquest.toggleVehicles(true);
 
         await mod.Wait(1)
 

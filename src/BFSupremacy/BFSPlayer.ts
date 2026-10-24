@@ -19,12 +19,14 @@ export class BFSupremacyPlayer {
         pd.containerWidget = playerUIContainer;
         pd.aimWidget = mod.FindUIWidgetWithName(aimName);
         pd.uiCreated = true;
+        pd.dotHoldUntil = 0;
     }
 
     public static destroyPlayerUI(player: mod.Player) {
         const pd = PlayerVariables.getPlayerData(player);
         if (!pd.uiCreated) return;
         mod.DeleteUIWidget(pd.containerWidget);
+        if (pd.aimWidget) mod.DeleteUIWidget(pd.aimWidget);
         pd.containerWidget = mod.GetUIRoot();
         pd.aimWidget = undefined;
         pd.uiCreated = false;

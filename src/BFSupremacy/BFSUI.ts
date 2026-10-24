@@ -145,30 +145,29 @@ export class BFSupremacyUI {
         mod.SetUIWidgetVisible(w.get("conquest_container")!, enable);
     }
 
+    // The leading team's bars fade with uiAlpha; the other team's are held at 1. Each is written only when its value
+    // changes (it was all eight every tick), with the same results.
+    private static flashLeader = 0;
+    private static flashAlpha = -1;
     public static conquest_UI_Flash() {
         let alpha = UIconfig.uiConfig.uiAlpha
         const w = BFSupremacyUI.cq;
-
-        if (UIconfig.uiConfig.ProgressFlashT1) {
-            mod.SetUIWidgetBgAlpha(w.get("LeftProgress1_Conquest")!, alpha);
-            mod.SetUIWidgetBgAlpha(w.get("RightProgress2_Conquest")!, alpha);
-            mod.SetUIWidgetBgAlpha(w.get("LeftProgress1_Underline_Conquest")!, alpha);
-            mod.SetUIWidgetBgAlpha(w.get("RightProgress2_Underline_Conquest")!, alpha);
-            mod.SetUIWidgetBgAlpha(w.get("LeftProgress2_Conquest")!, 1);
-            mod.SetUIWidgetBgAlpha(w.get("RightProgress1_Conquest")!, 1);
-            mod.SetUIWidgetBgAlpha(w.get("LeftProgress2_Underline_Conquest")!, 1);
-            mod.SetUIWidgetBgAlpha(w.get("RightProgress1_Underline_Conquest")!, 1);
+        const leader = UIconfig.uiConfig.ProgressFlashT1 ? 1 : UIconfig.uiConfig.ProgressFlashT2 ? 2 : 0;
+        if (leader === 0) return;
+        const fading = leader === 1
+            ? ["LeftProgress1_Conquest", "RightProgress2_Conquest", "LeftProgress1_Underline_Conquest", "RightProgress2_Underline_Conquest"]
+            : ["LeftProgress2_Conquest", "RightProgress1_Conquest", "LeftProgress2_Underline_Conquest", "RightProgress1_Underline_Conquest"];
+        if (leader !== BFSupremacyUI.flashLeader) {
+            const held = leader === 1
+                ? ["LeftProgress2_Conquest", "RightProgress1_Conquest", "LeftProgress2_Underline_Conquest", "RightProgress1_Underline_Conquest"]
+                : ["LeftProgress1_Conquest", "RightProgress2_Conquest", "LeftProgress1_Underline_Conquest", "RightProgress2_Underline_Conquest"];
+            for (const name of held) mod.SetUIWidgetBgAlpha(w.get(name)!, 1);
+            BFSupremacyUI.flashLeader = leader;
+            BFSupremacyUI.flashAlpha = -1;
         }
-        if (UIconfig.uiConfig.ProgressFlashT2) {
-            mod.SetUIWidgetBgAlpha(w.get("LeftProgress2_Conquest")!, alpha);
-            mod.SetUIWidgetBgAlpha(w.get("RightProgress1_Conquest")!, alpha);
-            mod.SetUIWidgetBgAlpha(w.get("LeftProgress2_Underline_Conquest")!, alpha);
-            mod.SetUIWidgetBgAlpha(w.get("RightProgress1_Underline_Conquest")!, alpha);
-            mod.SetUIWidgetBgAlpha(w.get("LeftProgress1_Conquest")!, 1);
-            mod.SetUIWidgetBgAlpha(w.get("RightProgress2_Conquest")!, 1);
-            mod.SetUIWidgetBgAlpha(w.get("LeftProgress1_Underline_Conquest")!, 1);
-            mod.SetUIWidgetBgAlpha(w.get("RightProgress2_Underline_Conquest")!, 1);
-        }
+        if (alpha === BFSupremacyUI.flashAlpha) return;
+        for (const name of fading) mod.SetUIWidgetBgAlpha(w.get(name)!, alpha);
+        BFSupremacyUI.flashAlpha = alpha;
     }
 
     public static async conquest_End_UI() {

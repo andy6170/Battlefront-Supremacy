@@ -261,6 +261,21 @@ export interface SupremacyPlayerData {
     shoulder: string;
     interacting: boolean;
     reloading: boolean;
+    dotHoldUntil: number;
+    dotEye: mod.Vector | undefined;
+    dotFacing: mod.Vector | undefined;
+    dotRayTick: number;
+    dotPending: boolean;
+    boltPending: boolean;
+    dotLastHit: number | undefined;
+    dotX: number | undefined;
+    dotY: number | undefined;
+    dotSide: number | undefined;
+    cameraAlive: boolean;
+    blasterAmmo: number | undefined;
+    boltEye: mod.Vector | undefined;
+    boltDir: mod.Vector | undefined;
+    boltDiag: boolean;
 
 }
 
@@ -303,6 +318,21 @@ export class PlayerVariables {
                 shoulder: "right",
                 interacting: false,
                 reloading: false,
+                dotHoldUntil: 0,
+                dotEye: undefined,
+                dotFacing: undefined,
+                dotRayTick: 0,
+                dotPending: false,
+                boltPending: false,
+                dotLastHit: undefined,
+                dotX: undefined,
+                dotY: undefined,
+                dotSide: undefined,
+                cameraAlive: false,
+                blasterAmmo: undefined,
+                boltEye: undefined,
+                boltDir: undefined,
+                boltDiag: false,
             });
         }
         return PlayerVariables.playerData.get(playerId)!;
