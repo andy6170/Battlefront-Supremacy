@@ -237,6 +237,7 @@ export class BFSupremacyRegroup {
             if (GameConfig.gameConfig.extractionRemainingTime === 30) {
                 BFSAudio.thirtySecondsVO();
             }
+            BFSupremacyUI.regroup_UI_Progress_Update();
         }
         else if (rounded % 2 != 0) {
             if (GameConfig.gameConfig.timeOdd) {
@@ -249,8 +250,8 @@ export class BFSupremacyRegroup {
             if (GameConfig.gameConfig.extractionRemainingTime === 30) {
                 BFSAudio.thirtySecondsVO();
             }
+            BFSupremacyUI.regroup_UI_Progress_Update();
         }
-        BFSupremacyUI.regroup_UI_Progress_Update();
     }
 
     public static async pilotReset(): Promise<void> {

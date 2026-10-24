@@ -240,23 +240,31 @@ export class BFSupremacyUI {
         mod.AddUIContainer("notification_bottom_bar1", mod.CreateVector(0, 0, 0), mod.CreateVector(width, 3, 0), mod.UIAnchor.BottomCenter, container, true, 0, t1colour, 1, mod.UIBgFill.Solid, mod.GetTeam(1));
         mod.AddUIContainer("notification_bottom_bar2", mod.CreateVector(0, 0, 0), mod.CreateVector(width, 3, 0), mod.UIAnchor.BottomCenter, container, true, 0, t2colour, 1, mod.UIBgFill.Solid, mod.GetTeam(2));
 
+        // Cache widget references once — avoids global string-search inside every animation tick
+        const notif_t1 = mod.FindUIWidgetWithName("notification_t1")!;
+        const notif_t2 = mod.FindUIWidgetWithName("notification_t2")!;
+        const notif_topBar1 = mod.FindUIWidgetWithName("notification_top_bar1")!;
+        const notif_topBar2 = mod.FindUIWidgetWithName("notification_top_bar2")!;
+        const notif_botBar1 = mod.FindUIWidgetWithName("notification_bottom_bar1")!;
+        const notif_botBar2 = mod.FindUIWidgetWithName("notification_bottom_bar2")!;
+
 
         for (let i = 1; i < animationTime; i++) {
-            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_t1"), mod.CreateVector(i * animationWidth, height, 0));
-            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_t2"), mod.CreateVector(i * animationWidth, height, 0));
-            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_top_bar1"), mod.CreateVector(i * animationWidth, 2, 0));
-            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_top_bar2"), mod.CreateVector(i * animationWidth, 2, 0));
-            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_bottom_bar1"), mod.CreateVector(i * animationWidth, 2, 0));
-            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_bottom_bar2"), mod.CreateVector(i * animationWidth, 2, 0));
+            mod.SetUIWidgetSize(notif_t1, mod.CreateVector(i * animationWidth, height, 0));
+            mod.SetUIWidgetSize(notif_t2, mod.CreateVector(i * animationWidth, height, 0));
+            mod.SetUIWidgetSize(notif_topBar1, mod.CreateVector(i * animationWidth, 2, 0));
+            mod.SetUIWidgetSize(notif_topBar2, mod.CreateVector(i * animationWidth, 2, 0));
+            mod.SetUIWidgetSize(notif_botBar1, mod.CreateVector(i * animationWidth, 2, 0));
+            mod.SetUIWidgetSize(notif_botBar2, mod.CreateVector(i * animationWidth, 2, 0));
             await mod.Wait(0.033);
         }
 
-        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_t1"), mod.CreateVector(width, height, 0));
-        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_t2"), mod.CreateVector(width, height, 0));
-        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_top_bar1"), mod.CreateVector(width, 2, 0));
-        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_top_bar2"), mod.CreateVector(width, 2, 0));
-        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_bottom_bar1"), mod.CreateVector(width, 2, 0));
-        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_bottom_bar2"), mod.CreateVector(width, 2, 0));
+        mod.SetUIWidgetSize(notif_t1, mod.CreateVector(width, height, 0));
+        mod.SetUIWidgetSize(notif_t2, mod.CreateVector(width, height, 0));
+        mod.SetUIWidgetSize(notif_topBar1, mod.CreateVector(width, 2, 0));
+        mod.SetUIWidgetSize(notif_topBar2, mod.CreateVector(width, 2, 0));
+        mod.SetUIWidgetSize(notif_botBar1, mod.CreateVector(width, 2, 0));
+        mod.SetUIWidgetSize(notif_botBar2, mod.CreateVector(width, 2, 0));
 
         await mod.Wait(0.1);
 
@@ -268,8 +276,8 @@ export class BFSupremacyUI {
             await mod.Wait(0.033);
         }
 
-        mod.SetUITextLabel(mod.FindUIWidgetWithName("notification_t1"), t1message);
-        mod.SetUITextLabel(mod.FindUIWidgetWithName("notification_t2"), t2message);
+        mod.SetUITextLabel(notif_t1, t1message);
+        mod.SetUITextLabel(notif_t2, t2message);
 
         for (let i = 9; i > 0; i--) {
             mod.SetUIWidgetBgAlpha(flash, 0.1 * i);
@@ -283,25 +291,25 @@ export class BFSupremacyUI {
         BFSAudio.playConquestEnd2();
 
 
-        mod.SetUITextLabel(mod.FindUIWidgetWithName("notification_t1"), mod.Message(mod.stringkeys.blank));
-        mod.SetUITextLabel(mod.FindUIWidgetWithName("notification_t2"), mod.Message(mod.stringkeys.blank));
+        mod.SetUITextLabel(notif_t1, mod.Message(mod.stringkeys.blank));
+        mod.SetUITextLabel(notif_t2, mod.Message(mod.stringkeys.blank));
 
         for (let i = animationTime; i > 1; i--) {
-            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_t1"), mod.CreateVector(i * animationWidth, height, 0));
-            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_t2"), mod.CreateVector(i * animationWidth, height, 0));
-            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_top_bar1"), mod.CreateVector(i * animationWidth, 2, 0));
-            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_top_bar2"), mod.CreateVector(i * animationWidth, 2, 0));
-            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_bottom_bar1"), mod.CreateVector(i * animationWidth, 2, 0));
-            mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_bottom_bar2"), mod.CreateVector(i * animationWidth, 2, 0));
+            mod.SetUIWidgetSize(notif_t1, mod.CreateVector(i * animationWidth, height, 0));
+            mod.SetUIWidgetSize(notif_t2, mod.CreateVector(i * animationWidth, height, 0));
+            mod.SetUIWidgetSize(notif_topBar1, mod.CreateVector(i * animationWidth, 2, 0));
+            mod.SetUIWidgetSize(notif_topBar2, mod.CreateVector(i * animationWidth, 2, 0));
+            mod.SetUIWidgetSize(notif_botBar1, mod.CreateVector(i * animationWidth, 2, 0));
+            mod.SetUIWidgetSize(notif_botBar2, mod.CreateVector(i * animationWidth, 2, 0));
             await mod.Wait(0.033);
         }
 
-        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_t1"), mod.CreateVector(animationWidth, height, 0));
-        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_t2"), mod.CreateVector(animationWidth, height, 0));
-        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_top_bar1"), mod.CreateVector(animationWidth, 2, 0));
-        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_top_bar2"), mod.CreateVector(animationWidth, 2, 0));
-        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_bottom_bar1"), mod.CreateVector(animationWidth, 2, 0));
-        mod.SetUIWidgetSize(mod.FindUIWidgetWithName("notification_bottom_bar2"), mod.CreateVector(animationWidth, 2, 0));
+        mod.SetUIWidgetSize(notif_t1, mod.CreateVector(animationWidth, height, 0));
+        mod.SetUIWidgetSize(notif_t2, mod.CreateVector(animationWidth, height, 0));
+        mod.SetUIWidgetSize(notif_topBar1, mod.CreateVector(animationWidth, 2, 0));
+        mod.SetUIWidgetSize(notif_topBar2, mod.CreateVector(animationWidth, 2, 0));
+        mod.SetUIWidgetSize(notif_botBar1, mod.CreateVector(animationWidth, 2, 0));
+        mod.SetUIWidgetSize(notif_botBar2, mod.CreateVector(animationWidth, 2, 0));
 
         await mod.Wait(0.033);
 
@@ -810,7 +818,7 @@ export class BFSupremacyUI {
     // PLAYER OOB UI
     public static async outOfBoundsUI(eventPlayer: mod.Player): Promise<void> {
         await mod.Wait(0.066);
-        return;
+        //return;
         if (!GameConfig.gameConfig.roundOngoing || !mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsAlive) || PlayerVariables.getPlayerData(eventPlayer).ingoreOOB) return;
         const playerData = PlayerVariables.getPlayerData(eventPlayer);
         playerData.outOfBounds = true;

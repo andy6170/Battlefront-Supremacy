@@ -35,103 +35,103 @@ export class BFSupremacy {
         });
 
         Events.OngoingPlayer.subscribe(async (eventPlayer: mod.Player) => {
-            if (GameConfig.gameConfig.gameStarted as boolean && PlayerVariables.getPlayerData(eventPlayer).cameraEnabled) {
-                if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsAlive) && !GameConfig.gameConfig.cutscene) {
-                    const pd = PlayerVariables.getPlayerData(eventPlayer);
-                    if (pd.interacting) return;
-                    const aimWidget = pd.aimWidget;
-                    if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsInteracting)) {
-                        pd.interacting = true;
-                        await mod.Wait(0.1);
-                        if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsReloading) && !pd.reloading) {
-                            pd.interacting = false;
-                            pd.reloading = true;
-                            await mod.Wait(3);
-                            pd.reloading = false;
-                            return;
-                        } else if (!mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsReviving) && !mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsInVehicle) && pd.stance != "ADS") {
-                            //pd.interacting = true;
-                            pd.stance = "changing";
-                            pd.thirdPerson = false;
-                            if (pd.shoulder === "left") {
-                                pd.shoulder = "right";
-                                if (aimWidget) {
-                                    mod.SetUIWidgetPosition(aimWidget, GameConfig.gameConfig.shoulderRightUI);
-                                }
-                            } else if (pd.shoulder === "right") {
-                                pd.shoulder = "left";
-                                if (aimWidget) {
-                                    mod.SetUIWidgetPosition(aimWidget, GameConfig.gameConfig.shoulderLeftUI);
-                                }
-                            }
+            if (!GameConfig.gameConfig.gameStarted) return;
+            const pd = PlayerVariables.getPlayerData(eventPlayer);
+            if (!pd.cameraEnabled || GameConfig.gameConfig.cutscene) return;
+            if (!mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsAlive)) return;
+            if (pd.interacting) return;
+
+            const aimWidget = pd.aimWidget;
+            if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsInteracting)) {
+                pd.interacting = true;
+                await mod.Wait(0.1);
+                if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsReloading) && !pd.reloading) {
+                    pd.interacting = false;
+                    pd.reloading = true;
+                    await mod.Wait(3);
+                    pd.reloading = false;
+                    return;
+                } else if (!mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsReviving) && !mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsInVehicle) && pd.stance != "ADS") {
+                    //pd.interacting = true;
+                    pd.stance = "changing";
+                    pd.thirdPerson = false;
+                    if (pd.shoulder === "left") {
+                        pd.shoulder = "right";
+                        if (aimWidget) {
+                            mod.SetUIWidgetPosition(aimWidget, GameConfig.gameConfig.shoulderRightUI);
                         }
-                    }
-
-                    const isZooming = mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsZooming);
-                    const specialWeaponActive = (pd.hasSniper && mod.IsInventorySlotActive(eventPlayer, mod.InventorySlots.PrimaryWeapon)) || (pd.hasLauncher && (mod.IsInventorySlotActive(eventPlayer, mod.InventorySlots.GadgetOne) || mod.IsInventorySlotActive(eventPlayer, mod.InventorySlots.GadgetTwo)));
-                    const cameraPos = pd.shoulder === "left" ? GameConfig.gameConfig.shoulderLeftCam : GameConfig.gameConfig.shoulderRightCam;
-                    const cameraZoom = pd.shoulder === "left" ? GameConfig.gameConfig.shoulderLeftCamZoom : GameConfig.gameConfig.shoulderRightCamZoom;
-
-                    if (isZooming) {
-                        if (!pd.firstPerson && specialWeaponActive) {
-                            if (aimWidget) mod.SetUIWidgetVisible(aimWidget, false)
-                            mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.FirstPerson);
-                            pd.firstPerson = true;
-                            pd.stance = "ADS"
-                        } else if (!specialWeaponActive) {
-                            if (pd.stance == "ADS") {
-                                mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson)
-                            }
-                            if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsStanding) && (pd.stance != "standing" || pd.interacting)) {
-                                mod.SetThirdPersonCameraPositionForPlayer(eventPlayer, 1, 0, cameraZoom)
-                                pd.stance = "standing"
-                                if (aimWidget) mod.SetUIWidgetVisible(aimWidget, true)
-                            } else if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsCrouching) && (pd.stance != "crouching" || pd.interacting)) {
-                                mod.SetThirdPersonCameraPositionForPlayer(eventPlayer, 0.9, -0.15, cameraZoom)
-                                pd.stance = "crouching"
-                                if (aimWidget) mod.SetUIWidgetVisible(aimWidget, true)
-                            } else if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsProne) && (pd.stance != "prone" || pd.interacting)) {
-                                mod.SetThirdPersonCameraPositionForPlayer(eventPlayer, 0.8, -0.25, cameraZoom)
-                                pd.stance = "prone"
-                                if (aimWidget) mod.SetUIWidgetVisible(aimWidget, true)
-                            }
+                    } else if (pd.shoulder === "right") {
+                        pd.shoulder = "left";
+                        if (aimWidget) {
+                            mod.SetUIWidgetPosition(aimWidget, GameConfig.gameConfig.shoulderLeftUI);
                         }
-                        pd.firstPerson = true;
-                        pd.thirdPerson = false;
-
-                    } else if (!isZooming) {
-                        const isSprinting = mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsSprinting);
-                        pd.firstPerson = false;
-                        pd.thirdPerson = true;
-
-                        if (isSprinting) {
-                            if (pd.stance !== "sprinting" || pd.interacting) {
-                                if (pd.stance === "ADS") {
-                                    mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson);
-                                }
-                                pd.sprinting = true;
-                                pd.stance = "sprinting";
-                                mod.SetThirdPersonCameraPositionForPlayer(eventPlayer, 2.2, 0, cameraPos);
-                                if (aimWidget) mod.SetUIWidgetVisible(aimWidget, false);
-                            }
-                        } else {
-                            if (pd.stance !== "3rdperson" || pd.interacting) {
-                                if (pd.stance === "ADS") {
-                                    mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson);
-                                }
-                                pd.sprinting = false;
-                                pd.stance = "3rdperson";
-                                mod.SetThirdPersonCameraPositionForPlayer(eventPlayer, 2.5, 0, cameraPos);
-                                if (aimWidget) mod.SetUIWidgetVisible(aimWidget, false);
-                            }
-                        }
-                    }
-
-                    if (pd.interacting) {
-                        await mod.Wait(0.033);
-                        pd.interacting = false;
                     }
                 }
+            }
+
+            const isZooming = mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsZooming);
+            const specialWeaponActive = (pd.hasSniper && mod.IsInventorySlotActive(eventPlayer, mod.InventorySlots.PrimaryWeapon)) || (pd.hasLauncher && (mod.IsInventorySlotActive(eventPlayer, mod.InventorySlots.GadgetOne) || mod.IsInventorySlotActive(eventPlayer, mod.InventorySlots.GadgetTwo)));
+            const cameraPos = pd.shoulder === "left" ? GameConfig.gameConfig.shoulderLeftCam : GameConfig.gameConfig.shoulderRightCam;
+            const cameraZoom = pd.shoulder === "left" ? GameConfig.gameConfig.shoulderLeftCamZoom : GameConfig.gameConfig.shoulderRightCamZoom;
+
+            if (isZooming) {
+                if (!pd.firstPerson && specialWeaponActive) {
+                    if (aimWidget) mod.SetUIWidgetVisible(aimWidget, false)
+                    mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.FirstPerson);
+                    pd.firstPerson = true;
+                    pd.stance = "ADS"
+                } else if (!specialWeaponActive) {
+                    if (pd.stance == "ADS") {
+                        mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson)
+                    }
+                    if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsStanding) && (pd.stance != "standing" || pd.interacting)) {
+                        mod.SetThirdPersonCameraPositionForPlayer(eventPlayer, 1, 0, cameraZoom)
+                        pd.stance = "standing"
+                        if (aimWidget) mod.SetUIWidgetVisible(aimWidget, true)
+                    } else if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsCrouching) && (pd.stance != "crouching" || pd.interacting)) {
+                        mod.SetThirdPersonCameraPositionForPlayer(eventPlayer, 0.9, -0.15, cameraZoom)
+                        pd.stance = "crouching"
+                        if (aimWidget) mod.SetUIWidgetVisible(aimWidget, true)
+                    } else if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsProne) && (pd.stance != "prone" || pd.interacting)) {
+                        mod.SetThirdPersonCameraPositionForPlayer(eventPlayer, 0.8, -0.25, cameraZoom)
+                        pd.stance = "prone"
+                        if (aimWidget) mod.SetUIWidgetVisible(aimWidget, true)
+                    }
+                }
+                pd.firstPerson = true;
+                pd.thirdPerson = false;
+
+            } else {
+                const isSprinting = mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsSprinting);
+                pd.firstPerson = false;
+                pd.thirdPerson = true;
+
+                if (isSprinting) {
+                    if (pd.stance !== "sprinting" || pd.interacting) {
+                        if (pd.stance === "ADS") {
+                            mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson);
+                        }
+                        pd.sprinting = true;
+                        pd.stance = "sprinting";
+                        mod.SetThirdPersonCameraPositionForPlayer(eventPlayer, 2.2, 0, cameraPos);
+                        if (aimWidget) mod.SetUIWidgetVisible(aimWidget, false);
+                    }
+                } else {
+                    if (pd.stance !== "3rdperson" || pd.interacting) {
+                        if (pd.stance === "ADS") {
+                            mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson);
+                        }
+                        pd.sprinting = false;
+                        pd.stance = "3rdperson";
+                        mod.SetThirdPersonCameraPositionForPlayer(eventPlayer, 2.5, 0, cameraPos);
+                        if (aimWidget) mod.SetUIWidgetVisible(aimWidget, false);
+                    }
+                }
+            }
+
+            if (pd.interacting) {
+                await mod.Wait(0.033);
+                pd.interacting = false;
             }
         });
 
