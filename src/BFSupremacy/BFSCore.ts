@@ -97,6 +97,10 @@ export class BFSupremacyCore {
                 PlayerVariables.getPlayerData(player).cameraEnabled = true;
                 PlayerVariables.getPlayerData(player).onPoint = false;
                 PlayerVariables.getPlayerData(player).boarded = false;
+                //The conquest area triggers are disabled for the final assault, so no exit events fire for them.
+                PlayerVariables.getPlayerData(player).area = 0;
+                PlayerVariables.getPlayerData(player).inAirspace = false;
+                PlayerVariables.getPlayerData(player).inEnemyHQ = false;
                 await mod.Wait(0.033)
             }
         }

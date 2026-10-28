@@ -33,7 +33,7 @@ export class BFSupremacy {
     private static readonly DOT_BELOW_M = 0.034;            // the bullet line runs this far below the camera axis
     private static readonly DOT_UI_HALF_HEIGHT = 540;       // UI units from screen centre to the top edge (1080-high UI)
     private static readonly DOT_FOCAL_UI = BFSupremacy.DOT_UI_HALF_HEIGHT / Math.tan(BFSupremacy.DOT_FOV_RAD / 2);
-    public static readonly DOT_FOR_BOTS = true;
+    public static readonly DOT_FOR_BOTS = false;
     private static readonly DOT_HOLD_TICKS = 18;            // 0.3 s at the 60 Hz script tick
     private static readonly DOT_MISS_GRACE_TICKS = 30;      // 0.5 s
 
@@ -82,18 +82,18 @@ export class BFSupremacy {
     private static readonly BLASTER_FIRE_SFX = [mod.RuntimeSpawn_Common.SFX_Projectiles_Flybys_Bullet_Whizby_Sniper_Main_OneShot3D];
     private static readonly BLASTER_HIT_SFX = mod.RuntimeSpawn_Common.SFX_Soldier_Melee_Hit_OneShot3D;
     private static readonly BLASTER_COLOR = mod.CreateVector(1, 0.1, 0.1);
-    private static readonly BLASTER_BOLT_SCALE = 2;
+    private static readonly BLASTER_BOLT_SCALE = 1;
     private static readonly BLASTER_SPEED_MPS = 60;          // close shots; farther ones fly faster to keep the cap
     private static readonly BLASTER_MAX_FLIGHT_S = 0.2;
-    private static readonly BLASTER_START_M = 1.5;           // past the shooter's own head (bullets leave from the eye)
+    private static readonly BLASTER_START_M = 1;           // past the shooter's own head (bullets leave from the eye)
     // The bolt starts this far below the eye and flies to the bullet's impact, so it runs with the visible tracer from the
     // gun instead of above it. Portal gives no muzzle position (SoldierStateVector: eye, facing,
     // velocity, position only).
     private static readonly BLASTER_DROP_M = 0.2;
     private static readonly BLASTER_RANGE_M = 300;
-    private static readonly BLASTER_BOLT_POOL = 48;
-    private static readonly BLASTER_IMPACT_POOL = 24;
-    private static readonly BLASTER_IMPACT_TICKS = 12;       // impact shows 0.2 s
+    private static readonly BLASTER_BOLT_POOL = 24;
+    private static readonly BLASTER_IMPACT_POOL = 0;
+    private static readonly BLASTER_IMPACT_TICKS = 0;       // impact shows 0.2 s
     private static readonly BLASTER_SOUND_AMPLITUDE = 2;
     private static readonly BLASTER_SOUND_RANGE_M = 80;      // 3D, everyone in range hears it
     private static readonly BLASTER_DIAG = false;            // test only: log the human player's shots and bolt ends
@@ -107,6 +107,14 @@ export class BFSupremacy {
     private static blasterShown: { vfx: mod.VFX; until: number }[] = [];
     private static blasterFireSfx: mod.SFX[] = [];
 
+    private static blasterActive: boolean[] = [];
+    private static blasterFrom: mod.Vector[] = [];
+    private static blasterDir: mod.Vector[] = [];
+    private static blasterLength: number[] = [];
+    private static blasterTravelled: number[] = [];
+    private static blasterStep: number[] = [];
+    private static blasterHit: boolean[] = [];
+
     private static blasterSpawn(kind: mod.RuntimeSpawn_Common, scale: number): mod.VFX {
         const e = mod.SpawnObject(kind, BFSupremacy.BLASTER_PARK, mod.CreateVector(0, 0, 0)) as unknown as mod.VFX;
         mod.EnableVFX(e, false);
@@ -115,95 +123,174 @@ export class BFSupremacy {
         return e;
     }
 
+
     public static blasterTick(): void {
         const now = BFSupremacy.cameraTicks;
+        const zero = mod.CreateVector(0, 0, 0);
+
+        // Create the pool once.
         if (BFSupremacy.blasterBolts.length === 0) {
-            for (let i = 0; i < BFSupremacy.BLASTER_BOLT_POOL; i++) BFSupremacy.blasterBolts.push(BFSupremacy.blasterSpawn(BFSupremacy.BLASTER_BOLT, BFSupremacy.BLASTER_BOLT_SCALE));
-            for (let i = 0; i < BFSupremacy.BLASTER_IMPACT_POOL; i++) BFSupremacy.blasterImpacts.push(BFSupremacy.blasterSpawn(BFSupremacy.BLASTER_IMPACT, 1));
-            BFSupremacy.blasterFireSfx = BFSupremacy.BLASTER_FIRE_SFX.map(k => mod.SpawnObject(k, BFSupremacy.BLASTER_PARK, mod.CreateVector(0, 0, 0)) as unknown as mod.SFX);
-            BFSupremacy.blasterHitSfx = mod.SpawnObject(BFSupremacy.BLASTER_HIT_SFX, BFSupremacy.BLASTER_PARK, mod.CreateVector(0, 0, 0)) as unknown as mod.SFX;
+            for (let i = 0; i < BFSupremacy.BLASTER_BOLT_POOL; i++) {
+                const bolt = BFSupremacy.blasterSpawn(
+                    BFSupremacy.BLASTER_BOLT,
+                    BFSupremacy.BLASTER_BOLT_SCALE
+                );
+
+                BFSupremacy.blasterBolts.push(bolt);
+                BFSupremacy.blasterActive.push(false);
+            }
         }
+
+        // Detect ammunition decreases.
         for (const [player, pd] of BFSupremacy.cameraPlayers.values()) {
-            if (!pd.cameraEnabled || pd.interacting || !pd.cameraAlive) continue;
-            // Reloads and respawns only raise the count, so they never read as shots.
-            const ammo = mod.GetInventoryAmmo(player, mod.InventorySlots.PrimaryWeapon) + mod.GetInventoryAmmo(player, mod.InventorySlots.SecondaryWeapon) * 1000;
-            const shot = pd.blasterAmmo !== undefined && ammo < pd.blasterAmmo;
+            if (!pd.cameraEnabled || pd.interacting || !pd.cameraAlive) {
+                continue;
+            }
+
+            const ammo =
+                mod.GetInventoryAmmo(player, mod.InventorySlots.PrimaryWeapon) +
+                mod.GetInventoryAmmo(player, mod.InventorySlots.SecondaryWeapon) * 1000;
+
+            const previousAmmo = pd.blasterAmmo;
             pd.blasterAmmo = ammo;
-            if (!shot) continue;
-            if (pd.dotRayTick === now) {   // the dot cast this pass: share its ray
+
+            if (previousAmmo === undefined || ammo >= previousAmmo) {
+                continue;
+            }
+
+            // Reuse the ray already cast for the aim dot when possible.
+            if (pd.dotRayTick === now) {
                 pd.boltEye = pd.dotEye;
                 pd.boltDir = pd.dotFacing;
             } else {
-                pd.boltEye = mod.GetSoldierState(player, mod.SoldierStateVector.EyePosition);
-                pd.boltDir = mod.GetSoldierState(player, mod.SoldierStateVector.GetFacingDirection);
+                pd.boltEye = mod.GetSoldierState(
+                    player,
+                    mod.SoldierStateVector.EyePosition
+                );
+
+                pd.boltDir = mod.GetSoldierState(
+                    player,
+                    mod.SoldierStateVector.GetFacingDirection
+                );
+
                 if (pd.boltEye && pd.boltDir) {
-                    mod.RayCast(player, mod.Add(pd.boltEye, mod.Multiply(pd.boltDir, BFSupremacy.DOT_RAY_START_M)),
-                        mod.Add(pd.boltEye, mod.Multiply(pd.boltDir, BFSupremacy.BLASTER_RANGE_M)));
+                    mod.RayCast(
+                        player,
+                        mod.Add(
+                            pd.boltEye,
+                            mod.Multiply(
+                                pd.boltDir,
+                                BFSupremacy.DOT_RAY_START_M
+                            )
+                        ),
+                        mod.Add(
+                            pd.boltEye,
+                            mod.Multiply(
+                                pd.boltDir,
+                                BFSupremacy.BLASTER_RANGE_M
+                            )
+                        )
+                    );
                 }
             }
+
             pd.boltPending = true;
-            if (BFSupremacy.BLASTER_DIAG && !mod.GetSoldierState(player, mod.SoldierStateBool.IsAISoldier)) {
-                pd.boltDiag = true;
-                console.log("BLASTERDIAG shot pass " + now + " firing " + mod.GetSoldierState(player, mod.SoldierStateBool.IsFiring)
-                    + " shared " + (pd.dotRayTick === now) + " ammo " + ammo + " dir " + (pd.boltDir ? BFSupremacy.blasterFmt(pd.boltDir, 3) : "none"));
-            }
-            if (pd.boltEye) {
-                for (const f of BFSupremacy.blasterFireSfx) mod.PlaySound(f, BFSupremacy.BLASTER_SOUND_AMPLITUDE, pd.boltEye, BFSupremacy.BLASTER_SOUND_RANGE_M);
-            }
         }
-        const flying = BFSupremacy.blasterFlying;
-        for (let i = flying.length - 1; i >= 0; i--) {
-            const b = flying[i];
-            b.travelled = Math.min(b.travelled + b.step, b.length);
-            const at = mod.Add(b.from, mod.Multiply(b.dir, b.travelled));
-            if (b.travelled < b.length) { mod.MoveVFX(b.vfx, at, mod.CreateVector(0, 0, 0)); continue; }
-            mod.EnableVFX(b.vfx, false);
-            flying.splice(i, 1);
-            if (!b.hit) continue;   // a miss just ends
-            const impact = BFSupremacy.blasterImpacts[BFSupremacy.blasterImpactNext++ % BFSupremacy.BLASTER_IMPACT_POOL];
-            const old = BFSupremacy.blasterShown.findIndex(x => x.vfx === impact);
-            if (old >= 0) BFSupremacy.blasterShown.splice(old, 1);
-            mod.MoveVFX(impact, at, mod.CreateVector(0, 0, 0));
-            mod.EnableVFX(impact, true);
-            BFSupremacy.blasterShown.push({ vfx: impact, until: now + BFSupremacy.BLASTER_IMPACT_TICKS });
-            if (BFSupremacy.blasterHitSfx) mod.PlaySound(BFSupremacy.blasterHitSfx, BFSupremacy.BLASTER_SOUND_AMPLITUDE, at, BFSupremacy.BLASTER_SOUND_RANGE_M);
-        }
-        const shown = BFSupremacy.blasterShown;
-        for (let i = shown.length - 1; i >= 0; i--) {
-            if (now < shown[i].until) continue;
-            mod.EnableVFX(shown[i].vfx, false);
-            shown.splice(i, 1);
+
+        // Update the fixed pool. No active-flight array or splice operations.
+        for (let i = 0; i < BFSupremacy.blasterBolts.length; i++) {
+            if (!BFSupremacy.blasterActive[i]) continue;
+
+            const travelled = Math.min(
+                BFSupremacy.blasterTravelled[i] +
+                BFSupremacy.blasterStep[i],
+                BFSupremacy.blasterLength[i]
+            );
+
+            BFSupremacy.blasterTravelled[i] = travelled;
+
+            const at = mod.Add(
+                BFSupremacy.blasterFrom[i],
+                mod.Multiply(
+                    BFSupremacy.blasterDir[i],
+                    travelled
+                )
+            );
+
+            mod.MoveVFX(
+                BFSupremacy.blasterBolts[i],
+                at,
+                zero
+            );
+
+            if (travelled >= BFSupremacy.blasterLength[i]) {
+                mod.EnableVFX(BFSupremacy.blasterBolts[i], false);
+                BFSupremacy.blasterActive[i] = false;
+            }
         }
     }
 
-    private static blasterFmt(v: mod.Vector, d: number): string {
-        return mod.XComponentOf(v).toFixed(d) + "," + mod.YComponentOf(v).toFixed(d) + "," + mod.ZComponentOf(v).toFixed(d);
-    }
 
-    private static blasterLaunch(pd: SupremacyPlayerData, point: mod.Vector | undefined): void {
+
+    private static blasterLaunch(
+        pd: SupremacyPlayerData,
+        point: mod.Vector | undefined
+    ): void {
         const eye = pd.boltEye;
         const dir = pd.boltDir;
+
         if (!eye || !dir) return;
-        const from = mod.Add(eye, mod.CreateVector(
-            mod.XComponentOf(dir) * BFSupremacy.BLASTER_START_M,
-            mod.YComponentOf(dir) * BFSupremacy.BLASTER_START_M - BFSupremacy.BLASTER_DROP_M,
-            mod.ZComponentOf(dir) * BFSupremacy.BLASTER_START_M));
-        const end = point ?? mod.Add(eye, mod.Multiply(dir, BFSupremacy.BLASTER_RANGE_M));
-        const length = mod.DistanceBetween(from, end);
-        const flightDir = mod.Normalize(mod.Subtract(end, from));
-        if (pd.boltDiag) {
-            pd.boltDiag = false;
-            console.log("BLASTERDIAG end " + BFSupremacy.blasterFmt(end, 2) + " hit " + (point !== undefined) + " eye " + BFSupremacy.blasterFmt(eye, 2));
+
+        const slot =
+            BFSupremacy.blasterBoltNext %
+            BFSupremacy.BLASTER_BOLT_POOL;
+
+        BFSupremacy.blasterBoltNext =
+            (slot + 1) % BFSupremacy.BLASTER_BOLT_POOL;
+
+        const e = BFSupremacy.blasterBolts[slot];
+
+        // Reuse this slot immediately. No search for an older flight.
+        if (BFSupremacy.blasterActive[slot]) {
+            mod.EnableVFX(e, false);
         }
-        const e = BFSupremacy.blasterBolts[BFSupremacy.blasterBoltNext++ % BFSupremacy.BLASTER_BOLT_POOL];
-        const old = BFSupremacy.blasterFlying.findIndex(b => b.vfx === e);   // a reused bolt still in flight stops there
-        if (old >= 0) BFSupremacy.blasterFlying.splice(old, 1);
-        const passS = BFSupremacy.CAMERA_EVERY_TICKS / 60;   // the S5 script ticks at 60 Hz
-        const step = Math.max(BFSupremacy.BLASTER_SPEED_MPS, length / BFSupremacy.BLASTER_MAX_FLIGHT_S) * passS;
+
+        const flightDir = mod.Normalize(dir);
+
+        // Keep the exact raycast hit point.
+        const end = point ??
+            mod.Add(eye, mod.Multiply(dir, BFSupremacy.BLASTER_RANGE_M));
+
+        // Start on the same line as the raycast, slightly ahead of the eye.
+        const from = mod.Add(
+            eye,
+            mod.Multiply(flightDir, BFSupremacy.BLASTER_START_M)
+        );
+
+        const length = mod.DistanceBetween(from, end);
+
+        // This assumes OngoingGlobal is running at 30 Hz.
+        // blasterTick runs every CAMERA_EVERY_TICKS global ticks.
+        const tickSeconds =
+            BFSupremacy.CAMERA_EVERY_TICKS / 30;
+
+        const speed = Math.max(
+            BFSupremacy.BLASTER_SPEED_MPS,
+            length / BFSupremacy.BLASTER_MAX_FLIGHT_S
+        );
+
+        BFSupremacy.blasterFrom[slot] = from;
+        BFSupremacy.blasterDir[slot] = flightDir;
+        BFSupremacy.blasterLength[slot] = length;
+        BFSupremacy.blasterTravelled[slot] = 0;
+        BFSupremacy.blasterStep[slot] = speed * tickSeconds;
+        BFSupremacy.blasterHit[slot] = point !== undefined;
+        BFSupremacy.blasterActive[slot] = true;
+
         mod.MoveVFX(e, from, mod.CreateVector(0, 0, 0));
         mod.EnableVFX(e, true);
-        BFSupremacy.blasterFlying.push({ vfx: e, from, dir: flightDir, length, travelled: 0, step, hit: point !== undefined });
     }
+
 
     // Was the async OngoingPlayer subscriber: one engine dispatch, one GetObjId and two Promises per player per tick.
     public static cameraUpdate(eventPlayer: mod.Player, pd: SupremacyPlayerData, full: boolean): void {
@@ -465,6 +552,8 @@ export class BFSupremacy {
                 //Force Reset the Camera as height can bug out
                 await mod.Wait(0.4);
                 mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.FirstPerson)
+                const aimWidget = PlayerVariables.getPlayerData(eventPlayer).aimWidget;
+                if (aimWidget) mod.SetUIWidgetVisible(aimWidget, false)
                 await mod.Wait(0.1);
                 if (!GameConfig.gameConfig.cutscene && !mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsInVehicle)) {
                     mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson)
@@ -481,8 +570,11 @@ export class BFSupremacy {
             }
             await mod.Wait(1);
             if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsInVehicle)) {
-                if (mod.Equals(mod.GetVehicleFromPlayer(eventPlayer), GameConfig.gameConfig.regroupVehicle)) {
-                    if (mod.Not(mod.Equals(eventPlayer, GameConfig.gameConfig.regroupBot))) {
+                const regroupVehicle = GameConfig.gameConfig.regroupVehicle;
+                const regroupBot = GameConfig.gameConfig.regroupBot;
+                const vehicle = mod.GetVehicleFromPlayer(eventPlayer);
+                if (regroupVehicle && vehicle && mod.Equals(vehicle, regroupVehicle)) {
+                    if (!regroupBot || !mod.Equals(eventPlayer, regroupBot)) {
                         mod.UndeployPlayer(eventPlayer);
                         mod.DisplayNotificationMessage(mod.Message(mod.stringkeys.regroup.undeploy), eventPlayer);
                     }
@@ -527,13 +619,18 @@ export class BFSupremacy {
             PlayerVariables.getPlayerData(eventPlayer).onPoint = false;
             PlayerVariables.getPlayerData(eventPlayer).area = 0;
             PlayerVariables.getPlayerData(eventPlayer).ingoreOOB = false;
+            PlayerVariables.getPlayerData(eventPlayer).inEnemyHQ = false;
+            PlayerVariables.getPlayerData(eventPlayer).inAirspace = false;
         });
 
         Events.OnPlayerDied.subscribe((eventPlayer: mod.Player, eventOtherPlayer: mod.Player) => {
             if (GameConfig.gameConfig.cutscene) return;
-
-            mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.FirstPerson);
+            if (!PlayerVariables.getPlayerData(eventPlayer).firstPerson) {
+                mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.FirstPerson);
+            }
             PlayerVariables.getPlayerData(eventPlayer).cameraEnabled = false;
+            const aimWidget = PlayerVariables.getPlayerData(eventPlayer).aimWidget;
+            if (aimWidget) mod.SetUIWidgetVisible(aimWidget, false)
         });
 
         Events.OnPlayerLeaveGame.subscribe((playerId: number) => {
@@ -567,13 +664,27 @@ export class BFSupremacy {
                 }
             } else if (mod.Equals(team, mod.GetTeam(1))) {
                 if (areaID >= 1200 && areaID <= 1299) {
-                    BFSupremacyUI.outOfBoundsUI(eventPlayer);
+                    PlayerVariables.getPlayerData(eventPlayer).inEnemyHQ = true;
+                    if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsInVehicle)) {
+                        if (BFSupremacy.isAirVehicle(mod.GetVehicleFromPlayer(eventPlayer))) {
+                            PlayerVariables.getPlayerData(eventPlayer).outOfBounds = false;
+                        }
+                    } else {
+                        BFSupremacyUI.outOfBoundsUI(eventPlayer);
+                    }
                 } else {
                     PlayerVariables.getPlayerData(eventPlayer).outOfBounds = false;
                 }
             } else if (mod.Equals(team, mod.GetTeam(2))) {
                 if (areaID >= 1100 && areaID <= 1199) {
-                    BFSupremacyUI.outOfBoundsUI(eventPlayer);
+                    PlayerVariables.getPlayerData(eventPlayer).inEnemyHQ = true;
+                    if (mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsInVehicle)) {
+                        if (BFSupremacy.isAirVehicle(mod.GetVehicleFromPlayer(eventPlayer))) {
+                            PlayerVariables.getPlayerData(eventPlayer).outOfBounds = false;
+                        }
+                    } else {
+                        BFSupremacyUI.outOfBoundsUI(eventPlayer);
+                    }
                 } else {
                     PlayerVariables.getPlayerData(eventPlayer).outOfBounds = false;
                 }
@@ -604,6 +715,11 @@ export class BFSupremacy {
             } else if (pd.area < 1) {
                 BFSupremacyUI.outOfBoundsUI(eventPlayer);
             }
+
+            //Match the ranges used in OnPlayerEnterAreaTrigger: 1100-1199 (team 2 HQ) and 1200-1299 (team 1 HQ).
+            if (areaID >= 1100 && areaID <= 1299) {
+                pd.inEnemyHQ = false;
+            }
         });
 
         Events.OnSpawnerSpawned.subscribe((eventPlayer: mod.Player, eventSpawner: mod.Spawner) => {
@@ -625,8 +741,10 @@ export class BFSupremacy {
             }
 
             if (GameConfig.gameConfig.stage === 1) {
-                if (mod.Equals(eventVehicle as mod.Vehicle, GameConfig.gameConfig.regroupVehicle as mod.Vehicle)) {
-                    if (!mod.Equals(eventPlayer as mod.Player, GameConfig.gameConfig.regroupBot as mod.Player)) {
+                const regroupVehicle = GameConfig.gameConfig.regroupVehicle;
+                const regroupBot = GameConfig.gameConfig.regroupBot;
+                if (regroupVehicle && eventVehicle && mod.Equals(eventVehicle, regroupVehicle)) {
+                    if (!regroupBot || !mod.Equals(eventPlayer, regroupBot)) {
                         if (GameConfig.gameConfig.extractReady && !PlayerVariables.getPlayerData(eventPlayer).spawned && !PlayerVariables.getPlayerData(eventPlayer).boarded) {
                             PlayerVariables.getPlayerData(eventPlayer).ingoreOOB = true;
                             PlayerVariables.getPlayerData(eventPlayer).boarded = true;
@@ -644,7 +762,9 @@ export class BFSupremacy {
         Events.OnPlayerExitVehicle.subscribe(async (eventPlayer: mod.Player, eventVehicle: mod.Vehicle) => {
             if (!GameConfig.gameConfig.cutscene) {
                 //Force Reset the Camera as height can bug out
-                if (!mod.Equals(eventVehicle as mod.Vehicle, GameConfig.gameConfig.regroupVehicle as mod.Vehicle)) {
+                //regroupVehicle is undefined once the regroup stage ends, so it must be checked before mod.Equals.
+                const regroupVehicle = GameConfig.gameConfig.regroupVehicle;
+                if (!regroupVehicle || !eventVehicle || !mod.Equals(eventVehicle, regroupVehicle)) {
                     mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.FirstPerson)
                     mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.FirstPerson)
                     mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.ThirdPerson)
@@ -652,11 +772,15 @@ export class BFSupremacy {
                 }
             }
 
-            if (PlayerVariables.getPlayerData(eventPlayer).inAirspace) {
-                if (PlayerVariables.getPlayerData(eventPlayer).area == 1) {
+            const pd = PlayerVariables.getPlayerData(eventPlayer);
+            if (pd.inEnemyHQ) {
+                //Enemy HQ always wins: area can be > 1 because the play area and air combat triggers overlap the HQ.
+                BFSupremacyUI.outOfBoundsUI(eventPlayer);
+            } else if (pd.inAirspace) {
+                if (pd.area == 1) {
                     BFSupremacyUI.outOfBoundsUI(eventPlayer);
                 }
-            } else if (!PlayerVariables.getPlayerData(eventPlayer).inAirspace && PlayerVariables.getPlayerData(eventPlayer).area < 1) {
+            } else if (pd.area < 1) {
                 BFSupremacyUI.outOfBoundsUI(eventPlayer);
             }
         });

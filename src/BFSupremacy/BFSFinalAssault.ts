@@ -344,6 +344,8 @@ export class BFSupremacyFinalAssault {
         for (let i = 0; i < mod.CountOf(players); i++) {
             const player = mod.ValueInArray(players, i);
             PlayerVariables.getPlayerData(player).area = 0;
+            PlayerVariables.getPlayerData(player).inAirspace = false;
+            PlayerVariables.getPlayerData(player).inEnemyHQ = false;
         }
         BFSupremacyFinalAssault.manageFinalSector(true);
         BFSupremacyUI.MCOMNotification();

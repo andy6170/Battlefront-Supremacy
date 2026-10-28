@@ -210,6 +210,8 @@ export class UIconfig {
             mod.Weapons.Sniper_Mini_Scout,
             mod.Weapons.Sniper_PSR,
             mod.Weapons.Sniper_SV_98,
+            mod.Weapons.Sniper_Interdictor,
+            mod.Weapons.Sniper_L115,
             //mod.Weapons.DMR_GRT_CPS,
             //mod.Weapons.DMR_LMR27,
             //mod.Weapons.DMR_M39_EMR,
@@ -276,7 +278,7 @@ export interface SupremacyPlayerData {
     boltEye: mod.Vector | undefined;
     boltDir: mod.Vector | undefined;
     boltDiag: boolean;
-
+    inEnemyHQ: boolean;
 }
 
 export class PlayerVariables {
@@ -333,6 +335,7 @@ export class PlayerVariables {
                 boltEye: undefined,
                 boltDir: undefined,
                 boltDiag: false,
+                inEnemyHQ: false,
             });
         }
         return PlayerVariables.playerData.get(playerId)!;
