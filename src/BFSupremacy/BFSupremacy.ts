@@ -625,9 +625,7 @@ export class BFSupremacy {
 
         Events.OnPlayerDied.subscribe((eventPlayer: mod.Player, eventOtherPlayer: mod.Player) => {
             if (GameConfig.gameConfig.cutscene) return;
-            if (!PlayerVariables.getPlayerData(eventPlayer).firstPerson) {
-                mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.FirstPerson);
-            }
+            mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.FirstPerson);
             PlayerVariables.getPlayerData(eventPlayer).cameraEnabled = false;
             const aimWidget = PlayerVariables.getPlayerData(eventPlayer).aimWidget;
             if (aimWidget) mod.SetUIWidgetVisible(aimWidget, false)

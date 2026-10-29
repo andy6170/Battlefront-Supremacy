@@ -55,7 +55,7 @@ export class BFSupremacyFinalAssault {
             mod.SetCapturePointCapturingTime(flag, GameConfig.gameConfig.finalCaptureTime);
             mod.SetCapturePointNeutralizationTime(flag, GameConfig.gameConfig.finalNeutralizeTime);
             mod.SetMaxCaptureMultiplier(flag, GameConfig.gameConfig.finalCaptureMultiplier);
-            mod.EnableCapturePointDeploying(flag, false);
+            //mod.EnableCapturePointDeploying(flag, false);
         }
     }
 
