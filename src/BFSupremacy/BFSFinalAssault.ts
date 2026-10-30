@@ -15,7 +15,7 @@ export class BFSupremacyFinalAssault {
         if (s152) mod.EnableGameModeObjective(s152, false);
         GameConfig.gameConfig.remainingTime = GameConfig.gameConfig.baseAttackTime + GameConfig.gameConfig.bonusTime;
         if (GameConfig.gameConfig.debug) {
-            GameConfig.gameConfig.remainingTime = 300;
+            GameConfig.gameConfig.remainingTime = 30;
         }
         for (let i = 1; i < 10; i++) {
             let hq = mod.GetHQ(i);
@@ -35,7 +35,7 @@ export class BFSupremacyFinalAssault {
             }
         }
 
-        let vehicles = mod.AllVehicles();
+        let vehicles = mod.GetAllVehicles();
         for (let i = 0; i < mod.CountOf(vehicles); i++) {
             mod.Kill(mod.ValueInArray(vehicles, i));
         }
@@ -44,6 +44,7 @@ export class BFSupremacyFinalAssault {
 
 
         GameConfig.gameConfig.roundOngoing = true;
+        BFSupremacyUI.ObjectiveUI_Enable(true);
 
 
     }
@@ -54,11 +55,15 @@ export class BFSupremacyFinalAssault {
             mod.SetCapturePointCapturingTime(flag, GameConfig.gameConfig.finalCaptureTime);
             mod.SetCapturePointNeutralizationTime(flag, GameConfig.gameConfig.finalNeutralizeTime);
             mod.SetMaxCaptureMultiplier(flag, GameConfig.gameConfig.finalCaptureMultiplier);
-            mod.EnableCapturePointDeploying(flag, false);
+            //mod.EnableCapturePointDeploying(flag, false);
         }
     }
 
     public static manageFinalSector(enable: boolean): void {
+        mod.EnableAreaTrigger(mod.GetAreaTrigger(1000), !enable);
+        mod.EnableAreaTrigger(mod.GetAreaTrigger(1100), !enable);
+        mod.EnableAreaTrigger(mod.GetAreaTrigger(1200), !enable);
+        mod.EnableAreaTrigger(mod.GetAreaTrigger(1400), !enable);
         const attacker = GameConfig.gameConfig.attacker;
         const attackerData = TeamVariables.getTeamData(attacker);
         if (mod.Equals(attacker, mod.GetTeam(1))) {
@@ -98,19 +103,12 @@ export class BFSupremacyFinalAssault {
         if (hq300) mod.EnableHQ(hq300, enable);
         let hq400 = mod.GetHQ(400);
         if (hq400) mod.EnableHQ(hq400, enable);
-        if (cp250) BFSupremacyUI.capturePoint_UI_Colour_Update(cp250);
-        if (cp251) BFSupremacyUI.capturePoint_UI_Colour_Update(cp251);
         mod.EnableAreaTrigger(mod.GetAreaTrigger(1001), enable);
         mod.EnableAreaTrigger(mod.GetAreaTrigger(1101), enable);
         mod.EnableAreaTrigger(mod.GetAreaTrigger(1201), enable);
     }
 
     public static team1FinalSectorLevel2(enable: boolean): void {
-        mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("mcom_container"), enable);
-        if (enable) {
-            BFSupremacyUI.MCOM_UI_Update();
-        }
-
         GameConfig.gameConfig.MCOMStart = 260;
 
         for (let i = 0; i < 3; i++) {
@@ -132,10 +130,6 @@ export class BFSupremacyFinalAssault {
         if (hq301) mod.EnableHQ(hq301, enable);
         let hq401 = mod.GetHQ(401);
         if (hq401) mod.EnableHQ(hq401, enable);
-        let cp0 = mod.GetCapturePoint(0);
-        if (cp0) BFSupremacyUI.capturePoint_UI_Colour_Update(cp0);
-        let cp1 = mod.GetCapturePoint(1);
-        if (cp1) BFSupremacyUI.capturePoint_UI_Colour_Update(cp1);
         mod.EnableAreaTrigger(mod.GetAreaTrigger(1002), enable);
         mod.EnableAreaTrigger(mod.GetAreaTrigger(1102), enable);
         mod.EnableAreaTrigger(mod.GetAreaTrigger(1202), enable);
@@ -159,19 +153,12 @@ export class BFSupremacyFinalAssault {
         if (hq302) mod.EnableHQ(hq302, enable);
         let hq402 = mod.GetHQ(402);
         if (hq402) mod.EnableHQ(hq402, enable);
-        if (cp252) BFSupremacyUI.capturePoint_UI_Colour_Update(cp252);
-        if (cp253) BFSupremacyUI.capturePoint_UI_Colour_Update(cp253);
         mod.EnableAreaTrigger(mod.GetAreaTrigger(1003), enable);
         mod.EnableAreaTrigger(mod.GetAreaTrigger(1103), enable);
         mod.EnableAreaTrigger(mod.GetAreaTrigger(1203), enable);
     }
 
     public static team2FinalSectorLevel2(enable: boolean): void {
-        mod.SetUIWidgetVisible(mod.FindUIWidgetWithName("mcom_container"), enable);
-        if (enable) {
-            BFSupremacyUI.MCOM_UI_Update();
-        }
-
         GameConfig.gameConfig.MCOMStart = 263;
 
         for (let i = 0; i < 3; i++) {
@@ -193,10 +180,6 @@ export class BFSupremacyFinalAssault {
         if (hq303) mod.EnableHQ(hq303, enable);
         let hq403 = mod.GetHQ(403);
         if (hq403) mod.EnableHQ(hq403, enable);
-        let cp0 = mod.GetCapturePoint(0);
-        if (cp0) BFSupremacyUI.capturePoint_UI_Colour_Update(cp0);
-        let cp1 = mod.GetCapturePoint(1);
-        if (cp1) BFSupremacyUI.capturePoint_UI_Colour_Update(cp1);
         mod.EnableAreaTrigger(mod.GetAreaTrigger(1004), enable);
         mod.EnableAreaTrigger(mod.GetAreaTrigger(1104), enable);
         mod.EnableAreaTrigger(mod.GetAreaTrigger(1204), enable);
@@ -332,6 +315,7 @@ export class BFSupremacyFinalAssault {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static async moveToFinalSectorLevel2(): Promise<void> {
+        BFSupremacyUI.finalAssault_UI_message_Enable(false);
         //GameConfig.gameConfig.roundOngoing = false;
         let cpStart = mod.GetCapturePoint(GameConfig.gameConfig.flagStart);
         if (cpStart) mod.EnableGameModeObjective(cpStart, false);
@@ -356,13 +340,17 @@ export class BFSupremacyFinalAssault {
 
         TeamVariables.getTeamData(GameConfig.gameConfig.attacker).finalSectorBreached += 1;
 
-        const players = mod.AllPlayers() as mod.Array;
+        const players = mod.GetAllPlayers() as mod.Array;
         for (let i = 0; i < mod.CountOf(players); i++) {
             const player = mod.ValueInArray(players, i);
             PlayerVariables.getPlayerData(player).area = 0;
+            PlayerVariables.getPlayerData(player).inAirspace = false;
+            PlayerVariables.getPlayerData(player).inEnemyHQ = false;
         }
         BFSupremacyFinalAssault.manageFinalSector(true);
         BFSupremacyUI.MCOMNotification();
+        BFSupremacyUI.finalAssault_UI_Team_Update();
+        BFSupremacyUI.finalAssault_UI_message_Enable(true);
 
         BFSAudio.playNextObjective();
         //GameConfig.gameConfig.roundOngoing = true;

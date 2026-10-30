@@ -60,7 +60,7 @@ export interface GameConfig {
 export class GameConfig {
     public static gameConfig: GameConfig = {
         gameStarted: false,
-        debug: true,
+        debug: false,
         capturePointNeutralizationTime: 15,
         capturePointCapturingTime: 15,
         capturePointMultiplier: 2,
@@ -113,7 +113,11 @@ export class GameConfig {
             mod.VehicleList.JAS39,
             mod.VehicleList.SU57,
             mod.VehicleList.UH60,
-            mod.VehicleList.UH60_Pax
+            mod.VehicleList.UH60_Pax,
+            mod.VehicleList.F_74A_Seacat,
+            mod.VehicleList.F_74A_Seacat_Pax,
+            mod.VehicleList.FA_81F_Super_Spectre,
+            mod.VehicleList.FA_81F_Super_Spectre_Pax,
         ],
         flagsVO: [
             mod.VoiceOverFlags.Alpha,
@@ -206,6 +210,8 @@ export class UIconfig {
             mod.Weapons.Sniper_Mini_Scout,
             mod.Weapons.Sniper_PSR,
             mod.Weapons.Sniper_SV_98,
+            mod.Weapons.Sniper_Interdictor,
+            mod.Weapons.Sniper_L115,
             //mod.Weapons.DMR_GRT_CPS,
             //mod.Weapons.DMR_LMR27,
             //mod.Weapons.DMR_M39_EMR,
@@ -235,10 +241,6 @@ export interface SupremacyPlayerData {
     uniqueUI: string;
     containerWidget: mod.UIWidget
     aimWidget: mod.UIWidget | undefined
-    objTextWidget: mod.UIWidget | undefined
-    objCounterWidget: mod.UIWidget | undefined
-    objProgressBGWidget: mod.UIWidget | undefined
-    objProgressWidget: mod.UIWidget | undefined
     uiCreated: boolean;
     firstDeploy: boolean;
     currentObjective: mod.CapturePoint;
@@ -246,6 +248,7 @@ export interface SupremacyPlayerData {
     firstPerson: boolean;
     thirdPerson: boolean;
     thirdPersonZoom: boolean;
+    sprinting: boolean;
     hasSniper: boolean;
     hasLauncher: boolean;
     flagTick: number;
@@ -260,7 +263,22 @@ export interface SupremacyPlayerData {
     shoulder: string;
     interacting: boolean;
     reloading: boolean;
-
+    dotHoldUntil: number;
+    dotEye: mod.Vector | undefined;
+    dotFacing: mod.Vector | undefined;
+    dotRayTick: number;
+    dotPending: boolean;
+    boltPending: boolean;
+    dotLastHit: number | undefined;
+    dotX: number | undefined;
+    dotY: number | undefined;
+    dotSide: number | undefined;
+    cameraAlive: boolean;
+    blasterAmmo: number | undefined;
+    boltEye: mod.Vector | undefined;
+    boltDir: mod.Vector | undefined;
+    boltDiag: boolean;
+    inEnemyHQ: boolean;
 }
 
 export class PlayerVariables {
@@ -280,10 +298,6 @@ export class PlayerVariables {
                 uniqueUI: "",
                 containerWidget: mod.GetUIRoot(),
                 aimWidget: undefined,
-                objTextWidget: undefined,
-                objCounterWidget: undefined,
-                objProgressBGWidget: undefined,
-                objProgressWidget: undefined,
                 uiCreated: false,
                 firstDeploy: true,
                 currentObjective: mod.GetCapturePoint(0),
@@ -291,6 +305,7 @@ export class PlayerVariables {
                 firstPerson: false,
                 thirdPerson: false,
                 thirdPersonZoom: false,
+                sprinting: false,
                 hasSniper: false,
                 hasLauncher: false,
                 flagTick: 0,
@@ -305,6 +320,22 @@ export class PlayerVariables {
                 shoulder: "right",
                 interacting: false,
                 reloading: false,
+                dotHoldUntil: 0,
+                dotEye: undefined,
+                dotFacing: undefined,
+                dotRayTick: 0,
+                dotPending: false,
+                boltPending: false,
+                dotLastHit: undefined,
+                dotX: undefined,
+                dotY: undefined,
+                dotSide: undefined,
+                cameraAlive: false,
+                blasterAmmo: undefined,
+                boltEye: undefined,
+                boltDir: undefined,
+                boltDiag: false,
+                inEnemyHQ: false,
             });
         }
         return PlayerVariables.playerData.get(playerId)!;
