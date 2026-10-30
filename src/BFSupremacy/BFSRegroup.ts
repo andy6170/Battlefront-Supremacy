@@ -8,6 +8,7 @@ import { BFSupremacyConquest } from "./BFSConquest.ts";
 
 export class BFSupremacyRegroup {
     private static lastPilotReset: number = -2;
+    private static lastBoardingCheck: number = -2;
 
     public static spawnHeli(): void {
         GameConfig.gameConfig.extractReady = false;
@@ -212,11 +213,61 @@ export class BFSupremacyRegroup {
         this.pilotReset();
     }
 
+    // Called from the enter event and from the regroup tick. The two sources see different vehicle handles (and an
+    // entry can be missed entirely), so all the rules live here.
+    public static checkPlayerBoarding(player: mod.Player, vehicle: mod.Vehicle | undefined): void {
+        if (GameConfig.gameConfig.stage !== 1) return;
+        // Until the heli and its pilot are set up the boarding side effects (bonus time, pilot reset) are not safe.
+        if (!GameConfig.gameConfig.regroupVehicleSelected) return;
+
+        const heli = GameConfig.gameConfig.regroupVehicle;
+        if (!heli || !vehicle || !mod.Equals(vehicle, heli)) return;
+
+        const bot = GameConfig.gameConfig.regroupBot;
+        if (bot && mod.IsPlayerValid(bot) && mod.Equals(player, bot)) return;
+
+        const pd = PlayerVariables.getPlayerData(player);
+        if (pd.spawned || pd.boarded) {
+            mod.UndeployPlayer(player);
+            return;
+        }
+
+        // extractReady stays false while the heli finishes its landing, but the heli is already on the ground and
+        // players can enter it. A force exit during that animation can be dropped, which left the player sitting in
+        // the heli with no boarding logic and made them exit and re-enter. Only a heli that is taking off is closed.
+        if (GameConfig.gameConfig.heliTakeOff) {
+            mod.ForcePlayerExitVehicle(player, vehicle);
+            return;
+        }
+
+        pd.ingoreOOB = true;
+        pd.boarded = true;
+        this.playerBoarding(player, vehicle);
+    }
+
+    // Bet on the enter event being missed: anyone still sitting in the landing heli is boarded from the tick as well.
+    private static boardingWatchdog(): void {
+        if (!GameConfig.gameConfig.extractReady || GameConfig.gameConfig.heliTakeOff) return;
+
+        const now = mod.GetMatchTimeElapsed();
+        if (now - BFSupremacyRegroup.lastBoardingCheck < 0.5) return;
+        BFSupremacyRegroup.lastBoardingCheck = now;
+
+        const heli = GameConfig.gameConfig.regroupVehicle;
+        if (!heli || !mod.GetVehicleState(heli, mod.VehicleStateVector.VehiclePosition)) return;
+
+        const players = mod.GetAllPlayersInVehicle(heli) as mod.Array;
+        for (let i = 0; i < mod.CountOf(players); i++) {
+            this.checkPlayerBoarding(mod.ValueInArray(players, i) as mod.Player, heli);
+        }
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Ongoing Rule
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static ongoingRegroup(): void {
+        this.boardingWatchdog();
         const elapsed = mod.GetMatchTimeElapsed();
         const rounded = mod.RoundToInteger(elapsed);
         if (!GameConfig.gameConfig.heliTakeOff && GameConfig.gameConfig.extractionRemainingTime <= 0) {

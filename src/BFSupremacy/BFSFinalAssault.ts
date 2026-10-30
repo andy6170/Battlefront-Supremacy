@@ -15,7 +15,7 @@ export class BFSupremacyFinalAssault {
         if (s152) mod.EnableGameModeObjective(s152, false);
         GameConfig.gameConfig.remainingTime = GameConfig.gameConfig.baseAttackTime + GameConfig.gameConfig.bonusTime;
         if (GameConfig.gameConfig.debug) {
-            GameConfig.gameConfig.remainingTime = 300;
+            GameConfig.gameConfig.remainingTime = 30;
         }
         for (let i = 1; i < 10; i++) {
             let hq = mod.GetHQ(i);

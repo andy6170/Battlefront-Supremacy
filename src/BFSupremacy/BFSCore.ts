@@ -62,6 +62,7 @@ export class BFSupremacyCore {
             GameConfig.gameConfig.bonusTime = 0;
             if (previousStage === 2) {
                 await BFSupremacyUI.changingLocation(true);
+                BFSupremacyUI.ObjectiveUI_Enable(true);
             }
 
         } else if (stage == 1) {

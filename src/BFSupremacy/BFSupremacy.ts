@@ -546,6 +546,14 @@ export class BFSupremacy {
 
             if (!mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsInVehicle)) {
                 PlayerVariables.getPlayerData(eventPlayer).cameraEnabled = true;
+            } else {
+                mod.SetCameraTypeForPlayer(eventPlayer, mod.Cameras.FirstPerson)
+            }
+
+            if (mod.LessThan(mod.DistanceBetween(mod.GetObjectPosition(mod.GetSpatialObject(951)), mod.GetObjectPosition(eventPlayer)), 10) || mod.LessThan(mod.DistanceBetween(mod.GetObjectPosition(mod.GetSpatialObject(951)), mod.GetObjectPosition(eventPlayer)), 10)) {
+                await mod.Wait(0.7);
+                mod.UndeployPlayer(eventPlayer);
+                return;
             }
 
             if (!GameConfig.gameConfig.cutscene && !mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsInVehicle)) {
@@ -730,31 +738,21 @@ export class BFSupremacy {
 
         Events.OnPlayerEnterVehicle.subscribe(async (eventPlayer: mod.Player, eventVehicle: mod.Vehicle) => {
             await mod.Wait(0.1);
-            PlayerVariables.getPlayerData(eventPlayer).cameraEnabled = false;
+            const pd = PlayerVariables.getPlayerData(eventPlayer);
+            pd.cameraEnabled = false;
 
-            if (PlayerVariables.getPlayerData(eventPlayer).area > 0) {
-                if (BFSupremacy.isAirVehicle(mod.GetVehicleFromPlayer(eventPlayer))) {
-                    PlayerVariables.getPlayerData(eventPlayer).outOfBounds = false;
+            // The handle the event carries can differ from the one cached when the heli spawned, so prefer the
+            // vehicle the player is actually sitting in once the enter animation has finished.
+            const inVehicle = mod.GetSoldierState(eventPlayer, mod.SoldierStateBool.IsInVehicle);
+            const vehicle = inVehicle ? mod.GetVehicleFromPlayer(eventPlayer) : eventVehicle;
+
+            if (pd.area > 0 && inVehicle) {
+                if (BFSupremacy.isAirVehicle(vehicle)) {
+                    pd.outOfBounds = false;
                 }
             }
 
-            if (GameConfig.gameConfig.stage === 1) {
-                const regroupVehicle = GameConfig.gameConfig.regroupVehicle;
-                const regroupBot = GameConfig.gameConfig.regroupBot;
-                if (regroupVehicle && eventVehicle && mod.Equals(eventVehicle, regroupVehicle)) {
-                    if (!regroupBot || !mod.Equals(eventPlayer, regroupBot)) {
-                        if (GameConfig.gameConfig.extractReady && !PlayerVariables.getPlayerData(eventPlayer).spawned && !PlayerVariables.getPlayerData(eventPlayer).boarded) {
-                            PlayerVariables.getPlayerData(eventPlayer).ingoreOOB = true;
-                            PlayerVariables.getPlayerData(eventPlayer).boarded = true;
-                            BFSupremacyRegroup.playerBoarding(eventPlayer, eventVehicle);
-                        } else if (PlayerVariables.getPlayerData(eventPlayer).spawned || PlayerVariables.getPlayerData(eventPlayer).boarded) {
-                            mod.UndeployPlayer(eventPlayer);
-                        } else {
-                            mod.ForcePlayerExitVehicle(eventPlayer, eventVehicle);
-                        }
-                    }
-                }
-            }
+            BFSupremacyRegroup.checkPlayerBoarding(eventPlayer, vehicle);
         });
 
         Events.OnPlayerExitVehicle.subscribe(async (eventPlayer: mod.Player, eventVehicle: mod.Vehicle) => {
