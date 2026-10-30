@@ -1,3 +1,41 @@
+# Capital Supremacy - Game Mode for Battlefield 6 Portal
+Inspired by EAs Star Wars Battlefront 2.
+
+Capital Supremacy is a multi phase mode featuring Conquest, Extraction, Breakthrough and Rush all in one.
+
+Control the Battlefield, then attack the enemy base before time runs out.
+
+Created by andy6170, Kurtinthegrind and TabbedScamper
+
+
+## Game Rules:
+- During the Conquest phase teams fight to capture objectives which increases their control of the battlefield.
+- Once a team has 100% control they enter a limited time Regroup phase.
+- Every team member that regroups will add an additional 10s bonus time for the Final Assault.
+- During the Final Assault the attacking team will have an opportunity to attack the other team's base in a different map location which is made op of 2 objectives:
+1. Breach and secure the defences (Capture 1 of 2 objectives)
+2. Destroy the Base (3 MCOMs to be destroyed)
+
+- If the defenders survive the assault then the game will reset to Conquest so they have an opportunity to strike back. However the conquest phase will be quicker.
+- Progress on the Final Assault is saved for each team so the next assault will start where it left off.
+- The game ends when either team loses their base.
+
+
+## Features:
+- 3rd person
+- Capital Supremacy UI
+- Cutscenes for map transitions
+- Custom maps
+- Fully animated extraction vehicle
+- Dynamic ADS
+
+
+## Trailer
+[![Capital Supremacy Trailer](https://img.youtube.com/vi/RsA6pGiE5Rs/maxresdefault.jpg)](https://www.youtube.com/watch?v=RsA6pGiE5Rs)
+
+*Click the image above to watch the video on YouTube.*
+
+
 # Battlefield 6 Portal TypeScript Template
 
 A ready-to-use template for creating Battlefield 6 Portal experiences using TypeScript. This template provides a solid
